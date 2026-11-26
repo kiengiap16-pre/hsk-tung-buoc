@@ -5,7 +5,8 @@
 <title>HSK Từng Bước</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#0F2A1D">
+<meta name="theme-color" content="#E3EED4">
+<meta name="color-scheme" content="light">
 
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +14,7 @@
 <style>
 /* Bố cục: một cột hẹp như sổ tay học, thanh tab cố định, thẻ chữ Hán là nhân vật chính */
 /* Màu: bảng xanh lá Kien chọn (#0F2A1D #375534 #6B9071 #AEC3B0 #E3EED4). Phần âm = xanh rêu đậm nhất, phần ý = xanh lá vừa. Đỏ đất chỉ dùng cho "sai / chưa nhớ" */
-:root{
+:root{color-scheme:light;
   --bg:#E3EED4; --surface:#F5F9EF; --ink:#0F2A1D; --muted:#375534; --line:#AEC3B0;
   --accent:#375534; --accent-soft:#D2E2C4; --cinnabar:#A2452D; --cinnabar-soft:#F3DED5; --gold:#8A6A12;
   --am:#0F2A1D; --am-soft:#DCE7D3; --yi:#5B8462; --yi-soft:#D7E6D6; --paper:#EEF4E6;
@@ -21,10 +22,7 @@
   --font-han:"Noto Serif SC","Songti SC","SimSun",serif;
   --r:20px;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0F2A1D; --surface:#163526; --ink:#E3EED4; --muted:#AEC3B0; --line:#375534;
-  --accent:#AEC3B0; --accent-soft:#25472F; --cinnabar:#EE8B70; --cinnabar-soft:#43251C; --gold:#E2BE5C;
-  --am:#E3EED4; --am-soft:#25472F; --yi:#8FB896; --yi-soft:#1F4029; --paper:#12301F; color-scheme:dark}}
+/* Giao diện sáng xanh lá là mặc định trên mọi thiết bị (Kien chốt 26-11), kể cả khi máy đang bật chế độ tối */
 :root[data-theme="dark"]{
   --bg:#0F2A1D; --surface:#163526; --ink:#E3EED4; --muted:#AEC3B0; --line:#375534;
   --accent:#AEC3B0; --accent-soft:#25472F; --cinnabar:#EE8B70; --cinnabar-soft:#43251C; --gold:#E2BE5C;

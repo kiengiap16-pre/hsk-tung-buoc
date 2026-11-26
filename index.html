@@ -5,23 +5,22 @@
 <title>HSK Từng Bước</title>
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#0F2A1D">
+<meta name="theme-color" content="#E3EED4">
+<meta name="color-scheme" content="light">
 
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;700&display=swap">
 <style>
 /* Bố cục: trang vở luyện chữ. Ô điền tự (田字格) là hoạ tiết xuyên suốt; hero là một chữ Hán lớn tự viết từng nét */
-:root{
+:root{color-scheme:light;
   --leaf:#E3EED4; --sage:#AEC3B0; --moss:#6B9071; --fern:#375534; --forest:#0F2A1D;
   --bg:var(--leaf); --paper:#F4F8EE; --ink:var(--forest); --soft:#375534; --line:#C3D4BF; --grid:rgba(55,85,52,.22);
   --am:#0F2A1D; --yi:#5B8462; --btn:#375534; --btn-ink:#F4F8EE; --band:#0F2A1D; --band-ink:#E3EED4; --band-soft:#AEC3B0;
   --font:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
   --han:"Noto Serif SC","Songti SC","SimSun",serif;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0F2A1D; --paper:#163526; --ink:#E3EED4; --soft:#AEC3B0; --line:#2C4A37; --grid:rgba(174,195,176,.18);
-  --am:#E3EED4; --yi:#8FB896; --btn:#AEC3B0; --btn-ink:#0F2A1D; --band:#E3EED4; --band-ink:#0F2A1D; --band-soft:#375534; color-scheme:dark}}
+/* Giao diện sáng xanh lá là mặc định trên mọi thiết bị (Kien chốt 26-11), kể cả khi máy đang bật chế độ tối */
 :root[data-theme="dark"]{
   --bg:#0F2A1D; --paper:#163526; --ink:#E3EED4; --soft:#AEC3B0; --line:#2C4A37; --grid:rgba(174,195,176,.18);
   --am:#E3EED4; --yi:#8FB896; --btn:#AEC3B0; --btn-ink:#0F2A1D; --band:#E3EED4; --band-ink:#0F2A1D; --band-soft:#375534; color-scheme:dark}
