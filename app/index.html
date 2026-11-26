@@ -6,7 +6,9 @@
 <link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#E3EED4">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
+<script>(function(){var t="light";try{t=localStorage.getItem("hsk-theme")||"light"}catch(e){}document.documentElement.dataset.theme=t})();</script>
+
 
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,11 +24,15 @@
   --font-han:"Noto Serif SC","Songti SC","SimSun",serif;
   --r:20px;
 }
-/* Giao diện sáng xanh lá là mặc định trên mọi thiết bị (Kien chốt 26-11), kể cả khi máy đang bật chế độ tối */
+/* Giao diện: Sáng là mặc định (Kien chốt 26-11); người học tự chọn Tối hoặc Theo máy bằng nút trên đầu trang */
 :root[data-theme="dark"]{
   --bg:#0F2A1D; --surface:#163526; --ink:#E3EED4; --muted:#AEC3B0; --line:#375534;
   --accent:#AEC3B0; --accent-soft:#25472F; --cinnabar:#EE8B70; --cinnabar-soft:#43251C; --gold:#E2BE5C;
   --am:#E3EED4; --am-soft:#25472F; --yi:#8FB896; --yi-soft:#1F4029; --paper:#12301F; color-scheme:dark}
+@media (prefers-color-scheme: dark){:root[data-theme="system"]{
+  --bg:#0F2A1D; --surface:#163526; --ink:#E3EED4; --muted:#AEC3B0; --line:#375534;
+  --accent:#AEC3B0; --accent-soft:#25472F; --cinnabar:#EE8B70; --cinnabar-soft:#43251C; --gold:#E2BE5C;
+  --am:#E3EED4; --am-soft:#25472F; --yi:#8FB896; --yi-soft:#1F4029; --paper:#12301F; color-scheme:dark}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.55;
@@ -45,6 +51,8 @@ header.top{display:flex;align-items:center;justify-content:space-between;gap:12p
 .streak b{color:var(--gold);font-size:1.05rem}
 .topr{display:flex;align-items:center;gap:10px;flex-shrink:0}
 @media (max-width:440px){header.top h1{font-size:1.05rem;line-height:1.2;white-space:nowrap}.streak{display:grid;line-height:1.25}.streak .sep{display:none}.brand .muted{display:none}.streak{font-size:.75rem}.topr{gap:6px}.acct{padding:6px 10px}}
+[data-theme-set][aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.themebtn{width:36px;height:36px;padding:0;border-radius:99px;display:grid;place-items:center;flex-shrink:0;color:var(--ink)}
 .acct{padding:7px 12px;font-size:.85rem;border-radius:99px;max-width:9.5em;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .acct.on{background:var(--accent);color:var(--surface);border-color:var(--accent);width:36px;height:36px;padding:0;display:grid;place-items:center}
 dialog#acct-dlg{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);padding:0;width:min(400px,calc(100vw - 32px))}
@@ -439,7 +447,7 @@ nav.tabs[hidden]{display:none!important}
 <div class="wrap">
   <header class="top">
     <div class="brand"><img class="seal" src="logo.svg" alt="" width="38" height="38"><div><h1>HSK Từng Bước</h1><div class="muted" style="font-size:.82rem">Học tiếng Trung HSK 3.0 · Cấp 1–6</div></div></div>
-    <div class="topr"><div class="streak" id="streak"></div><button class="acct" id="acct" hidden aria-haspopup="dialog">Đăng nhập</button></div>
+    <div class="topr"><div class="streak" id="streak"></div><button type="button" class="themebtn" data-theme-btn aria-label="Đổi giao diện"></button><button class="acct" id="acct" hidden aria-haspopup="dialog">Đăng nhập</button></div>
   </header>
 
   <aside class="rail" id="rail" aria-label="Tiến độ của bạn"></aside>
@@ -822,6 +830,7 @@ nav.tabs[hidden]{display:none!important}
     <div class="levels" id="levels"></div>
     <div class="panel">
       <span class="eyebrow">Cài đặt</span>
+      <div class="row" role="group" aria-label="Giao diện"><span class="muted" style="align-self:center">Giao diện:</span><button type="button" data-theme-set="light">Sáng</button><button type="button" data-theme-set="dark">Tối</button><button type="button" data-theme-set="system">Theo máy</button></div>
       <div class="row"><button id="btn-reset-plan">Đổi mục tiêu học</button><button class="bad" id="btn-wipe">Xoá toàn bộ tiến độ</button></div>
       <div class="row" id="wipe-confirm" hidden><span class="muted" style="flex:1 1 100%">Chắc chắn xoá hết? Không hoàn tác được.</span><button id="wipe-no">Giữ lại</button><button class="bad" id="wipe-yes">Xoá</button></div>
       <p class="hint" style="margin:0">Tiến độ được lưu ngay trên trình duyệt này. Đổi máy hoặc xoá dữ liệu trình duyệt thì tiến độ sẽ mất.</p>
@@ -2039,4 +2048,27 @@ loadData().then(() => {
   $("loading").hidden = true;
   if (S.profile) show("today"); else show("setup");
 }).catch(() => { $("loading").innerHTML = "<b>Không tải được dữ liệu từ vựng.</b><span>Hãy tải lại trang. Nếu bạn mở file trên máy, cần chạy qua một máy chủ web nhỏ (xem hướng dẫn).</span>"; });
+
+// ===== Giao diện: Sáng (mặc định) / Tối / Theo máy. Lưu trên từng máy.
+(function(){
+  const ICON = {light:'<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></g></svg>',
+    dark:'<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+    system:'<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 20h8M12 16v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'};
+  const NAME = {light:"Sáng", dark:"Tối", system:"Theo máy"}, ORDER = ["light","dark","system"];
+  const cur = () => document.documentElement.dataset.theme || "light";
+  function paint(){
+    const t = cur(), m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#E3EED4";
+    document.querySelectorAll("[data-theme-btn]").forEach(b => { b.innerHTML = ICON[t]; b.title = b.ariaLabel = "Giao diện: " + NAME[t] + " (bấm để đổi)"; });
+    document.querySelectorAll("[data-theme-set]").forEach(b => b.setAttribute("aria-pressed", b.dataset.themeSet === t));
+  }
+  window.setTheme = t => { document.documentElement.dataset.theme = t; try { localStorage.setItem("hsk-theme", t); } catch(e){} paint(); };
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-theme-btn]"), s = e.target.closest("[data-theme-set]");
+    if (b){ const t = ORDER[(ORDER.indexOf(cur()) + 1) % 3]; setTheme(t); if (window.toast) toast("Giao diện: " + NAME[t]); }
+    if (s) setTheme(s.dataset.themeSet);
+  });
+  try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", paint); } catch(e){}
+  paint();
+})();
 </script>
