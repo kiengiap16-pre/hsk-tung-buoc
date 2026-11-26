@@ -649,6 +649,11 @@ nav.tabs[hidden]{display:none!important}
       <label class="search"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg><input id="dq" type="search" placeholder="Chữ Hán, pinyin, tiếng Việt, Hán Việt hoặc English" aria-label="Tra từ" autocomplete="off"></label>
       <div class="dres" id="dres"></div>
     </div>
+    <div class="panel" id="tp-panel">
+      <span class="eyebrow">Từ vựng theo chủ đề</span>
+      <h2 id="tp-h">Chủ đề</h2>
+      <div id="tp-body"><p class="muted" style="margin:0">Đang tải chủ đề…</p></div>
+    </div>
     <div class="panel" id="ext-panel">
       <span class="eyebrow">Mở rộng vốn từ</span>
       <h2>Từ ghép phổ biến theo cấp</h2>
@@ -1167,7 +1172,7 @@ function show(v){
   if (v === "deck") renderDeck();
   if (v === "path") renderPath();
   if (v === "grammar") renderGrammar();
-  if (v === "chars") renderChars();
+  if (v === "chars"){ renderChars(); renderCharTopics(); }
   if (v === "write") renderWrite();
   if (v === "pinyin") renderPinyin();
   if (v === "rad") { renderRad(); $("rad-detail").hidden = true; }
@@ -2205,4 +2210,33 @@ function startDeck(ws, label){
   show("study"); renderCard();
 }
 $("study-x").onclick = () => show(studyBack === "deck" ? "deck" : "today");
+
+// ===== Tab Chữ Hán: duyệt từ theo chủ đề (chủ đề tự soạn, dùng chung với Flashcard)
+var chTopic = null, chTopicShown = 60;
+async function renderCharTopics(){
+  await topicsLoad(); const box = $("tp-body"); if (!box) return;
+  if (!chTopic){
+    $("tp-h").textContent = "Chủ đề";
+    box.innerHTML = `<p class="dk-note" style="margin:0 0 10px">${TOPICS.list.length} chủ đề do HSK Từng Bước tự phân loại theo nghĩa của từ (không thuộc tài liệu HSK gốc). Chọn một chủ đề để xem các từ.</p>
+      <div class="dk-grid small">${TOPICS.list.map(([id, name, ic]) => { const ws = TOPICS.by[id] || []; if (!ws.length) return "";
+        const kn = ws.filter(isKnown).length; return `<button class="dk" data-tp="${id}"><span class="ic">${ic}</span><b>${name}</b><small>${ws.length} từ · thuộc ${kn}</small></button>`; }).join("")}</div>`;
+    return;
+  }
+  const tp = TOPICS.list.find(x => x[0] === chTopic) || [chTopic, chTopic, ""], ws = TOPICS.by[chTopic] || [];
+  const nHsk = ws.filter(w => !w.ext).length;
+  $("tp-h").textContent = `${tp[2]} ${tp[1]}`;
+  box.innerHTML = `<div class="dk-bar" style="justify-content:space-between;margin-bottom:10px"><button class="back" data-tpback="1" style="border:0;background:transparent;color:var(--muted);padding:6px 0">← Tất cả chủ đề</button><button class="primary" data-tpstudy="1">Học bằng Flashcard</button></div>
+    <p class="dk-note" style="margin:0 0 8px">${nHsk} từ HSK 1–6${ws.length > nHsk ? ` và ${ws.length - nHsk} từ mở rộng` : ""}. Bấm vào từ để xem nghĩa, phát âm, cách viết, từ ghép, ví dụ.</p>
+    <div class="wl">${ws.slice(0, chTopicShown).map(w => { const c = S.cards[w.k], kn = (c?.box || 0) >= 2;
+      return `<button data-w="${w.k}"><span class="h">${w.h}</span><span class="p">${w.p}</span><span class="st">${w.ext ? "mở rộng" : "HSK " + w.L}<i class="${kn ? "on" : c ? "mid" : ""}"></i></span><span class="v">${w.v.split(/;\s*/)[0]}</span></button>`; }).join("")}</div>
+    ${ws.length > chTopicShown ? `<button data-tpmore="1" style="margin-top:8px;width:100%">Xem thêm (${ws.length - chTopicShown} từ)</button>` : ""}`;
+}
+$("tp-body").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.tp){ chTopic = b.dataset.tp; chTopicShown = 60; renderCharTopics(); $("tp-panel").scrollIntoView({block: "start"}); }
+  else if (b.dataset.tpback){ chTopic = null; renderCharTopics(); $("tp-panel").scrollIntoView({block: "start"}); }
+  else if (b.dataset.tpmore){ chTopicShown += 120; renderCharTopics(); }
+  else if (b.dataset.tpstudy){ DK.m = "tp"; DK.tlv = 0; dkSave(); deckId = "tp:" + chTopic; deckShown = 120; show("deck"); }
+  else if (b.dataset.w) openWord(b.dataset.w, "chars");
+};
 </script>
