@@ -78,8 +78,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 /* tabs */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
   padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:5}
-nav.tabs .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
-nav.tabs button{border:0;background:transparent;padding:8px 4px;font-size:.78rem;font-weight:500;color:var(--muted);display:grid;gap:2px;justify-items:center}
+nav.tabs .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+nav.tabs button{white-space:nowrap;letter-spacing:-.01em;border:0;background:transparent;padding:8px 2px;font-size:.72rem;font-weight:500;color:var(--muted);display:grid;gap:2px;justify-items:center}
 nav.tabs button .ic{font-family:var(--font-han);font-size:1.2rem;line-height:1}
 nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent-soft)}
 /* today */
@@ -156,6 +156,40 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 .senses{margin:0;padding-left:1.4em;display:grid;gap:6px}
 .senses li::marker{color:var(--muted);font-weight:600}
 .pron{display:grid;gap:8px}
+.gtoday{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;text-align:left;font-weight:400;border-radius:var(--r);padding:14px 16px}
+.gtoday .ic{font-family:var(--font-han);font-size:1.6rem;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.gtoday b{display:block}.gtoday small{color:var(--muted)}
+.grow2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.glist{display:grid;gap:10px}
+.gp{display:grid;gap:8px}
+.gp .gt{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.gp .st{font-weight:700;font-size:1.02rem}
+.gp .st .n{color:var(--muted);font-weight:600;margin-right:6px}
+.gp .ok{font-size:.78rem;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.gp .ok[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.gp .ex{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;background:var(--paper);border-radius:12px;padding:10px 12px}
+.gp .ex .zh{font-family:var(--font-han);font-size:1.25rem}
+.gp .ex .zh mark{background:none;color:var(--cinnabar);font-weight:700}
+.gp .ex .py{font-size:.85rem;color:var(--accent);grid-column:1}
+.gp .ex .vi{font-size:.88rem;color:var(--muted);grid-column:1}
+.gp .ex button.say{grid-row:1/4;grid-column:2;width:38px;height:38px}
+.gnote{background:var(--paper);border:1px dashed var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:8px;margin-bottom:10px}
+.gnote h3{margin:0;font-size:1rem}
+.gnote p{margin:0;font-size:.92rem}
+.gnote .zh{font-family:var(--font-han)}
+.gp-sent{font-family:var(--font-han);font-size:1.6rem;line-height:1.5}
+.gp-sent u{text-decoration:none;border-bottom:3px solid var(--cinnabar);padding:0 .6em}
+.gp-build{display:grid;gap:10px}
+.gp-ans{min-height:56px;border:2px dashed var(--line);border-radius:14px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.gp-bank{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.gp-ans button,.gp-bank button{font-family:var(--font-han);font-size:1.2rem;padding:8px 12px;border-radius:10px;font-weight:500}
+.gp-ans.right{border-color:var(--accent);background:var(--accent-soft)}.gp-ans.wrong{border-color:var(--cinnabar);background:var(--cinnabar-soft)}
+.gr-sec{display:grid;gap:8px;margin-bottom:14px}
+.gr-item{display:grid;gap:6px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.gr-item .q{font-size:1rem}.gr-item .q .zh{font-family:var(--font-han);font-size:1.15rem}
+.gr-item .a{font-family:var(--font-han);color:var(--accent);font-size:1.1rem}
+.gr-item .a small{font-family:var(--font-ui);color:var(--muted);font-size:.82rem;display:block}
+.gr-item > button{justify-self:start;font-size:.82rem;padding:6px 12px}
 .jump{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .jump a{font-size:.8rem;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:4px 10px}
 .jump a:hover{color:var(--accent);border-color:var(--accent)}
@@ -409,6 +443,7 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
       </div>
       <button class="primary" id="btn-go">Học ngay</button>
     </div>
+    <button class="gtoday" id="g-today" hidden></button>
     <div class="map" id="map"></div>
   </section>
 
@@ -551,6 +586,42 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
     </div>
   </section>
 
+  <!-- NGỮ PHÁP -->
+  <section id="v-grammar" hidden>
+    <div class="panel">
+      <span class="eyebrow">Ngữ pháp theo cấp</span>
+      <h2>Ngữ pháp HSK <span id="g-lvname">1</span></h2>
+      <div class="lvchips" id="g-lv"></div>
+      <div class="cardmeta"><span id="g-prog"></span><span id="g-best"></span></div>
+      <div class="bar"><i id="g-bar" style="width:0"></i></div>
+      <div class="grow2"><button class="primary" id="g-practice">Luyện tập 10 câu</button><button id="g-review">Bài tập tổng hợp</button></div>
+      <p class="hint" style="margin:0">Cách học: đọc cấu trúc, nghe và đọc to ví dụ 3 lần, tự đặt 3 câu, rồi bấm “Đã hiểu”. Luyện tập để ôn lại.</p>
+    </div>
+    <div id="g-notes"></div>
+    <div class="glist" id="g-list"></div>
+    <p class="hint" id="g-src" style="text-align:center"></p>
+  </section>
+
+  <!-- LUYỆN NGỮ PHÁP -->
+  <section id="v-gpractice" hidden>
+    <div class="cardmeta"><button class="iconbtn" data-go="grammar" aria-label="Thoát luyện tập">✕</button><span id="gp-label" style="flex:1"></span><span id="gp-count"></span></div>
+    <div class="bar"><i id="gp-bar" style="width:0"></i></div>
+    <div class="panel" style="text-align:center;justify-items:center">
+      <span class="hint" id="gp-q"></span>
+      <div class="gp-sent" id="gp-sent"></div>
+      <div class="hint" id="gp-vi"></div>
+    </div>
+    <div class="gp-build" id="gp-build" hidden><div class="gp-ans" id="gp-ans"></div><div class="gp-bank" id="gp-bank"></div><button class="primary" id="gp-check" disabled>Kiểm tra</button></div>
+    <div class="opts" id="gp-opts"></div>
+  </section>
+
+  <!-- BÀI TẬP TỔNG HỢP -->
+  <section id="v-greview" hidden>
+    <div class="ctop"><button class="back" data-go="grammar">← Ngữ pháp</button></div>
+    <div class="panel"><span class="eyebrow">Theo tài liệu HSK 1–3</span><h2>Bài tập tổng hợp</h2><p class="hint" style="margin:0">Tự làm ra giấy hoặc nói to trước, rồi bấm “Xem đáp án” để so sánh. Phần sắp xếp câu thì chạm từng mảnh theo thứ tự.</p></div>
+    <div id="gr-body"></div>
+  </section>
+
   <!-- B1: PINYIN -->
   <section id="v-pinyin" hidden>
     <div class="ctop"><button class="back" data-go="path">← Lộ trình</button><span class="pill" id="py-status"></span></div>
@@ -634,6 +705,7 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
     <button data-v="today" aria-current="true"><span class="ic">今</span>Hôm nay</button>
     <button data-v="study"><span class="ic">卡</span>Flashcard</button>
     <button data-v="chars"><span class="ic">字</span>Chữ Hán</button>
+    <button data-v="grammar"><span class="ic">法</span>Ngữ pháp</button>
     <button data-v="quiz"><span class="ic">考</span>Kiểm tra</button>
     <button data-v="path"><span class="ic">路</span>Lộ trình</button>
   </div>
@@ -878,15 +950,16 @@ function showDone(title, txt){
 
 // ===== 4. GIAO DIỆN
 const $ = id => document.getElementById(id);
-const VIEWS = ["setup","today","study","done","quiz","path","chars","char","pinyin","rad","word"];
+const VIEWS = ["setup","today","study","done","quiz","path","chars","char","pinyin","rad","word","grammar","gpractice","greview"];
 function show(v){
   VIEWS.forEach(x => $("v-"+x).hidden = x !== v);
   if (v !== "quiz") $("sheet").hidden = true;
-  $("tabs").hidden = ["setup","study","quiz"].includes(v); // đang làm bài thì ẩn thanh tab cho tập trung
-  const tab = v === "done" ? "study" : (v === "char" || v === "word") ? "chars" : (v === "pinyin" || v === "rad") ? "path" : v;
+  $("tabs").hidden = ["setup","study","quiz","gpractice"].includes(v); // đang làm bài thì ẩn thanh tab cho tập trung
+  const tab = v === "done" ? "study" : (v === "char" || v === "word") ? "chars" : (v === "gpractice" || v === "greview") ? "grammar" : (v === "pinyin" || v === "rad") ? "path" : v;
   document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.v === tab));
   if (v === "today") renderToday();
   if (v === "path") renderPath();
+  if (v === "grammar") renderGrammar();
   if (v === "chars") renderChars();
   if (v === "pinyin") renderPinyin();
   if (v === "rad") { renderRad(); $("rad-detail").hidden = true; }
@@ -936,7 +1009,7 @@ function renderMap(){
 }
 
 function renderToday(){
-  rollDay();
+  rollDay(); renderGToday();
   const d = new Date();
   $("today-date").textContent = d.toLocaleDateString("vi-VN",{weekday:"long",day:"numeric",month:"numeric"});
   const due = WORDS.filter(isDue).length, nw = Math.max(0, dailyNew() - S.day.newDone), known = WORDS.filter(isKnown).length;
@@ -1017,6 +1090,7 @@ let QZ = [], zi = 0, zScore = 0, zPlacement = false, zLvScore = {};
 const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 let zKind = "word", zKey = null;
 function startQuiz(placement=false, kind="word", pool=null, key=null){
+  sheetMode = "q";
   zPlacement = placement; zKind = kind; zKey = key; resetSession(); $("sheet").hidden = true;
   if (kind !== "word"){
     if (kind === "tone"){ const syl = Object.values(CHARS).filter(c => c.L === 1 && c.py).map(c => ({h:c.py, c:c.c}));
@@ -1336,7 +1410,8 @@ $("btn-quiz2").onclick = () => startQuiz(false, zKind);
 $("quiz-opts").onclick = e => { const b = e.target.closest(".opt"); if (!b || b.disabled) return; if (b.classList.contains("done")) say(b.dataset.h, b.dataset.p); else answer(b); };
 $("quiz-say").onclick = quizSay;
 $("btn-next").onclick = nextQ;
-$("sheet-next").onclick = () => { $("sheet").hidden = true; nextQ(); };
+let sheetMode = "q"; // "q" = bài kiểm tra từ, "g" = luyện ngữ pháp
+$("sheet-next").onclick = () => { $("sheet").hidden = true; if (sheetMode === "g"){ gi++; if (gi < GQ.length) renderGQ(); else finishGP(); } else nextQ(); };
 $("map").onclick = e => { const u = e.target.closest("[data-lv]");
   if (u){ if (u.dataset.locked) return toast(`Học xong HSK ${+u.dataset.lv - 1} (hoặc làm bài xếp cấp) để mở HSK ${u.dataset.lv}`); S.viewLv = +u.dataset.lv; save(); renderMap(); return; }
   const b = e.target.closest("[data-node]"); if (!b) return; const n = NODES[+b.dataset.node];
@@ -1508,6 +1583,143 @@ $("wd-write").onclick = e => { const b = e.target.closest("button[data-c]"); if 
 $("ch-words").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "char"); };
 $("wd-comp").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w); };
 $("wd-pron").onclick = e => { const b = e.target.closest(".syl"); if (!b) return; if (!(b.dataset.syl && saySyl(b.dataset.syl))) speak(b.dataset.c); };
+
+// ===== 5d. NGỮ PHÁP: bài học theo cấp, luyện tập tự sinh, bài tập tổng hợp
+let GRAM = null, gLv = 1;
+const loadGram = () => GRAM ? Promise.resolve(GRAM) : fetch("data/grammar.json").then(r => r.json()).then(j => GRAM = j);
+const gKey = (L, i) => L + "-" + i;
+// tách câu thành từ theo từ điển HSK (ghép dài nhất), dùng cho pinyin và bài sắp xếp câu
+function segZh(t){
+  searchIndex(); const out = []; let i = 0;
+  while (i < t.length){
+    if (!/[一-鿿]/.test(t[i])){ out.push(t[i++]); continue; }
+    let j = Math.min(t.length, i + 4); while (j > i + 1 && !BYH[t.slice(i, j)]) j--;
+    out.push(t.slice(i, j)); i = j;
+  }
+  return out;
+}
+function zhPy(t){ return segZh(t).map(x => BYH[x] ? BYH[x].p : [...x].map(c => CHARS[c]?.py || (/[一-鿿]/.test(c) ? c : "")).join("")).filter(Boolean).join(" ").replace(/ ([，。？！,.?!])/g, "$1"); }
+const markKey = (zh, k) => k && zh.includes(k) ? zh.replace(k, `<mark>${k}</mark>`) : zh;
+function sayZh(t){ const w = BYH[t.replace(/[。？！，]/g, "")]; if (w) return say(w.h, w.p); speak(t); }
+function renderGrammar(){
+  loadGram().then(G => {
+    S.gram = S.gram || {}; S.gramBest = S.gramBest || {};
+    const lvs = Object.keys(G.levels).map(Number);
+    if (!lvs.includes(gLv)) gLv = Math.min(Math.max(...lvs), Math.max(1, curLv()));
+    $("g-lv").innerHTML = lvs.map(L => `<button class="${L === gLv ? "on" : ""}" data-l="${L}">HSK ${L}</button>`).join("");
+    $("g-lvname").textContent = gLv;
+    const pts = G.levels[gLv], done = pts.filter((_, i) => S.gram[gKey(gLv, i)]).length;
+    $("g-prog").textContent = `Đã hiểu ${done}/${pts.length} điểm ngữ pháp`; $("g-bar").style.width = (done / pts.length * 100) + "%";
+    $("g-best").textContent = S.gramBest[gLv] != null ? `Luyện tập tốt nhất: ${S.gramBest[gLv]}/10` : "";
+    $("g-notes").innerHTML = (G.notes[gLv] || []).map(n => `<div class="gnote"><h3>${n.t}</h3><p>${n.d}</p>${n.ex.map(e => `<p><span class="zh">${e.zh}</span> <span class="muted">${e.vi}</span></p>`).join("")}</div>`).join("");
+    $("g-list").innerHTML = pts.map((p, i) => { const on = !!S.gram[gKey(gLv, i)];
+      return `<div class="panel gp"><div class="gt"><div class="st"><span class="n">${i + 1}.</span>${p.t}</div><button class="ok" data-i="${i}" aria-pressed="${on}">${on ? "✓ Đã hiểu" : "Đã hiểu"}</button></div>
+      <div>${p.d}</div>
+      <div class="ex"><div class="zh">${markKey(p.zh, p.k)}</div><div class="py">${zhPy(p.zh)}</div><div class="vi">${p.vi}</div><button class="say" data-zh="${p.zh}" aria-label="Nghe câu ví dụ"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg></button></div></div>`; }).join("");
+    $("g-src").textContent = G.src;
+  });
+}
+// --- luyện tập: điền từ, chọn nghĩa, sắp xếp câu
+let GQ = [], gi = 0, gScore = 0, gMode = "lv";
+function makeGQ(L){
+  const pts = GRAM.levels[L], keys = [...new Set(pts.map(p => p.k))], qs = [];
+  shuffle(pts).slice(0, 10).forEach((p, n) => {
+    const kind = n % 3;
+    if (kind === 0 && p.zh.includes(p.k)){
+      const opts = shuffle([p.k, ...shuffle(keys.filter(k => k !== p.k && !p.zh.includes(k))).slice(0, 3)]);
+      qs.push({kind: "fill", p, opts});
+    } else if (kind === 1){
+      const opts = shuffle([p, ...shuffle(pts.filter(x => x !== p && x.vi !== p.vi)).slice(0, 3)]);
+      qs.push({kind: "mean", p, opts});
+    } else {
+      const toks = segZh(p.zh.replace(/[。？！]$/, "")).filter(x => x.trim());
+      if (toks.length >= 3) qs.push({kind: "order", p, toks}); else qs.push({kind: "mean", p, opts: shuffle([p, ...shuffle(pts.filter(x => x !== p)).slice(0, 3)])});
+    }
+  });
+  return qs;
+}
+function startGP(){ loadGram().then(() => { GQ = makeGQ(gLv); gi = 0; gScore = 0; resetSession(); $("gp-label").textContent = `Luyện ngữ pháp HSK ${gLv}`; show("gpractice"); renderGQ(); }); }
+function renderGQ(){
+  const q = GQ[gi]; $("sheet").hidden = true;
+  $("gp-count").textContent = `${gi + 1} / ${GQ.length}`; $("gp-bar").style.width = (gi / GQ.length * 100) + "%";
+  $("gp-build").hidden = q.kind !== "order"; $("gp-opts").innerHTML = ""; $("gp-vi").textContent = "";
+  if (q.kind === "fill"){
+    $("gp-q").textContent = `Chọn từ điền vào chỗ trống (${q.p.t})`;
+    $("gp-sent").innerHTML = q.p.zh.replace(q.p.k, "<u>&nbsp;</u>"); $("gp-vi").textContent = q.p.vi;
+    $("gp-opts").innerHTML = q.opts.map(o => `<button class="opt" data-a="${o}"><span style="font-family:var(--font-han);font-size:1.3rem">${o}</span></button>`).join("");
+  } else if (q.kind === "mean"){
+    $("gp-q").textContent = "Câu này nghĩa là gì?"; $("gp-sent").textContent = q.p.zh;
+    $("gp-opts").innerHTML = q.opts.map(o => `<button class="opt" data-a="${o.vi}">${o.vi}</button>`).join("");
+  } else {
+    $("gp-q").textContent = "Sắp xếp thành câu đúng"; $("gp-sent").textContent = ""; $("gp-vi").textContent = q.p.vi;
+    q.ans = []; q.bank = shuffle(q.toks.map((t, i) => ({t, i})));
+    if (q.bank.every((x, n) => x.i === n)) q.bank.reverse();
+    renderBuild();
+  }
+}
+function renderBuild(){
+  const q = GQ[gi];
+  $("gp-ans").className = "gp-ans"; $("gp-ans").innerHTML = q.ans.map((x, n) => `<button data-n="${n}">${x.t}</button>`).join("");
+  $("gp-bank").innerHTML = q.bank.map((x, n) => `<button data-n="${n}">${x.t}</button>`).join("");
+  $("gp-check").disabled = q.bank.length > 0;
+}
+function gAnswer(ok, msg){
+  if (ok){ gScore++; addXP(10); }
+  touchStreak(); save(); renderStreak();
+  const q = GQ[gi];
+  sheetMode = "g"; feedback(ok, msg || `${q.p.zh} · ${q.p.vi}`, gi + 1 >= GQ.length);
+}
+function finishGP(){
+  $("sheet").hidden = true; S.gramBest = S.gramBest || {}; S.gramBest[gLv] = Math.max(S.gramBest[gLv] || 0, gScore); save();
+  sheetMode = "q";
+  showDone(`Đúng ${gScore}/${GQ.length} câu ngữ pháp`, gScore >= 8 ? "Rất tốt. Bạn nắm khá chắc ngữ pháp cấp này." : "Xem lại các điểm ngữ pháp có ví dụ bạn làm sai rồi luyện lại nhé.");
+}
+$("gp-opts").onclick = e => { const b = e.target.closest(".opt"); if (!b || b.disabled) return; const q = GQ[gi];
+  const right = q.kind === "fill" ? q.p.k : q.p.vi, ok = b.dataset.a === right;
+  document.querySelectorAll("#gp-opts .opt").forEach(x => { x.disabled = true; if (x.dataset.a === right) x.classList.add("right"); });
+  if (!ok) b.classList.add("wrong");
+  if (q.kind === "fill") $("gp-sent").textContent = q.p.zh;
+  gAnswer(ok); };
+$("gp-bank").onclick = e => { const b = e.target.closest("button"); if (!b) return; const q = GQ[gi]; q.ans.push(q.bank.splice(+b.dataset.n, 1)[0]); renderBuild(); };
+$("gp-ans").onclick = e => { const b = e.target.closest("button"); if (!b || $("gp-check").dataset.done) return; const q = GQ[gi]; q.bank.push(q.ans.splice(+b.dataset.n, 1)[0]); renderBuild(); };
+$("gp-check").onclick = () => { const q = GQ[gi], got = q.ans.map(x => x.t).join(""), want = q.toks.join(""); const ok = got === want;
+  $("gp-ans").classList.add(ok ? "right" : "wrong"); $("gp-check").disabled = true; gAnswer(ok, `${q.p.zh} · ${q.p.vi}`); };
+// --- bài tập tổng hợp trong tài liệu
+function renderReview(){
+  loadGram().then(G => { const E = G.ex;
+    const sec = (title, items) => `<div class="gr-sec"><h2>${title}</h2>${items}</div>`;
+    const item = (q, a, extra = "") => `<div class="gr-item"><div class="q">${q}</div>${extra}<button class="gr-show">Xem đáp án</button><div class="a" hidden>${a}</div></div>`;
+    $("gr-body").innerHTML =
+      sec("A. Điền từ thích hợp", E.fill.map((x, i) => item(`${i + 1}. <span class="zh">${x.q.replace(/___/g, "____")}</span> <span class="muted">(${x.h})</span>`, x.a)).join("")) +
+      sec("B. Sắp xếp thành câu đúng", E.order.map((x, i) => `<div class="gr-item" data-a="${x.a.replace(/[，。]/g, "")}"><div class="q">${i + 1}. Chạm các mảnh theo thứ tự đúng</div><div class="gp-ans"></div><div class="gp-bank">${shuffle(x.q.split(" / ")).map(t => `<button>${t}</button>`).join("")}</div><button class="gr-show">Xem đáp án</button><div class="a" hidden>${x.a}</div></div>`).join("")) +
+      sec("C. Dịch Việt → Trung", E.trans.map((x, i) => item(`${i + 1}. ${x.q}`, `${x.a}<small>${zhPy(x.a)}</small>`)).join("")) +
+      sec("D. Tìm và sửa lỗi", E.fix.map((x, i) => item(`${i + 1}. <span class="zh">${x.q}</span>`, `${x.a}<small>${x.why}</small>`)).join(""));
+  });
+}
+$("gr-body").onclick = e => {
+  const it = e.target.closest(".gr-item"); if (!it) return;
+  if (e.target.closest(".gr-show")){ const a = it.querySelector(".a"); a.hidden = !a.hidden; e.target.textContent = a.hidden ? "Xem đáp án" : "Ẩn đáp án"; return; }
+  const b = e.target.closest("button"); if (!b) return;
+  const ans = it.querySelector(".gp-ans"), bank = it.querySelector(".gp-bank");
+  if (b.parentElement === bank) ans.appendChild(b); else if (b.parentElement === ans) bank.appendChild(b);
+  if (!bank.children.length){ const ok = [...ans.children].map(x => x.textContent).join("") === it.dataset.a; ans.className = "gp-ans " + (ok ? "right" : "wrong"); if (ok){ addXP(5); save(); renderStreak(); } }
+  else ans.className = "gp-ans";
+};
+$("g-lv").onclick = e => { const b = e.target.closest("[data-l]"); if (b){ gLv = +b.dataset.l; renderGrammar(); } };
+$("g-list").onclick = e => { const k = e.target.closest(".ok"), sp = e.target.closest(".say");
+  if (sp) return sayZh(sp.dataset.zh);
+  if (k){ const key = gKey(gLv, +k.dataset.i); S.gram = S.gram || {}; if (S.gram[key]) delete S.gram[key]; else { S.gram[key] = 1; addXP(5); } save(); renderStreak(); renderGrammar(); } };
+$("g-practice").onclick = startGP;
+$("g-review").onclick = () => { show("greview"); renderReview(); };
+// thẻ gợi ý ngữ pháp trên trang Hôm nay
+function renderGToday(){
+  loadGram().then(G => { S.gram = S.gram || {};
+    const L = Math.min(3, Math.max(1, curLv())), pts = G.levels[L] || [], i = pts.findIndex((_, n) => !S.gram[gKey(L, n)]);
+    const el = $("g-today"); if (i < 0){ el.hidden = true; return; }
+    el.hidden = false; el.innerHTML = `<span class="ic">法</span><span><small>Ngữ pháp hôm nay · HSK ${L}</small><b>${pts[i].t}</b><small>${pts[i].zh} ${pts[i].vi}</small></span><span aria-hidden="true">›</span>`;
+    el.onclick = () => { gLv = L; show("grammar"); setTimeout(() => document.querySelectorAll("#g-list .gp")[i]?.scrollIntoView({block: "center"}), 150); };
+  }).catch(() => {});
+}
 
 // ===== 6. KHỞI ĐỘNG: tải dữ liệu từ thư mục data/ rồi mới vẽ giao diện
 // Cầu nối cho account.js (đăng nhập + lưu lên mạng)
