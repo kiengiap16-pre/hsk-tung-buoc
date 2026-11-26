@@ -370,6 +370,48 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 @media (prefers-reduced-motion:reduce){.node.cur .bubble,.pop,.sheet{animation:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 @media (max-width:420px){.big{font-size:3.8rem}.plan .stat .n{font-size:1.25rem}}
+/* ---- Bố cục máy tính: thanh bên trái chứa chức năng, nội dung giữa, cột phải thống kê ---- */
+nav.tabs[hidden]{display:none!important}
+.side-brand,.rail,nav.tabs .side-acct{display:none}
+@media (min-width:700px){
+  body:not(.focus){padding-left:112px;padding-bottom:40px}
+  nav.tabs{top:0;bottom:0;right:auto;width:96px;border-top:0;border-right:2px solid var(--line);padding:20px 10px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
+  nav.tabs .in{display:flex;flex-direction:column;gap:6px;max-width:none;margin:0}
+  nav.tabs button{padding:10px 4px;border-radius:14px;border:2px solid transparent;font-size:.7rem}
+  nav.tabs button:hover{background:var(--accent-soft)}
+  nav.tabs button[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  .side-brand{display:flex;justify-content:center;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:800;font-size:1.15rem}
+  .side-brand img{width:44px;height:44px;flex-shrink:0}
+  .side-brand span{display:none}
+  header.top .brand{visibility:hidden}
+  nav.tabs .side-acct:not([hidden]){display:grid;margin-top:auto}
+}
+@media (min-width:1100px){
+  body:not(.focus){padding-left:272px}
+  nav.tabs{width:256px;padding:28px 16px}
+  nav.tabs button{display:flex;align-items:center;justify-content:flex-start;gap:14px;font-size:.92rem;font-weight:700;padding:10px 14px;color:var(--ink);letter-spacing:0}
+  nav.tabs button .ic{font-size:1.45rem;width:34px;text-align:center;color:var(--accent)}
+  .side-brand{justify-content:flex-start;padding:0 8px}
+  .side-brand span{display:inline}
+  nav.tabs .side-acct:not([hidden]){display:flex}
+  body:not(.focus) .wrap{max-width:1000px;display:grid;grid-template-columns:minmax(0,600px) 320px;gap:0 44px;justify-content:center;align-items:start;padding-top:24px}
+  body:not(.focus) .wrap>*{grid-column:1}
+  body:not(.focus) header.top{display:none}
+  body:not(.focus) .rail{display:grid;gap:16px;grid-column:2;grid-row:1/span 40;position:sticky;top:24px}
+  body:not(.focus) #v-today .hud{display:none}
+}
+.rail .rstats{display:flex;gap:8px;justify-content:space-between}
+.rail .rstats>div{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:800;font-size:1.05rem;padding:8px;border-radius:14px;border:2px solid var(--line);background:var(--surface)}
+.rail .rstats svg{width:22px;height:22px}
+.rail .rstats small{font-weight:600;color:var(--muted);font-size:.72rem}
+.rail .rcard{border:2px solid var(--line);border-radius:18px;padding:16px;background:var(--surface);display:grid;gap:10px}
+.rail .rcard h3{margin:0;font-size:1rem}
+.rail .rcard p{margin:0;color:var(--muted);font-size:.85rem}
+.rail .rrow{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center}
+.rail .rrow .ic{font-family:var(--font-han);font-size:1.5rem;color:var(--accent);grid-row:span 2}
+.rail .rrow b{font-size:.88rem}
+.rail .rfoot{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:.75rem;color:var(--muted)}
+.rail .rfoot a{color:inherit}
 </style>
 
 <div class="wrap">
@@ -377,6 +419,8 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
     <div class="brand"><img class="seal" src="logo.svg" alt="" width="38" height="38"><div><h1>HSK Từng Bước</h1><div class="muted" style="font-size:.82rem">Lộ trình HSK 3.0 · Cấp 1–6</div></div></div>
     <div class="topr"><div class="streak" id="streak"></div><button class="acct" id="acct" hidden aria-haspopup="dialog">Đăng nhập</button></div>
   </header>
+
+  <aside class="rail" id="rail" aria-label="Tiến độ của bạn"></aside>
 
   <!-- TÀI KHOẢN: chỉ hiện khi đã cấu hình Firebase (xem account.js) -->
   <dialog id="acct-dlg" aria-labelledby="acct-title">
@@ -734,7 +778,8 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
   </section>
 </div>
 
-<nav class="tabs" id="tabs" hidden>
+<nav class="tabs" id="tabs" hidden aria-label="Chức năng">
+  <a class="side-brand" href="../" aria-label="HSK Từng Bước, trang giới thiệu"><img src="logo.svg" alt="" width="44" height="44"><span>HSK Từng Bước</span></a>
   <div class="in">
     <button data-v="today" aria-current="true"><span class="ic">今</span>Hôm nay</button>
     <button data-v="study"><span class="ic">卡</span>Flashcard</button>
@@ -743,6 +788,7 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
     <button data-v="quiz"><span class="ic">考</span>Kiểm tra</button>
     <button data-v="path"><span class="ic">路</span>Lộ trình</button>
   </div>
+  <button type="button" class="side-acct" id="side-acct" hidden><span class="ic">我</span><span id="side-acct-l">Tài khoản</span></button>
 </nav>
 <div class="sheet" id="sheet" hidden><div class="in"><div class="msg"><b id="sheet-t"></b><span id="sheet-d"></span></div><button id="sheet-next">Tiếp tục</button></div></div>
 <div class="toast" id="toast" hidden></div>
@@ -989,6 +1035,7 @@ function show(v){
   VIEWS.forEach(x => $("v-"+x).hidden = x !== v);
   if (v !== "quiz") $("sheet").hidden = true;
   $("tabs").hidden = ["setup","study","quiz","gpractice"].includes(v); // đang làm bài thì ẩn thanh tab cho tập trung
+  document.body.classList.toggle("focus", $("tabs").hidden); renderRail();
   const tab = v === "done" ? "study" : (v === "char" || v === "word") ? "chars" : (v === "gpractice" || v === "greview") ? "grammar" : (v === "pinyin" || v === "rad") ? "path" : v;
   document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.v === tab));
   if (v === "today") renderToday();
@@ -1000,7 +1047,28 @@ function show(v){
   window.scrollTo(0,0);
 }
 function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,1800); }
-function renderStreak(){ $("streak").innerHTML = `<span><b>${S.streak.count || 0}</b> ngày</span><span class="sep"> · </span><span><b>${S.xp || 0}</b> XP</span>`; }
+// Cột phải (máy tính màn rộng): chuỗi ngày, XP, mục tiêu hôm nay, tài khoản
+function renderRail(){
+  const el = $("rail"); if (!el || !S.profile) return;
+  const goal = XP_GOAL[S.profile.minutes || 10], xpd = S.day?.xp || 0, target = dailyNew(), doneN = Math.min(S.day?.newDone || 0, target);
+  const due = WORDS.filter(isDue).length, a = $("acct"), on = a && a.classList.contains("on");
+  const pct = (x, y) => Math.min(100, y ? x / y * 100 : 0);
+  const sa = $("side-acct"); if (sa && a){ sa.hidden = a.hidden; $("side-acct-l").textContent = on ? (($("acct-handle")?.textContent || "").trim() || "Tài khoản") : "Đăng nhập"; }
+  el.innerHTML = `<div class="rstats"><div title="Chuỗi ngày học liên tiếp">${ICON_FIRE}${S.streak.count || 0}<small>ngày</small></div><div title="Tổng XP">${S.xp || 0}<small>XP</small></div><div title="Cấp đang học"><small>HSK</small>${curLv()}</div></div>
+  <div class="rcard"><h3>Mục tiêu hôm nay</h3>
+    <div class="rrow"><span class="ic">经</span><b>Kiếm ${goal} XP</b><div class="bar"><i style="width:${pct(xpd, goal)}%"></i></div></div>
+    <div class="rrow"><span class="ic">新</span><b>Học ${target} từ mới (${doneN}/${target})</b><div class="bar"><i style="width:${pct(doneN, target)}%"></i></div></div>
+    <div class="rrow"><span class="ic">复</span><b>${due ? `Ôn ${due} thẻ đến hạn` : "Không còn thẻ cần ôn"}</b><div class="bar"><i style="width:${due ? 0 : 100}%"></i></div></div>
+    <button class="primary" type="button" data-rail="go">${due || doneN < target ? "Học ngay" : "Học thêm"}</button></div>
+  ${a && !a.hidden ? (on ? `<div class="rcard"><h3>Tài khoản</h3><p>${($("acct-handle")?.textContent || "").trim() || "Đã đăng nhập"} · tiến độ được lưu lên mạng.</p><button type="button" data-rail="acct">Quản lý tài khoản</button></div>`
+    : `<div class="rcard"><h3>Lưu tiến độ của bạn</h3><p>Đăng nhập bằng Google hoặc username để học tiếp trên điện thoại, máy tính khác.</p><button class="primary" type="button" data-rail="acct">Đăng nhập / Tạo tài khoản</button></div>`) : ""}
+  <div class="rfoot"><a href="../">Giới thiệu</a><a href="../#hoi-dap">Hỏi đáp</a><span>Miễn phí · HSK 3.0</span></div>`;
+}
+$("rail").onclick = e => { const b = e.target.closest("[data-rail]"); if (!b) return;
+  if (b.dataset.rail === "acct") $("acct").click(); else { show("today"); $("btn-go").click(); } };
+$("side-acct").onclick = () => $("acct").click();
+new MutationObserver(() => renderRail()).observe($("acct"), {attributes: true, childList: true, characterData: true, subtree: true});
+function renderStreak(){ renderRail(); $("streak").innerHTML = `<span><b>${S.streak.count || 0}</b> ngày</span><span class="sep"> · </span><span><b>${S.xp || 0}</b> XP</span>`; }
 const ICON_FIRE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="var(--gold)" d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-2.5 1.2-4 2.5-5 .2 2 1 3 2 3.5C11 9 10.5 5.5 12 2z"/></svg>';
 const ICON_BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" d="M4 5c3-1 5-1 8 1 3-2 5-2 8-1v14c-3-1-5-1-8 1-3-2-5-2-8-1z M12 6v14"/></svg>';
 // Bản đồ: mỗi nút là một bài. Nút sau mở khi nút trước xong (chọn "Biết một ít" thì mở hết)
