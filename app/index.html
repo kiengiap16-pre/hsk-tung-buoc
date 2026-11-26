@@ -136,6 +136,58 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 .choice label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:99px;font-size:.88rem;z-index:9}
 /* danh sách chữ */
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:var(--bg);color:var(--muted)}
+.search:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.search input{flex:1;min-width:0;border:0;background:none;color:var(--ink);font:inherit;padding:12px 0;outline:none}
+.dres{display:grid;gap:6px}
+.dres:empty{display:none}
+.drow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;text-align:left;font-weight:400;padding:10px 12px}
+.drow .h{font-family:var(--font-han);font-size:1.5rem;line-height:1.1}
+.drow .m{display:grid;gap:2px;min-width:0}.drow .m b{font-weight:600}.drow .m span{font-size:.85rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lvb{font-size:.72rem;font-weight:700;border-radius:99px;padding:3px 8px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.wd-head{justify-items:center;text-align:center}
+.wd-han{display:flex;gap:2px;flex-wrap:wrap;justify-content:center}
+.wd-han button{font-family:var(--font-han);font-size:3.4rem;line-height:1.1;border:0;background:none;padding:0 2px;font-weight:700;color:var(--ink)}
+.wd-han button:hover{color:var(--accent)}
+.wd-py{display:flex;align-items:center;gap:10px;font-size:1.35rem;font-weight:600;color:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:6px 12px;font-size:.82rem}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+.senses{margin:0;padding-left:1.4em;display:grid;gap:6px}
+.senses li::marker{color:var(--muted);font-weight:600}
+.pron{display:grid;gap:8px}
+.jump{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.jump a{font-size:.8rem;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:4px 10px}
+.jump a:hover{color:var(--accent);border-color:var(--accent)}
+[id^="wd-sec"],#wd-partsp,#wd-compp{scroll-margin-top:12px}
+.pop{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}.pop i{width:7px;height:7px;border-radius:99px;background:var(--line)}.pop i.on{background:var(--gold)}
+.wwrite{display:flex;flex-wrap:wrap;gap:12px}
+.wbox{display:grid;gap:6px;justify-items:center;text-align:center;font-size:.8rem;color:var(--muted)}
+.wbox .bx{width:120px;height:120px;border:1px solid var(--line);border-radius:12px;background:var(--paper);position:relative;cursor:pointer}
+.wbox .bx svg.g{position:absolute;inset:0;width:100%;height:100%}.wbox .bx svg.g line{stroke:var(--line);stroke-dasharray:3 3}
+.wbox .bx .w{position:absolute;inset:0}
+.wbox button{font-size:.8rem;padding:5px 10px}
+.syl{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);text-align:left;font-weight:400}
+.syl .c{font-family:var(--font-han);font-size:2rem;line-height:1;text-align:center}
+.syl .d{display:grid;gap:4px;min-width:0}
+.syl .p{font-size:1.15rem;font-weight:700;color:var(--accent)}
+.syl .parts{display:flex;flex-wrap:wrap;gap:6px;font-size:.82rem}
+.syl .parts span{border-radius:8px;padding:2px 8px;background:var(--surface);border:1px solid var(--line)}
+.syl .parts i{font-style:normal;color:var(--muted)}
+.syl svg.tc{width:56px;height:28px}
+.syl svg.tc line{stroke:var(--line);stroke-width:1.5}.syl svg.tc polyline{fill:none;stroke:var(--cinnabar);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.pnote{margin:0;font-size:.88rem;border-left:3px solid var(--gold);padding:6px 10px;background:var(--paper);border-radius:0 8px 8px 0}
+.wparts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.wpart{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;text-align:left;font-weight:400;padding:10px}
+.wpart .h{font-family:var(--font-han);font-size:2rem;line-height:1}
+.wpart small{display:block;color:var(--muted);font-size:.8rem}
+.comp{display:grid;gap:6px;margin-bottom:10px}
+.comp h3{margin:0;font-size:.9rem;font-weight:600;color:var(--muted)}
+.comp h3 b{font-family:var(--font-han);color:var(--ink);font-size:1.1rem}
+.wchips{display:flex;flex-wrap:wrap;gap:6px}
+.wchips button{display:inline-flex;gap:6px;align-items:baseline;padding:6px 10px;border-radius:10px;font-weight:400;font-size:.85rem;text-align:left;max-width:100%}
+.wchips button b{font-family:var(--font-han);font-size:1.1rem;font-weight:700;white-space:nowrap}
+.wchips button .lvb{font-size:.65rem;padding:1px 6px}
 .chargrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
 .chargrid button{display:grid;gap:0;justify-items:center;padding:8px 4px;border-radius:14px;font-weight:400;position:relative}
 .chargrid .h{font-family:var(--font-han);font-size:1.7rem;line-height:1.2}
@@ -400,8 +452,14 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
     <button class="primary" id="btn-next" hidden>Câu tiếp</button>
   </section>
 
-  <!-- DANH SÁCH CHỮ -->
+  <!-- TRA TỪ + DANH SÁCH CHỮ -->
   <section id="v-chars" hidden>
+    <div class="panel">
+      <span class="eyebrow">Từ điển HSK 1–6</span>
+      <h2>Tra từ</h2>
+      <label class="search"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg><input id="dq" type="search" placeholder="Chữ Hán, pinyin, tiếng Việt, Hán Việt hoặc English" aria-label="Tra từ" autocomplete="off"></label>
+      <div class="dres" id="dres"></div>
+    </div>
     <div class="panel">
       <span class="eyebrow">Học mặt chữ và cách viết</span>
       <h2>Chữ Hán theo cấp</h2>
@@ -457,7 +515,40 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
         </div>
       </div>
     </div>
-    <p class="hint" style="text-align:center;margin:0">Từ chứa chữ này: <span id="ch-words"></span></p>
+    <div class="panel"><div class="sech"><h2>Từ chứa chữ này</h2><span>Chạm để tra từ</span></div><div class="wchips" id="ch-words"></div></div>
+  </section>
+
+  <!-- MỤC TỪ (kiểu từ điển) -->
+  <section id="v-word" hidden>
+    <div class="ctop"><button class="back" id="wd-back">← Quay lại</button><div class="r"><button class="iconbtn" id="wd-star" aria-label="Đánh dấu sao">☆</button></div></div>
+    <div class="panel wd-head">
+      <div class="wd-han" id="wd-han"></div>
+      <div class="wd-py"><span id="wd-py"></span><button class="say" id="wd-say" aria-label="Nghe cả từ"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg></button></div>
+      <div class="tags" id="wd-tags"></div>
+      <nav class="jump" aria-label="Các mục"><a href="#wd-sec-mean">Nghĩa</a><a href="#wd-sec-pron">Phát âm</a><a href="#wd-sec-write">Cách viết</a><a href="#wd-partsp">Bóc tách</a><a href="#wd-compp">Từ ghép</a></nav>
+    </div>
+    <div class="panel" id="wd-sec-mean">
+      <div class="sech"><h2>Nghĩa</h2><div class="seg" role="tablist"><button id="wd-l-vi" aria-pressed="true">Tiếng Việt</button><button id="wd-l-en" aria-pressed="false">English</button></div></div>
+      <ol class="senses" id="wd-senses"></ol>
+      <p class="hint" id="wd-extra"></p>
+    </div>
+    <div class="panel" id="wd-sec-pron">
+      <div class="sech"><h2>Phát âm chi tiết</h2><span>Bấm từng âm tiết để nghe</span></div>
+      <div class="pron" id="wd-pron"></div>
+      <p class="pnote" id="wd-pnote" hidden></p>
+    </div>
+    <div class="panel" id="wd-sec-write">
+      <div class="sech"><h2>Cách viết</h2><span>Chạm ô chữ để xem lại thứ tự nét</span></div>
+      <div class="wwrite" id="wd-write"></div>
+    </div>
+    <div class="panel" id="wd-partsp">
+      <div class="sech"><h2>Bóc tách từ</h2><span>Chạm chữ để xem cách viết</span></div>
+      <div class="wparts" id="wd-parts"></div>
+    </div>
+    <div class="panel" id="wd-compp">
+      <div class="sech"><h2>Từ ghép thường gặp</h2><span>Theo cấp HSK</span></div>
+      <div id="wd-comp"></div>
+    </div>
   </section>
 
   <!-- B1: PINYIN -->
@@ -787,12 +878,12 @@ function showDone(title, txt){
 
 // ===== 4. GIAO DIỆN
 const $ = id => document.getElementById(id);
-const VIEWS = ["setup","today","study","done","quiz","path","chars","char","pinyin","rad"];
+const VIEWS = ["setup","today","study","done","quiz","path","chars","char","pinyin","rad","word"];
 function show(v){
   VIEWS.forEach(x => $("v-"+x).hidden = x !== v);
   if (v !== "quiz") $("sheet").hidden = true;
   $("tabs").hidden = ["setup","study","quiz"].includes(v); // đang làm bài thì ẩn thanh tab cho tập trung
-  const tab = v === "done" ? "study" : v === "char" ? "chars" : (v === "pinyin" || v === "rad") ? "path" : v;
+  const tab = v === "done" ? "study" : (v === "char" || v === "word") ? "chars" : (v === "pinyin" || v === "rad") ? "path" : v;
   document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.v === tab));
   if (v === "today") renderToday();
   if (v === "path") renderPath();
@@ -883,7 +974,7 @@ function renderCard(){
   $("c-topic").textContent = `HSK ${w.L} · Bài ${w.ls+1}`;
   $("c-hv").textContent = w.hv ? "Hán Việt: " + w.hv : "";
   $("c-han").textContent = w.h; $("c-han2").textContent = w.h; $("c-py").textContent = w.p; $("c-vi").textContent = w.v;
-  $("c-chips").innerHTML = [...new Set(w.h)].filter(c => CHARS[c]).map(c => `<button type="button" data-c="${c}" aria-label="Xem chữ ${c}">${c} ›</button>`).join("");
+  $("c-chips").innerHTML = `<button type="button" data-w="${w.h}">Chi tiết từ ›</button>` + [...new Set(w.h)].filter(c => CHARS[c]).map(c => `<button type="button" data-c="${c}" aria-label="Xem chữ ${c}">${c} ›</button>`).join("");
   $("study-label").textContent = isNew ? "Từ mới" : "Ôn tập";
   $("study-count").textContent = `${qi+1} / ${Q.length}`;
 }
@@ -1085,7 +1176,7 @@ function openChar(c, from){
   }
   $("ch-origin").innerHTML = makeOrigin(ch) || `Chưa có dữ liệu nguồn gốc cho chữ ${ch.c}.`;
   $("ch-tip").value = S.tips[c] || makeTip(ch);
-  $("ch-words").innerHTML = wordsWith(c).map(w => `<b class="han">${w.h}</b> ${w.p} (${w.v})`).join(" · ");
+  $("ch-words").innerHTML = wordsWith(c).sort((a, b) => a.L - b.L || a.h.length - b.h.length).slice(0, 30).map(x => `<button data-w="${x.h}"><b>${x.h}</b>${x.p} · ${x.v.split(/[;,]/)[0]} <span class="lvb">${x.L}</span></button>`).join("");
   $("ch-msg").textContent = "";
   drawWriter(ch);
 }
@@ -1261,7 +1352,7 @@ $("rad-replay").onclick = () => radW && radW.animateCharacter();
 $("rd-know").onclick = () => { S.rad[curRad.g] = 1; save(); renderRad(); $("rd-know").textContent = "Đã nhớ ✓"; toast("Đã đánh dấu bộ " + curRad.hv); };
 $("rd-ex").onclick = e => { const b = e.target.closest("button[data-c]"); if (b) openChar(b.dataset.c, "rad"); };
 $("chargrid").onclick = e => { const b = e.target.closest("button"); if (b) openChar(b.dataset.c, "chars"); };
-$("c-chips").onclick = e => { e.stopPropagation(); const b = e.target.closest("button"); if (b) openChar(b.dataset.c, "study"); };
+$("c-chips").onclick = e => { e.stopPropagation(); const b = e.target.closest("button"); if (!b) return; if (b.dataset.w) openWord(b.dataset.w, "study"); else openChar(b.dataset.c, "study"); };
 $("ch-back").onclick = () => { if (writer) writer.cancelQuiz(); show(prevView); if (prevView === "study") renderCard(); };
 $("ch-star").onclick = () => { const c = curChar.c; if (S.stars[c]) delete S.stars[c]; else S.stars[c] = 1; save(); $("ch-star").textContent = S.stars[c] ? "★" : "☆"; $("ch-star").classList.toggle("on", !!S.stars[c]); toast(S.stars[c] ? "Đã đánh dấu sao" : "Đã bỏ sao"); };
 $("ch-say").onclick = () => say(curChar.c);
@@ -1279,6 +1370,144 @@ document.addEventListener("keydown", e => {
   if (e.key === "1") grade(false);
   if (e.key === "2") grade(true);
 });
+
+// ===== 5c. TỪ ĐIỂN: tra từ, mục từ chi tiết, phát âm từng âm tiết, bóc tách và từ ghép theo cấp
+const DICT = {}; // DICT[L][từ] = [english, [từ loại], phồn thể, [lượng từ]]
+const dictLv = L => DICT[L] ? Promise.resolve(DICT[L]) : fetch(`data/dict${L}.json`).then(r => r.json()).then(j => DICT[L] = j).catch(() => DICT[L] = {});
+const BYH = {}; // tra nhanh theo chữ Hán
+const unacc = t => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase();
+let SEARCH = null;
+function searchIndex(){ if (SEARCH) return SEARCH;
+  WORDS.forEach(w => BYH[w.h] = BYH[w.h] || w);
+  return SEARCH = WORDS.map(w => ({w, py: unacc(w.p).replace(/\s/g, ""), vi: unacc(w.v), hv: unacc(w.hv)})); }
+function lookup(q){
+  q = q.trim(); if (!q) return [];
+  const idx = searchIndex(), u = unacc(q), uz = u.replace(/\s/g, ""), han = /[\u4e00-\u9fff]/.test(q), out = [];
+  for (const x of idx){
+    let sc = 0;
+    if (han){ if (x.w.h === q) sc = 100; else if (x.w.h.startsWith(q)) sc = 60; else if (x.w.h.includes(q)) sc = 40; }
+    else {
+      if (x.py === uz) sc = 90; else if (x.py.startsWith(uz)) sc = 50;
+      if (x.hv === u) sc = Math.max(sc, 85); else if (x.hv.startsWith(u)) sc = Math.max(sc, 45);
+      const vi = x.vi.split(/[;,]\s*/); if (vi.includes(u)) sc = Math.max(sc, 80); else if (x.vi.includes(u)) sc = Math.max(sc, 30);
+      const en = (DICT[x.w.L]?.[x.w.h]?.[0] || "").toLowerCase(); if (u.length > 2 && en.includes(u)) sc = Math.max(sc, en.split(/[;,] ?/).some(e => e.replace(/^to /, "") === u) ? 70 : 20);
+    }
+    if (sc) out.push([sc - x.w.L * 0.5, x.w]);
+  }
+  return out.sort((a, b) => b[0] - a[0]).slice(0, 40).map(x => x[1]);
+}
+function renderResults(){
+  const q = $("dq").value, r = lookup(q);
+  $("dres").innerHTML = !q.trim() ? "" : r.length ? r.map(w => `<button class="drow" data-w="${w.h}"><span class="h">${w.h}</span><span class="m"><b>${w.p}</b><span>${w.v}</span></span><span class="lvb">HSK ${w.L}</span></button>`).join("")
+    : `<p class="muted" style="margin:0">Chưa có từ này trong HSK 1–6. Thử gõ chữ Hán, pinyin không dấu (ví dụ "xuexi") hoặc nghĩa tiếng Việt.</p>`;
+}
+// --- tách pinyin thành âm tiết, rồi thành thanh mẫu + vận mẫu + thanh điệu
+const PY_MARK = {"\u0304":1,"\u0301":2,"\u030c":3,"\u0300":4};
+let PY_BASES = null;
+function segPy(p){
+  if (!PY_BASES){ PY_BASES = new Set((AUD?.py || []).map(x => x.slice(0, -1))); ["r","ng","m","n","hm","hng"].forEach(x => PY_BASES.add(x)); }
+  const out = [];
+  for (const chunk of p.toLowerCase().split(/[\s'’·-]+/)){ if (!chunk) continue;
+    const L = [], T = []; for (const ch of chunk.normalize("NFD").replace(/u\u0308/g, "v")){ if (PY_MARK[ch]) T[T.length-1] = PY_MARK[ch]; else if (/[a-z]/.test(ch)){ L.push(ch); T.push(0); } }
+    const s = L.join(""), n = s.length, best = Array(n+1).fill(null); best[n] = [];
+    for (let i = n-1; i >= 0; i--) for (let j = Math.min(n, i+6); j > i; j--){
+      const marks = T.slice(i, j).filter(Boolean).length;
+      if (PY_BASES.has(s.slice(i, j)) && best[j] && marks <= 1){ best[i] = [[i, j], ...best[j]]; break; } }
+    if (!best[0]) return null;
+    best[0].forEach(([i, j]) => out.push({b: s.slice(i, j), t: Math.max(0, ...T.slice(i, j))}));
+  }
+  return out;
+}
+const INIT = ["zh","ch","sh","b","p","m","f","d","t","n","l","g","k","h","j","q","x","r","z","c","s","y","w"];
+const VOW = {a:"āáǎàa",e:"ēéěèe",i:"īíǐìi",o:"ōóǒòo",u:"ūúǔùu",v:"ǖǘǚǜü"};
+function markPy(b, t){ // đặt lại dấu thanh lên vận mẫu theo quy tắc a/e > o > nguyên âm cuối
+  const k = t || 5, pos = /a/.test(b) ? b.indexOf("a") : /e/.test(b) ? b.indexOf("e") : /ou/.test(b) ? b.indexOf("o") : Math.max(...[..."iouv"].map(v => b.lastIndexOf(v)));
+  return [...b].map((c, i) => i === pos && VOW[c] ? VOW[c][k-1] : c === "v" ? "ü" : c).join("");
+}
+function splitSyl(b){
+  const ini = INIT.find(x => b.startsWith(x) && b.length > x.length) || "";
+  let fin = b.slice(ini.length), note = "";
+  if (ini === "y"){ fin = fin === "u" || fin.startsWith("u") ? "ü" + fin.slice(1) : fin.startsWith("i") ? fin : "i" + fin; note = "y chỉ là ký hiệu viết"; }
+  if (ini === "w"){ fin = fin === "u" ? "u" : "u" + fin; note = "w chỉ là ký hiệu viết"; }
+  if (["j","q","x"].includes(ini) && fin.startsWith("u")){ fin = "ü" + fin.slice(1); note = "sau j, q, x thì u đọc là ü"; }
+  if (["zh","ch","sh","r","z","c","s"].includes(ini) && fin === "i") note = "i ở đây là âm lưỡi, không đọc như i";
+  fin = fin.replace(/v/g, "ü").replace(/^iu$/, "iou").replace(/^ui$/, "uei").replace(/^un$/, "uen");
+  return {ini: ["y","w"].includes(ini) ? "" : ini, fin, note};
+}
+const VI_INI = Object.fromEntries(INITIALS.map(x => [x[0], x[1]]));
+const VI_FIN = Object.fromEntries(FINALS.map(x => [x[0], x[1]]).concat([["iou","iêu"],["uei","uây"],["uen","uân"],["iong","iung"],["üan","oen (môi tròn)"],["ün","uyn"],["-i",""]]));
+function sandhiNotes(h, syls){
+  const t = syls.map(x => x.t), notes = [], eff = t.slice();
+  for (let i = t.length-2; i >= 0; i--) if (eff[i] === 3 && eff[i+1] === 3){ eff[i] = 2; notes.push(`${h[i]} đứng trước một thanh 3 nên đọc thành thanh 2`); }
+  [...h].forEach((c, i) => { if (i+1 >= t.length) return;
+    if (c === "不" && t[i] === 4 && t[i+1] === 4){ eff[i] = 2; notes.push("不 đứng trước thanh 4 nên đọc thành bú"); }
+    if (c === "一" && t[i] === 1 && !"第初".includes(h[i-1] || "")){ eff[i] = t[i+1] === 4 ? 2 : 4; notes.push(`一 đứng trước ${pyName(t[i+1])} nên đọc thành ${eff[i] === 2 ? "yí" : "yì"}`); } });
+  return {eff, notes};
+}
+let curWord = null, wordFrom = "chars", wdLang = "vi", wordWriters = [];
+async function openWord(h, from){
+  searchIndex(); const w = BYH[h]; if (!w) return openChar(h, from);
+  curWord = w; if (from && from !== "word") wordFrom = from;
+  const d = (await dictLv(w.L))[w.h] || ["", [], "", []];
+  show("word");
+  $("wd-han").innerHTML = [...w.h].map(c => `<button data-c="${c}" aria-label="Xem chữ ${c}">${c}</button>`).join("");
+  $("wd-py").textContent = w.p;
+  $("wd-star").textContent = S.stars[w.h] ? "★" : "☆"; $("wd-star").classList.toggle("on", !!S.stars[w.h]);
+  const card = S.cards[w.h];
+  $("wd-tags").innerHTML = [`<span class="lvb">HSK ${w.L}</span>`, w.hv ? `<span class="pill" style="border:1px solid var(--line)">Hán Việt: <b>${w.hv}</b></span>` : "",
+    ...d[1].map(x => `<span class="pill" style="border:1px solid var(--line)">${x}</span>`), d[2] ? `<span class="pill" style="border:1px solid var(--line)">Phồn thể ${d[2]}</span>` : "",
+    d[4] ? (() => { const f = d[4], n = f <= 300 ? 5 : f <= 1500 ? 4 : f <= 5000 ? 3 : f <= 15000 ? 2 : 1; return `<span class="pill" style="border:1px solid var(--line)" title="Thứ hạng tần suất ${f}">${["","Ít gặp","Khá ít gặp","Thường gặp","Phổ biến","Rất phổ biến"][n]}<span class="pop">${[1,2,3,4,5].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span></span>`; })() : "",
+    `<span class="pill" style="border:1px solid var(--line)">${card ? (card.box >= 2 ? "Đã thuộc" : "Đang học") : "Chưa học"}</span>`].join("");
+  const renderSenses = () => {
+    const list = wdLang === "vi" ? w.v.split(/;\s*/) : (d[0] || "").split(/;\s*/);
+    $("wd-senses").innerHTML = list.filter(Boolean).map(x => `<li>${x}</li>`).join("") || "<li>Chưa có nghĩa tiếng Anh.</li>";
+    $("wd-l-vi").setAttribute("aria-pressed", wdLang === "vi"); $("wd-l-en").setAttribute("aria-pressed", wdLang === "en");
+  };
+  $("wd-l-vi").onclick = () => { wdLang = "vi"; renderSenses(); }; $("wd-l-en").onclick = () => { wdLang = "en"; renderSenses(); };
+  renderSenses();
+  $("wd-extra").textContent = d[3]?.length ? "Lượng từ đi kèm: " + d[3].join(", ") : "";
+  // phát âm chi tiết
+  const syls = segPy(w.p) || [], chars = [...w.h.replace(/儿$/, syls.length < w.h.length ? "" : "儿")];
+  const {eff, notes} = sandhiNotes(w.h, syls);
+  $("wd-pron").innerHTML = syls.map((x, i) => { const sp = splitSyl(x.b), tone = TONES.find(t => t.n === x.t) || TONES[4];
+    const key = x.b + (x.t || 5), has = AUD?.py?.includes(key);
+    return `<button class="syl" data-syl="${has ? key : ""}" data-c="${chars[i] || ""}"><span class="c">${chars[i] || ""}</span><span class="d"><span class="p">${markPy(x.b, x.t)}</span>
+      <span class="parts"><span><i>Thanh mẫu</i> ${sp.ini || "không có"}${sp.ini && VI_INI[sp.ini] ? ` <i>≈ ${VI_INI[sp.ini]}</i>` : ""}</span><span><i>Vận mẫu</i> ${sp.fin}${VI_FIN[sp.fin] ? ` <i>≈ ${VI_FIN[sp.fin]}</i>` : ""}</span><span><i>Thanh</i> ${pyName(x.t)}${eff[i] !== x.t ? ` → đọc ${pyName(eff[i])}` : ""}</span>${sp.note ? `<span><i>${sp.note}</i></span>` : ""}</span></span>
+      <svg class="tc" viewBox="0 0 100 50" aria-label="${pyName(x.t)}"><line x1="0" y1="5" x2="100" y2="5"/><line x1="0" y1="45" x2="100" y2="45"/><polyline points="${tone.pts}"/></svg></button>`; }).join("");
+  $("wd-pnote").hidden = !notes.length; $("wd-pnote").innerHTML = notes.length ? "<b>Biến điệu khi đọc cả từ:</b> " + notes.join("; ") + "." : "";
+  // bóc tách từ
+  const uniq = [...new Set([...w.h])].filter(c => CHARS[c] || COMP[c]);
+  $("wd-partsp").hidden = w.h.length < 2 && !CHARS[w.h];
+  $("wd-parts").innerHTML = uniq.map(c => { const ch = CHARS[c] || COMP[c]; return `<button class="wpart" data-c="${c}"><span class="h">${c}</span><span><b>${ch.py || ""}</b> · ${ch.hv || ""}<small>${(ch.m || "").split(/[;,]/)[0]}</small></span></button>`; }).join("");
+  // từ ghép theo cấp
+  const comp = uniq.map(c => { const ws = WORDS.filter(x => x.h !== w.h && x.h.includes(c)).sort((a, b) => a.L - b.L || a.h.length - b.h.length);
+    if (!ws.length) return ""; const shown = ws.slice(0, 12);
+    return `<div class="comp"><h3><b>${c}</b> có trong ${ws.length} từ HSK</h3><div class="wchips">${shown.map(x => `<button data-w="${x.h}"><b>${x.h}</b>${x.p} · ${x.v.split(/[;,]/)[0]} <span class="lvb">${x.L}</span></button>`).join("")}</div></div>`; }).join("");
+  $("wd-compp").hidden = !comp; $("wd-comp").innerHTML = comp;
+  // cách viết: một ô cho mỗi chữ, chạy thứ tự nét
+  const wc = [...w.h].filter(c => CHARS[c]);
+  $("wd-sec-write").hidden = !wc.length;
+  $("wd-write").innerHTML = wc.map((c, i) => `<div class="wbox"><div class="bx" data-i="${i}" role="button" aria-label="Xem thứ tự nét chữ ${c}"><svg class="g" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50" y1="0" x2="50" y2="100"/><line x1="0" y1="50" x2="100" y2="50"/></svg><div class="w" id="ww${i}"></div></div><span id="wn${i}"></span><button data-c="${c}">Tập viết ${c}</button></div>`).join("");
+  wordWriters = [];
+  wc.forEach(async (c, i) => { const raw = await strokeOf(c), el = $("ww" + i); if (!el) return;
+    if (!raw || typeof HanziWriter === "undefined"){ el.innerHTML = `<div class="han" style="display:grid;place-items:center;height:100%;font-size:4rem">${c}</div>`; return; }
+    $("wn" + i).textContent = `${raw.strokes.length} nét` + (i === 0 && d[5] ? ` · bộ ${d[5]}` : "");
+    wordWriters[i] = HanziWriter.create(el, c, {width:120, height:120, padding:8, showOutline:true, strokeColor: css("--ink"), outlineColor: css("--line"), strokeAnimationSpeed: 1.4, delayBetweenStrokes: 180, charDataLoader: (x, ok) => ok(raw)});
+    setTimeout(() => wordWriters[i]?.animateCharacter(), 300 + i * 900); });
+  window.scrollTo(0, 0);
+}
+$("dq").addEventListener("input", () => { clearTimeout(renderResults.t); renderResults.t = setTimeout(renderResults, 120); });
+$("dq").addEventListener("focus", () => { for (let L = 1; L <= MAXLV; L++) dictLv(L); }, {once: true});
+$("dres").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "chars"); };
+$("wd-back").onclick = () => { show(wordFrom); if (wordFrom === "study") renderCard(); };
+$("wd-say").onclick = () => curWord && say(curWord.h, curWord.p);
+$("wd-star").onclick = () => { const h = curWord.h; if (S.stars[h]) delete S.stars[h]; else S.stars[h] = 1; save(); $("wd-star").textContent = S.stars[h] ? "★" : "☆"; $("wd-star").classList.toggle("on", !!S.stars[h]); };
+$("wd-han").onclick = e => { const b = e.target.closest("[data-c]"); if (b && CHARS[b.dataset.c]) openChar(b.dataset.c, "word"); };
+$("wd-parts").onclick = e => { const b = e.target.closest("[data-c]"); if (b && CHARS[b.dataset.c]) openChar(b.dataset.c, "word"); };
+$("wd-write").onclick = e => { const b = e.target.closest("button[data-c]"); if (b) return openChar(b.dataset.c, "word"); const x = e.target.closest(".bx"); if (x) wordWriters[+x.dataset.i]?.animateCharacter(); };
+$("ch-words").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "char"); };
+$("wd-comp").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w); };
+$("wd-pron").onclick = e => { const b = e.target.closest(".syl"); if (!b) return; if (!(b.dataset.syl && saySyl(b.dataset.syl))) speak(b.dataset.c); };
 
 // ===== 6. KHỞI ĐỘNG: tải dữ liệu từ thư mục data/ rồi mới vẽ giao diện
 // Cầu nối cho account.js (đăng nhập + lưu lên mạng)
