@@ -41,8 +41,9 @@ header.top{display:flex;align-items:center;justify-content:space-between;gap:12p
 .seal{width:38px;height:38px;border-radius:9px;background:var(--accent);color:var(--surface);display:grid;place-items:center;font-family:var(--font-han);font-size:22px;font-weight:700}
 .streak{font-size:.85rem;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
 .streak b{color:var(--gold);font-size:1.05rem}
-.topr{display:flex;align-items:center;gap:10px}
-.acct{padding:7px 12px;font-size:.85rem;border-radius:99px;max-width:9.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topr{display:flex;align-items:center;gap:10px;flex-shrink:0}
+@media (max-width:440px){header.top h1{font-size:1.05rem;line-height:1.2;white-space:nowrap}.streak{display:grid;line-height:1.25}.streak .sep{display:none}.brand .muted{display:none}.streak{font-size:.75rem}.topr{gap:6px}.acct{padding:6px 10px}}
+.acct{padding:7px 12px;font-size:.85rem;border-radius:99px;max-width:9.5em;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .acct.on{background:var(--accent);color:var(--surface);border-color:var(--accent);width:36px;height:36px;padding:0;display:grid;place-items:center}
 dialog#acct-dlg{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);padding:0;width:min(400px,calc(100vw - 32px))}
 dialog#acct-dlg::backdrop{background:rgba(15,42,29,.55)}
@@ -63,6 +64,11 @@ button.link{border:0;background:none;padding:4px 0;color:var(--muted);text-decor
 .uname-msg.ok{color:var(--accent)}.uname-msg.bad{color:var(--cinnabar)}
 .uname-sug{display:flex;flex-wrap:wrap;gap:6px}
 .uname-sug button{padding:5px 10px;border-radius:99px;font-size:.82rem}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.8rem}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.pwseg{justify-self:stretch;display:grid;grid-template-columns:1fr 1fr}
+.uname-in .link{padding:0 2px;text-decoration:none}
+.chpw{display:grid;gap:8px}.chpw summary{cursor:pointer;font-weight:600;font-size:.9rem;color:var(--muted)}
+.chpw[open]{display:grid;gap:8px}
 .sso{display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
 .acct-err{color:var(--cinnabar);font-size:.85rem}
 section{display:grid;gap:14px;padding-block:8px}
@@ -376,11 +382,27 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
         <p class="muted">Đăng nhập để lưu tiến độ học lên mạng và học tiếp trên mọi thiết bị. Không đăng nhập vẫn học được, tiến độ lưu trên trình duyệt này.</p>
         <button type="button" class="sso" id="login-google"><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3A12 12 0 1 1 24 12a11.9 11.9 0 0 1 8.4 3.3l5.7-5.7A20 20 0 1 0 44 24c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8A12 12 0 0 1 24 12a11.9 11.9 0 0 1 8.4 3.3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/><path fill="#4CAF50" d="M24 44a20 20 0 0 0 13.5-5.2l-6.2-5.3A12 12 0 0 1 12.7 28l-6.5 5A20 20 0 0 0 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4 5.5l6.2 5.3C37 39.2 44 34 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>Tiếp tục với Google</button>
         <button type="button" class="sso" id="login-apple" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4.1zM13.9 5c.7-.9 1.2-2 1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3.1-1.5z"/></svg>Tiếp tục với Apple</button>
+        <div class="or"><span>hoặc dùng username</span></div>
+        <div class="seg pwseg" role="tablist"><button type="button" id="pw-tab-in" aria-pressed="true">Đăng nhập</button><button type="button" id="pw-tab-up" aria-pressed="false">Tạo tài khoản</button></div>
+        <label class="uname-in"><span>@</span><input id="pw-user" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" placeholder="username" aria-label="Username"></label>
+        <label class="uname-in"><input id="pw-pass" type="password" autocomplete="current-password" placeholder="Mật khẩu (ít nhất 6 ký tự)" aria-label="Mật khẩu"><button type="button" class="link" id="pw-eye" aria-label="Hiện mật khẩu">Hiện</button></label>
+        <label class="uname-in" id="pw-pass2-l" hidden><input id="pw-pass2" type="password" autocomplete="new-password" placeholder="Nhập lại mật khẩu" aria-label="Nhập lại mật khẩu"></label>
+        <p class="uname-msg" id="pw-msg" aria-live="polite"></p>
+        <p class="hint" id="pw-warn" hidden style="margin:0">Lưu ý: tài khoản username không gắn email nên <b>quên mật khẩu sẽ không lấy lại được</b>. Hãy ghi lại mật khẩu, hoặc sau khi vào thì bấm “Liên kết Google” để có thêm cách đăng nhập.</p>
+        <button type="button" class="primary" id="pw-go">Đăng nhập</button>
       </div>
       <div id="acct-in" hidden>
         <div class="uname-row"><span class="uname" id="acct-handle"></span><button type="button" class="link" id="uname-edit">Đổi username</button></div>
         <p class="muted" style="font-size:.85rem">Tài khoản: <span id="acct-name"></span></p>
         <p class="muted" id="acct-sync">Tiến độ được tự động lưu lên mạng.</p>
+        <div id="pw-tools" hidden style="display:grid;gap:8px">
+          <button type="button" class="sso" id="link-google">Liên kết Google (để không mất tài khoản)</button>
+          <details class="chpw"><summary>Đổi mật khẩu</summary>
+            <label class="uname-in"><input id="cp-old" type="password" autocomplete="current-password" placeholder="Mật khẩu hiện tại" aria-label="Mật khẩu hiện tại"></label>
+            <label class="uname-in"><input id="cp-new" type="password" autocomplete="new-password" placeholder="Mật khẩu mới (ít nhất 6 ký tự)" aria-label="Mật khẩu mới"></label>
+            <button type="button" id="cp-go">Lưu mật khẩu mới</button><p class="uname-msg" id="cp-msg"></p>
+          </details>
+        </div>
         <button type="button" id="logout">Đăng xuất</button>
       </div>
       <div id="acct-user" hidden>
@@ -714,8 +736,8 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.2/dist/hanzi-writer.min.js"></script>
-<script src="firebase-config.js?v=4"></script>
-<script type="module" src="account.js?v=4"></script>
+<script src="firebase-config.js?v=5"></script>
+<script type="module" src="account.js?v=5"></script>
 <script>
 // ===== 1. DỮ LIỆU: từ vựng HSK 3.0 cấp 1–6 nằm trong thư mục data/ (mỗi cấp một file), tải khi mở web
 // Mỗi từ: [chữ Hán, pinyin, nghĩa tiếng Việt, Hán Việt]. Mỗi cấp chia thành bài 20 từ, xếp theo độ thông dụng.
@@ -966,7 +988,7 @@ function show(v){
   window.scrollTo(0,0);
 }
 function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,1800); }
-function renderStreak(){ $("streak").innerHTML = `<b>${S.streak.count || 0}</b> ngày · <b>${S.xp || 0}</b> XP`; }
+function renderStreak(){ $("streak").innerHTML = `<span><b>${S.streak.count || 0}</b> ngày</span><span class="sep"> · </span><span><b>${S.xp || 0}</b> XP</span>`; }
 const ICON_FIRE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="var(--gold)" d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-2.5 1.2-4 2.5-5 .2 2 1 3 2 3.5C11 9 10.5 5.5 12 2z"/></svg>';
 const ICON_BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" d="M4 5c3-1 5-1 8 1 3-2 5-2 8-1v14c-3-1-5-1-8 1-3-2-5-2-8-1z M12 6v14"/></svg>';
 // Bản đồ: mỗi nút là một bài. Nút sau mở khi nút trước xong (chọn "Biết một ít" thì mở hết)

@@ -116,21 +116,80 @@ async function start(){
     } finally { save.textContent = "Lưu username"; }
   };
 
+  // ----- TÀI KHOẢN USERNAME + MẬT KHẨU (Firebase lưu mật khẩu an toàn, web không giữ mật khẩu)
+  const PW_DOMAIN = "taikhoan.hsk-tung-buoc.app";
+  const pwEmail = u => `${u}@${PW_DOMAIN}`;
+  const isPwUser = u => !!u && u.providerData.some(p => p.providerId === "password");
+  let pwMode = "in", pendingSignup = null;
+  const pwMsg = (t, ok) => { const m = $("pw-msg"); m.textContent = t; m.className = "uname-msg " + (ok ? "ok" : t ? "bad" : ""); };
+  function setPwMode(m){ pwMode = m; $("pw-tab-in").setAttribute("aria-pressed", m === "in"); $("pw-tab-up").setAttribute("aria-pressed", m === "up");
+    $("pw-pass2-l").hidden = m === "in"; $("pw-warn").hidden = m === "in"; $("pw-go").textContent = m === "in" ? "Đăng nhập" : "Tạo tài khoản";
+    $("pw-pass").autocomplete = m === "in" ? "current-password" : "new-password"; pwMsg(""); }
+  $("pw-tab-in").onclick = () => setPwMode("in"); $("pw-tab-up").onclick = () => setPwMode("up");
+  $("pw-eye").onclick = () => { const t = $("pw-pass").type === "password"; $("pw-pass").type = $("pw-pass2").type = t ? "text" : "password"; $("pw-eye").textContent = t ? "Ẩn" : "Hiện"; };
+  ["pw-user","pw-pass","pw-pass2"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); $("pw-go").click(); } }));
+  $("pw-go").onclick = async () => {
+    const u = $("pw-user").value.trim().toLowerCase().replace(/^@/, ""), pw = $("pw-pass").value; $("pw-user").value = u;
+    const e1 = unameErr(u); if (!u) return pwMsg("Nhập username."); if (e1) return pwMsg(e1);
+    if (pw.length < 6) return pwMsg("Mật khẩu cần ít nhất 6 ký tự.");
+    const go = $("pw-go"); go.disabled = true;
+    try {
+      if (pwMode === "in"){ go.textContent = "Đang đăng nhập…"; await A.signInWithEmailAndPassword(auth, pwEmail(u), pw); }
+      else {
+        if (pw !== $("pw-pass2").value) { pwMsg("Hai lần nhập mật khẩu chưa giống nhau."); return; }
+        go.textContent = "Đang tạo…";
+        const d = await F.getDoc(F.doc(db, "usernames", u)); if (d.exists()){ pwMsg(`@${u} đã có người dùng, thử tên khác nhé.`); return; }
+        pendingSignup = u; await A.createUserWithEmailAndPassword(auth, pwEmail(u), pw);
+      }
+    } catch(e){
+      pendingSignup = null; const c = e.code || "";
+      pwMsg(c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found") ? "Sai username hoặc mật khẩu." :
+        c.includes("email-already-in-use") ? `@${u} đã có người dùng, thử tên khác nhé.` : c.includes("too-many-requests") ? "Bạn thử sai nhiều lần quá, đợi một lát rồi thử lại." :
+        c.includes("operation-not-allowed") ? "Cách đăng nhập này chưa được bật." : c.includes("network") ? "Mất kết nối mạng, thử lại nhé." : "Không thực hiện được: " + (c || e.message));
+    } finally { go.disabled = false; go.textContent = pwMode === "in" ? "Đăng nhập" : "Tạo tài khoản"; }
+  };
+  $("link-google").onclick = async () => {
+    try { await A.linkWithPopup(auth.currentUser, new A.GoogleAuthProvider()); window.HSK.toast("Đã liên kết Google. Từ giờ bạn đăng nhập được bằng cả hai cách."); showPwTools(auth.currentUser); }
+    catch(e){ err.textContent = (e.code || "").includes("credential-already-in-use") ? "Gmail này đã gắn với một tài khoản khác." : (e.code || "").includes("popup-closed") ? "Bạn đã đóng cửa sổ Google." : "Chưa liên kết được: " + (e.code || e.message); err.hidden = false; }
+  };
+  $("cp-go").onclick = async () => {
+    const m = $("cp-msg"), o = $("cp-old").value, n = $("cp-new").value; m.className = "uname-msg bad";
+    if (n.length < 6){ m.textContent = "Mật khẩu mới cần ít nhất 6 ký tự."; return; }
+    try { const u = auth.currentUser; await A.reauthenticateWithCredential(u, A.EmailAuthProvider.credential(u.email, o)); await A.updatePassword(u, n);
+      m.textContent = "Đã đổi mật khẩu."; m.className = "uname-msg ok"; $("cp-old").value = $("cp-new").value = ""; }
+    catch(e){ m.textContent = (e.code || "").includes("credential") || (e.code || "").includes("wrong-password") ? "Mật khẩu hiện tại chưa đúng." : "Chưa đổi được: " + (e.code || e.message); }
+  };
+  function showPwTools(user){
+    const pwU = isPwUser(user), hasG = user && user.providerData.some(p => p.providerId === "google.com");
+    $("pw-tools").hidden = !pwU; $("link-google").hidden = !pwU || hasG; $("uname-edit").hidden = pwU;
+  }
+
   A.onAuthStateChanged(auth, async user => {
     uid = user ? user.uid : null; ready = false;
     $("acct-out").hidden = !!user; $("acct-in").hidden = !user; $("acct-user").hidden = true; handle = null;
     if (!user){ btn.textContent = "Đăng nhập"; btn.classList.remove("on"); btn.setAttribute("aria-label", "Đăng nhập"); return; }
-    const name = user.displayName || user.email || "Bạn";
-    $("acct-name").textContent = user.email ? `${name} (${user.email})` : name;
+    const pwU = isPwUser(user), pwName = pwU ? user.email.split("@")[0] : null;
+    const name = user.displayName || (pwU ? "@" + pwName : user.email) || "Bạn";
+    $("acct-name").textContent = pwU ? `đăng nhập bằng username @${pwName}` + (user.providerData.some(p => p.providerId === "google.com") ? " · đã liên kết Google" : "") : user.email ? `${name} (${user.email})` : name;
+    showPwTools(user);
+    $("pw-pass").value = $("pw-pass2").value = "";
     btn.textContent = name.trim()[0].toUpperCase(); btn.classList.add("on"); btn.setAttribute("aria-label", "Tài khoản: " + name);
     try {
+      if (pendingSignup){ // tài khoản username mới: giữ chỗ username ngay
+        const u = pendingSignup; pendingSignup = null;
+        try { await F.runTransaction(db, async tx => { const nref = F.doc(db, "usernames", u), d = await tx.get(nref);
+            if (d.exists() && d.data().uid !== uid) throw new Error("taken");
+            tx.set(nref, { uid, at: F.serverTimestamp() }); tx.set(ref(), { username: u }, { merge: true }); }); }
+        catch(e){ await user.delete().catch(() => {}); pwMsg(e.message === "taken" ? `@${u} vừa có người lấy mất, thử tên khác nhé.` : "Chưa tạo được tài khoản, thử lại nhé."); return; }
+      }
       const snap = await F.getDoc(ref());
       const cloud = snap.exists() ? JSON.parse(snap.data().data || "null") : null;
       setHandle(snap.exists() ? snap.data().username || null : null);
       const merged = merge(window.HSK.get(), cloud);
       window.HSK.set(merged); ready = true; await push();
       window.HSK.toast(cloud ? "Đã đồng bộ tiến độ học" : "Đã lưu tiến độ lên tài khoản");
-      if (!handle) askUsername(user); else if (dlg.open) dlg.close();
+      if (!handle && !pwU) askUsername(user); else if (dlg.open) dlg.close();
+      if (!handle && pwU) setHandle(pwName);
     } catch(e){ console.error(e); $("acct-sync").textContent = "Chưa tải được tiến độ trên mạng. Kiểm tra mạng rồi tải lại trang."; }
   });
 }
