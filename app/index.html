@@ -253,6 +253,11 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 .box svg.grid{position:absolute;inset:10px;width:calc(100% - 20px);height:calc(100% - 20px);pointer-events:none}
 .box svg.grid line,.box svg.grid rect{stroke:var(--accent);stroke-opacity:.25;fill:none}
 .box #writer{position:relative;width:100%;height:100%}
+.lvpick{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lvpick .lbl{font-size:.8rem;color:var(--muted);font-weight:600;margin-right:2px}
+.lvpick button{padding:5px 11px;font-size:.82rem;border-radius:99px}
+.lvpick button.on{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.lv[data-pick]{cursor:pointer}.lv[data-pick]:hover{border-color:var(--accent)}
 .wrlist{display:grid;gap:10px}
 .wrl{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
 .wrl h3{margin:0;font-size:1rem}.wrl .muted{font-size:.8rem}
@@ -515,6 +520,7 @@ nav.tabs[hidden]{display:none!important}
   <section id="v-today" hidden>
     <div class="hud" id="hud"></div>
     <div class="panel">
+      <div class="lvpick" id="lv-pick" role="group" aria-label="Chọn cấp để học"></div>
       <span class="eyebrow" id="today-date"></span>
       <h2 id="today-title"></h2>
       <div class="plan">
@@ -1029,10 +1035,15 @@ function touchStreak(){
 // ===== 3. GỢI Ý BÀI: ôn thẻ đến hạn trước, rồi lấy từ mới theo thứ tự chủ đề hợp mục tiêu
 const isDue = w => { const c = S.cards[w.h]; return c && c.due <= todayStr() && c.box < 5; };
 const isKnown = w => (S.cards[w.h]?.box || 0) >= 2;
-const curLv = () => { for (let L = S.start || 1; L <= MAXLV; L++) if ((BYLV[L] || []).some(w => !S.cards[w.h])) return Math.min(L, unlockLv()); return MAXLV; };
-const unlockLv = () => { let u = S.unlock || 1; while (u < MAXLV && BYLV[u] && BYLV[u].every(w => S.cards[w.h])) u++; return u; };
-function newWords(){ const u = unlockLv(), st = S.start || 1; // từ cấp bắt đầu (theo bài xếp cấp) trước, cấp thấp hơn sau
-  const ws = WORDS.filter(w => w.L <= u && !S.cards[w.h]); return [...ws.filter(w => w.L >= st), ...ws.filter(w => w.L < st)]; }
+// Mọi cấp đều mở. S.lv = cấp người học tự chọn (0/trống = Tự động theo lộ trình gợi ý)
+const autoLv = () => { for (let L = S.start || 1; L <= MAXLV; L++) if ((BYLV[L] || []).some(w => !S.cards[w.h])) return L; return MAXLV; };
+const curLv = () => S.lv || autoLv();
+const unlockLv = () => MAXLV;
+function newWords(){
+  if (S.lv) return (BYLV[S.lv] || []).filter(w => !S.cards[w.h]);   // chỉ học từ mới của cấp đã chọn
+  const st = S.start || 1, ws = WORDS.filter(w => !S.cards[w.h]);    // tự động: từ cấp bắt đầu trở lên, rồi cấp thấp hơn
+  return [...ws.filter(w => w.L >= st), ...ws.filter(w => w.L < st)]; }
+function setLv(L){ S.lv = L || 0; S.viewLv = L || autoLv(); S.charLv = L || S.charLv; save(); wrLv = 0; extLv = 0; }
 function dailyNew(){ return NEW_PER_DAY[S.profile?.minutes || 10]; }
 function buildQueue(extra=0, lk=null){
   rollDay();
@@ -1121,29 +1132,30 @@ const ICON_BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none"
 // Bản đồ: mỗi nút là một bài. Nút sau mở khi nút trước xong (chọn "Biết một ít" thì mở hết)
 function mapNodes(){
   const open = S.profile?.level === 1, u = [], ul = unlockLv();
-  const vl = S.viewLv || curLv();
+  const vl = S.viewLv === 0 ? -1 : (S.viewLv || curLv());
   u.push({unit:"Bước 1", title:"Pinyin và thanh điệu"});
   u.push({id:"pinyin", g:"声", label:"Thanh điệu", sub: S.steps.pinyin ? `Tốt nhất ${S.steps.pinyin}/10` : "4 thanh + thanh nhẹ", p: Math.min(100,(S.steps.pinyin||0)/8*100), done: pyDone(), act:()=>show("pinyin")});
   u.push({unit:"Bước 2", title:"52 bộ thủ thông dụng"});
   u.push({id:"rad", g:"部", label:"Bộ thủ", sub:`${radKnown()}/52 bộ`, p: radKnown()/40*100, done: radDone(), act:()=>show("rad")});
   for (let L = 1; L <= MAXLV; L++){
     const ws = BYLV[L] || [], seen = ws.filter(w => S.cards[w.h]).length, kn = ws.filter(isKnown).length;
-    u.push({unit: L === 1 ? "Bước 3" : "Bước 4", title:`HSK ${L}`, lv:L, prog:`${kn}/${ws.length} từ đã thuộc`, pct: ws.length ? seen/ws.length*100 : 0, lockedLv: L > ul, expanded: L === vl});
+    u.push({unit: L === 1 ? "Bước 3" : "Bước 4", title:`HSK ${L}`, lv:L, prog:`${kn}/${ws.length} từ đã thuộc`, pct: ws.length ? seen/ws.length*100 : 0, lockedLv: false, chosen: L === S.lv, expanded: L === vl});
     if (L !== vl) continue;
     lessonsOf(L).forEach(i => {
       const lw = wordsOfLesson(L, i), s2 = lw.filter(w => S.cards[w.h]).length, k2 = lw.filter(isKnown).length;
-      u.push({id:`${L}-${i}`, g: lw[0].h[0], label:`Bài ${i+1}`, sub:`${lw.slice(0,3).map(w=>w.h).join(" · ")}`, p: k2/lw.length*100, done: s2 === lw.length, lvLock: L > ul, act:()=>startStudy(0, `${L}-${i}`)});
+      u.push({id:`${L}-${i}`, g: lw[0].h[0], label:`Bài ${i+1}`, sub:`${lw.slice(0,3).map(w=>w.h).join(" · ")}`, p: k2/lw.length*100, done: s2 === lw.length, act:()=>startStudy(0, `${L}-${i}`)});
       if ((i + 1) % 5 === 0 || i === lessonsOf(L).length - 1){
         const from = Math.floor(i / 5) * 5, key = `${L}-r${from}`;
         const pool = []; for (let j = from; j <= i; j++) pool.push(...wordsOfLesson(L, j));
-        u.push({id:key, g:"考", label:"Ôn tập", sub:`Bài ${from+1}–${i+1}`, p: Math.min(100,(S.reviews?.[key]||0)/8*100), done: (S.reviews?.[key]||0) >= 8, lvLock: L > ul, act:()=>startQuiz(false, "word", pool, key)});
+        u.push({id:key, g:"考", label:"Ôn tập", sub:`Bài ${from+1}–${i+1}`, p: Math.min(100,(S.reviews?.[key]||0)/8*100), done: (S.reviews?.[key]||0) >= 8, act:()=>startQuiz(false, "word", pool, key)});
       }
     });
   }
   let prevDone = true, curSet = false, i = 0;
   u.forEach(n => { if (n.unit) return;
-    n.locked = n.lvLock || (!open && !prevDone);
-    if (!n.locked && !n.done && !curSet && !(open && (n.id === "pinyin" || n.id === "rad"))){ n.cur = true; curSet = true; }
+    n.locked = false; // tự do chọn bài; nút "Bắt đầu" chỉ gợi ý bài kế tiếp
+    const inLv = !S.lv || n.id === "pinyin" || n.id === "rad" ? true : String(n.id).startsWith(S.lv + "-");
+    if (!n.done && !curSet && inLv && !(open && (n.id === "pinyin" || n.id === "rad")) && !(S.lv && (n.id === "pinyin" || n.id === "rad"))){ n.cur = true; curSet = true; }
     prevDone = n.done || open;
     n.x = [0, 48, 72, 48, 0, -48, -72, -48][i++ % 8]; });
   return u;
@@ -1152,13 +1164,19 @@ let NODES = [];
 function renderMap(){
   NODES = mapNodes();
   $("map").innerHTML = NODES.map((n,i) => n.unit
-    ? (n.lv ? `<button class="unit lvunit ${n.expanded?"open":""}" data-lv="${n.lv}" ${n.lockedLv?'data-locked="1"':""}><small>${n.unit}${n.lockedLv?" · chưa mở":""}</small><b>${n.title}</b><span class="uprog"><span class="bar"><i style="width:${n.pct}%"></i></span><span>${n.prog}</span></span><span class="chev">${n.expanded?"▾":"▸"}</span></button>`
+    ? (n.lv ? `<button class="unit lvunit ${n.expanded?"open":""}" data-lv="${n.lv}" ${n.lockedLv?'data-locked="1"':""}><small>${n.unit}${n.chosen?" · đang chọn":""}</small><b>${n.title}</b><span class="uprog"><span class="bar"><i style="width:${n.pct}%"></i></span><span>${n.prog}</span></span><span class="chev">${n.expanded?"▾":"▸"}</span></button>`
              : `<div class="unit"><small>${n.unit}</small><b>${n.title}</b></div>`)
     : `<div class="node ${n.done?"done":""} ${n.locked?"locked":""} ${n.cur?"cur":""}" style="--x:${n.x}px">${n.cur?'<span class="bubble">Bắt đầu</span>':""}<button data-node="${i}" style="--p:${n.locked?0:Math.round(n.p)}" aria-label="${n.label}${n.locked?" (chưa mở)":""}"><span class="face">${n.done?"✓":n.g}</span></button><span class="lbl">${n.label}<small>${n.sub}</small></span></div>`).join("");
 }
 
+function renderLvPick(){
+  $("lv-pick").innerHTML = `<span class="lbl">Học cấp:</span><button data-pl="0" class="${!S.lv ? "on" : ""}" title="Đi lần lượt theo lộ trình gợi ý">Tự động</button>` +
+    Array.from({length: MAXLV}, (_, i) => `<button data-pl="${i+1}" class="${S.lv === i+1 ? "on" : ""}">HSK ${i+1}</button>`).join("");
+}
+$("lv-pick").onclick = e => { const b = e.target.closest("[data-pl]"); if (!b) return; const L = +b.dataset.pl;
+  setLv(L); toast(L ? `Đã chọn học HSK ${L}. Bấm "Học ngay" để học từ mới của cấp này` : "Học tự động theo lộ trình gợi ý"); renderToday(); };
 function renderToday(){
-  rollDay(); renderGToday();
+  rollDay(); renderGToday(); renderLvPick();
   const d = new Date();
   $("today-date").textContent = d.toLocaleDateString("vi-VN",{weekday:"long",day:"numeric",month:"numeric"});
   const due = WORDS.filter(isDue).length, nw = Math.max(0, dailyNew() - S.day.newDone), known = WORDS.filter(isKnown).length;
@@ -1187,7 +1205,7 @@ function startStudy(extra=0, lk=null){
   Q = buildQueue(extra, lk); qi = 0; sessionNew = 0; sessionRev = 0;
   if (!Q.length && lk){ Q = shuffle(WORDS.filter(w => w.lk === lk)).slice(0,10).map(w=>({w,isNew:false})); }
   if (!Q.length){ Q = buildQueue(5); }
-  if (!Q.length){ toast("Bạn đã học hết các cấp đang mở"); show("today"); return; }
+  if (!Q.length){ toast(S.lv ? `Bạn đã học hết từ mới HSK ${S.lv}. Chọn cấp khác ở trang Hôm nay nhé` : "Bạn đã học hết từ mới"); show("today"); return; }
   show("study"); renderCard();
 }
 function renderCard(){
@@ -1345,16 +1363,17 @@ function nextQ(){
   if (zPlacement){ let start = 1; while (start < MAXLV && (zLvScore[start]||0) >= 3) start++;
     S.unlock = start; S.start = start; S.viewLv = start; save(); }
   showDone(T, zPlacement
-    ? `Bạn nên bắt đầu từ HSK ${S.unlock}. Các cấp từ 1 đến ${S.unlock} đã được mở, ${zScore} từ bạn biết đã được đánh dấu.`
+    ? `Bạn nên bắt đầu từ HSK ${S.unlock}. ${zScore} từ bạn biết đã được đánh dấu. Bạn vẫn có thể tự chọn cấp khác ở trang Hôm nay.`
     : zScore >= 8 ? "Rất tốt. Bạn nhớ khá chắc các từ đã học." : "Những từ trả lời sai đã được đưa lại vào hàng ôn tập.");
 }
 
+$("levels").onclick = e => { const b = e.target.closest("[data-pick]"); if (!b) return; setLv(+b.dataset.pick); toast(`Đã chọn học HSK ${b.dataset.pick}`); show("today"); };
 function renderPath(){
   $("steps").innerHTML = stepsHtml();
   const known = WORDS.filter(isKnown).length;
   $("levels").innerHTML = LEVELS.map(([band, rows]) => `<div class="band">${band}</div>` + rows.map(([n,s,c,v]) => {
     const on = n === curLv(), ws = BYLV[n] || [];
-    return `<div class="lv ${on?"on":""}"><div class="num">Cấp ${n}</div><div><div><b>${v.toLocaleString("vi-VN")}</b> từ mới · ${c.toLocaleString("vi-VN")} chữ Hán · ${s} âm tiết</div><div class="sub">${ws.length ? `${on ? "Đang học · " : n <= unlockLv() ? "Đã mở · " : "Chưa mở · "}đã thuộc ${ws.filter(isKnown).length}/${ws.length} từ` : "Chưa có trong web"}</div></div></div>`;
+    return `<div class="lv ${on?"on":""}" ${ws.length ? `data-pick="${n}" role="button" tabindex="0" title="Chọn học HSK ${n}"` : ""}><div class="num">Cấp ${n}</div><div><div><b>${v.toLocaleString("vi-VN")}</b> từ mới · ${c.toLocaleString("vi-VN")} chữ Hán · ${s} âm tiết</div><div class="sub">${ws.length ? `${on ? "Đang học · " : ""}đã thuộc ${ws.filter(isKnown).length}/${ws.length} từ` : "Chưa có trong web"}</div></div></div>`;
   }).join("")).join("");
 }
 
@@ -1601,7 +1620,7 @@ function stepsHtml(){
     {n:1, t:"Pinyin và thanh điệu", sub: pyDone() ? `Hoàn thành · ${S.steps.pinyin}/10 câu` : (S.steps.pinyin ? `Điểm cao nhất ${S.steps.pinyin}/10, cần 8` : "4 thanh + thanh nhẹ, 21 thanh mẫu, vận mẫu"), go:"pinyin", done:pyDone()},
     {n:2, t:"52 bộ thủ thông dụng", sub:`Đã nhớ ${radKnown()}/52 bộ${radDone() ? " · Hoàn thành" : ", cần 40"}`, go:"rad", done:radDone()},
     {n:3, t:"Giáo trình HSK 1 (3.0)", sub:`Đã thuộc ${(BYLV[1]||[]).filter(isKnown).length}/${(BYLV[1]||[]).length} từ`, go:"today", done:(BYLV[1]||[]).every(isKnown)},
-    {n:4, t:"Lên HSK 2 → 6", sub:`Đang mở đến HSK ${unlockLv()} · đã thuộc ${WORDS.filter(w => w.L > 1 && isKnown(w)).length}/${WORDS.filter(w => w.L > 1).length} từ`, go:"today", done:false}
+    {n:4, t:"Lên HSK 2 → 6", sub:`Tự chọn cấp bất kỳ · đã thuộc ${WORDS.filter(w => w.L > 1 && isKnown(w)).length}/${WORDS.filter(w => w.L > 1).length} từ`, go:"today", done:false}
   ];
   return st.map(s => `<button class="step ${s.done?"done":""} ${s.n===cur?"cur":""}" ${s.go?`data-go="${s.go}"`:"disabled"}><span class="sn">${s.done?"✓":"B"+s.n}</span><span class="t"><b>${s.t}</b>${s.n===cur?' <span class="tag">Đang ở bước này</span>':""}<span class="muted">${s.sub}</span></span></button>`).join("");
 }
@@ -1656,9 +1675,9 @@ $("btn-next").onclick = nextQ;
 let sheetMode = "q"; // "q" = bài kiểm tra từ, "g" = luyện ngữ pháp
 $("sheet-next").onclick = () => { $("sheet").hidden = true; if (sheetMode === "g"){ gi++; if (gi < GQ.length) renderGQ(); else finishGP(); } else nextQ(); };
 $("map").onclick = e => { const u = e.target.closest("[data-lv]");
-  if (u){ if (u.dataset.locked) return toast(`Học xong HSK ${+u.dataset.lv - 1} (hoặc làm bài xếp cấp) để mở HSK ${u.dataset.lv}`); S.viewLv = +u.dataset.lv; save(); renderMap(); return; }
+  if (u){ S.viewLv = +u.dataset.lv === S.viewLv ? 0 : +u.dataset.lv; save(); renderMap(); return; }
   const b = e.target.closest("[data-node]"); if (!b) return; const n = NODES[+b.dataset.node];
-  if (n.locked) return toast(n.lvLock ? "Cấp này chưa mở" : "Hoàn thành bài trước để mở bài này"); n.act(); };
+  n.act(); };
 $("char-lv").onclick = e => { const b = e.target.closest("[data-clv]"); if (b){ S.charLv = +b.dataset.clv; save(); renderChars(); } };
 document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g && !g.disabled) show(g.dataset.go); });
 $("tones").onclick = e => { const b = e.target.closest("[data-say]"); if (!b) return; const t = TONES.find(x => x.c === b.dataset.say); if (!(t && saySyl("ma" + (t.n || 5)))) say(b.dataset.say); };
