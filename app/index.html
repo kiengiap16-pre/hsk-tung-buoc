@@ -449,6 +449,31 @@ nav.tabs[hidden]{display:none!important}
 .rail .rrow b{font-size:.88rem}
 .rail .rfoot{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:.75rem;color:var(--muted)}
 .rail .rfoot a{color:inherit}
+/* Flashcard: chọn bộ thẻ */
+.dk-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.dk-top h2{margin:0}
+.dk-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.dk-grid.small{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}
+.dk{display:grid;gap:4px;text-align:left;padding:12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-weight:400}
+.dk:hover{border-color:var(--accent)}
+.dk .ic{font-family:var(--font-han);font-size:1.5rem;line-height:1;color:var(--accent)}
+.dk b{font-size:.95rem}
+.dk small{color:var(--muted);font-size:.75rem}
+.dk.whole{background:var(--accent-soft);border-color:transparent}
+.dk .bar{height:5px}
+.dk-bar,#v-decks>*,#dk-body{min-width:0}
+.dk-bar .seg{max-width:100%;min-width:0;overflow-x:auto;scrollbar-width:none}
+.dk-bar .seg button{white-space:nowrap;padding:6px 10px;flex:none}
+.dk-note{font-size:.78rem;color:var(--muted);margin:0}
+.wl{display:grid;gap:6px}
+.wl button{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center;text-align:left;padding:10px 12px;border-radius:12px;font-weight:400}
+.wl .h{font-family:var(--font-han);font-size:1.35rem;font-weight:700;grid-row:span 2}
+.wl .p{color:var(--accent);font-size:.85rem}
+.wl .v{font-size:.85rem;grid-column:2;color:var(--ink)}
+.wl .st{grid-row:span 2;grid-column:3;font-size:.7rem;color:var(--muted);text-align:right}
+.wl .st i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--line);margin-left:4px;vertical-align:middle}
+.wl .st i.on{background:var(--accent)} .wl .st i.mid{background:var(--gold)}
 </style>
 
 <div class="wrap">
@@ -557,7 +582,7 @@ nav.tabs[hidden]{display:none!important}
 
   <!-- STUDY -->
   <section id="v-study" hidden>
-    <div class="cardmeta"><button class="iconbtn" data-go="today" aria-label="Thoát bài học">✕</button><span id="study-label" style="flex:1"></span><span id="study-count"></span></div>
+    <div class="cardmeta"><button class="iconbtn" id="study-x" aria-label="Thoát bài học">✕</button><span id="study-label" style="flex:1"></span><span id="study-count"></span></div>
     <div class="card" id="card" tabindex="0" role="button" aria-label="Lật thẻ">
       <div class="inner">
         <div class="face front"><span class="tag" id="c-topic"></span><div class="big" id="c-han"></div><span class="hint">Chạm để xem nghĩa</span></div>
@@ -569,6 +594,27 @@ nav.tabs[hidden]{display:none!important}
       <button class="good" id="btn-ok">Nhớ rồi</button>
     </div>
     <p class="hint" style="margin:0;text-align:center">Phím tắt: Space để lật, 1 = Chưa nhớ, 2 = Nhớ rồi</p>
+  </section>
+
+  <!-- FLASHCARD: CHỌN BỘ THẺ -->
+  <section id="v-decks" hidden>
+    <div class="dk-top"><h2>Flashcard</h2><button class="primary" id="dk-today">Ôn tập hôm nay</button></div>
+    <div class="dk-bar"><div class="seg" id="dk-mode"><button data-m="lv">Theo cấp độ</button><button data-m="tp">Theo chủ đề</button></div></div>
+    <div class="dk-bar" id="dk-lvs"></div>
+    <div id="dk-body" style="display:grid;gap:12px"></div>
+  </section>
+  <section id="v-deck" hidden>
+    <div class="ctop"><button class="back" data-go="decks">← Flashcard</button><span class="pill" id="dk-tag"></span></div>
+    <div class="panel">
+      <h2 id="dk-title" style="margin:0"></h2>
+      <span class="muted" id="dk-sub"></span>
+      <div class="bar"><i id="dk-pbar" style="width:0"></i></div>
+      <button class="primary" id="dk-start">Học bộ thẻ này</button>
+      <p class="dk-note" id="dk-hint"></p>
+    </div>
+    <p class="hint" style="margin:0">Bấm vào một từ để xem chi tiết: nghĩa, phát âm, cách viết, từ ghép, ví dụ.</p>
+    <div class="wl" id="dk-words"></div>
+    <button id="dk-more" hidden>Xem thêm</button>
   </section>
 
   <section id="v-done" hidden>
@@ -1070,7 +1116,7 @@ function buildQueue(extra=0, lk=null){
     const inT = w => w.lk === lk;
     return [...WORDS.filter(w => inT(w) && isDue(w)).map(w=>({w,isNew:false})), ...newWords().filter(inT).slice(0,10).map(w=>({w,isNew:true}))];
   }
-  const due = WORDS.filter(isDue);
+  const due = [...WORDS, ...EXTALL].filter(isDue);
   const left = Math.max(0, dailyNew() + extra - S.day.newDone);
   return [...due.map(w=>({w,isNew:false})), ...newWords().slice(0,left).map(w=>({w,isNew:true}))];
 }
@@ -1097,7 +1143,9 @@ function feedback(ok, detail, last){
   $("sheet-d").textContent = detail;
   $("sheet-next").textContent = last ? "Xem kết quả" : "Tiếp tục"; $("sheet-next").focus();
 }
-function showDone(title, txt){
+let doneDeck = false;
+function showDone(title, txt, deck=false){
+  doneDeck = deck; $("btn-more").textContent = deck ? "Quay lại bộ thẻ" : "Tiếp tục lộ trình";
   $("done-title").textContent = title; $("done-txt").textContent = txt;
   const acc = sessionAll ? Math.round(sessionOK/sessionAll*100) + "%" : "–";
   $("done-stats").innerHTML = `<div><span>XP nhận</span><b>+${sessionXP}</b></div><div><span>Chính xác</span><b>${acc}</b></div><div><span>Chuỗi ngày</span><b>${S.streak.count || 0}</b></div>`;
@@ -1106,15 +1154,17 @@ function showDone(title, txt){
 
 // ===== 4. GIAO DIỆN
 const $ = id => document.getElementById(id);
-const VIEWS = ["setup","today","study","done","quiz","path","chars","char","pinyin","rad","word","grammar","gpractice","greview","write","wpractice"];
+const VIEWS = ["setup","today","decks","deck","study","done","quiz","path","chars","char","pinyin","rad","word","grammar","gpractice","greview","write","wpractice"];
 function show(v){
   VIEWS.forEach(x => $("v-"+x).hidden = x !== v);
   if (v !== "quiz") $("sheet").hidden = true;
   $("tabs").hidden = ["setup","study","quiz","gpractice","wpractice"].includes(v); // đang làm bài thì ẩn thanh tab cho tập trung
   document.body.classList.toggle("focus", $("tabs").hidden); renderRail();
-  const tab = v === "done" ? "study" : (v === "char" || v === "word") ? "chars" : (v === "gpractice" || v === "greview") ? "grammar" : v === "wpractice" ? "write" : (v === "pinyin" || v === "rad") ? "path" : v;
+  const tab = (v === "done" || v === "decks" || v === "deck") ? "study" : (v === "char" || v === "word") ? "chars" : (v === "gpractice" || v === "greview") ? "grammar" : v === "wpractice" ? "write" : (v === "pinyin" || v === "rad") ? "path" : v;
   document.querySelectorAll("#tabs button[data-v]").forEach(b => b.setAttribute("aria-current", b.dataset.v === tab));
   if (v === "today") renderToday();
+  if (v === "decks") renderDecks();
+  if (v === "deck") renderDeck();
   if (v === "path") renderPath();
   if (v === "grammar") renderGrammar();
   if (v === "chars") renderChars();
@@ -1220,7 +1270,7 @@ function renderToday(){
 // --- flashcard
 let Q = [], qi = 0, sessionNew = 0, sessionRev = 0;
 function startStudy(extra=0, lk=null){
-  resetSession();
+  resetSession(); deckLbl = ""; studyBack = "today";
   Q = buildQueue(extra, lk); qi = 0; sessionNew = 0; sessionRev = 0;
   if (!Q.length && lk){ Q = shuffle(WORDS.filter(w => w.lk === lk)).slice(0,10).map(w=>({w,isNew:false})); }
   if (!Q.length){ Q = buildQueue(5); }
@@ -1230,7 +1280,7 @@ function startStudy(extra=0, lk=null){
 function renderCard(){
   const {w,isNew} = Q[qi];
   $("card").classList.remove("flipped");
-  $("c-topic").textContent = `HSK ${w.L} · Bài ${w.ls+1}`;
+  $("c-topic").textContent = deckLbl ? `${deckLbl} · ${w.ext ? "HSK 7–9 mở rộng" : "HSK " + w.L}` : `HSK ${w.L} · Bài ${w.ls+1}`;
   $("c-hv").textContent = w.hv ? "Hán Việt: " + w.hv : "";
   $("c-han").textContent = w.h; $("c-han2").textContent = w.h; $("c-py").textContent = w.p; $("c-vi").textContent = w.v; $("c-ex").textContent = w.ex ? "Ví dụ: " + w.ex : "";
   $("c-chips").innerHTML = `<button type="button" data-w="${w.k}">Chi tiết từ ›</button>` + [...new Set(w.h)].filter(c => CHARS[c]).map(c => `<button type="button" data-c="${c}" aria-label="Xem chữ ${c}">${c} ›</button>`).join("");
@@ -1250,7 +1300,7 @@ function grade(ok){
   touchStreak(); save(); renderStreak();
   qi++;
   if (qi >= Q.length){
-    showDone("Hoàn thành bài học!", `Bạn vừa học ${sessionNew} từ mới và ôn ${sessionRev} lượt. Ngày mai quay lại để ôn những từ đến hạn nhé.`);
+    showDone("Hoàn thành bài học!", `Bạn vừa học ${sessionNew} từ mới và ôn ${sessionRev} lượt. Ngày mai quay lại để ôn những từ đến hạn nhé.`, studyBack === "deck");
   } else renderCard();
 }
 function flip(){ $("card").classList.toggle("flipped"); }
@@ -1673,7 +1723,7 @@ async function openRad(g){
 }
 // ===== 5. GẮN SỰ KIỆN
 document.querySelectorAll("#tabs button[data-v]").forEach(b => b.onclick = () => {
-  const v = b.dataset.v; if (v === "study") startStudy(); else if (v === "chars") show("chars"); else if (v === "quiz") startQuiz(); else show(v);
+  const v = b.dataset.v; if (v === "study") show("decks"); else if (v === "chars") show("chars"); else if (v === "quiz") startQuiz(); else show(v);
 });
 $("btn-start").onclick = () => {
   const val = n => document.querySelector(`input[name=${n}]:checked`).value;
@@ -1687,7 +1737,7 @@ $("card").onkeydown = e => { if (e.key === "Enter") flip(); };
 $("btn-speak").onclick = e => { e.stopPropagation(); say(Q[qi].w.h, Q[qi].w.p); };
 $("btn-again").onclick = () => grade(false);
 $("btn-ok").onclick = () => grade(true);
-$("btn-more").onclick = () => show("today");
+$("btn-more").onclick = () => show(doneDeck ? "deck" : "today");
 $("btn-quiz2").onclick = () => startQuiz(false, zKind);
 $("quiz-opts").onclick = e => { const b = e.target.closest(".opt"); if (!b || b.disabled) return; if (b.classList.contains("done")) say(b.dataset.h, b.dataset.p); else answer(b); };
 $("quiz-say").onclick = quizSay;
@@ -1739,7 +1789,7 @@ var EXT = null, EXTALL = [], extP = null;
 const lvTxt = w => w.ext ? "7–9" : w.L;
 function extLoad(){ return extP ||= fetch("data/ext.json").then(r => r.json()).then(j => {
     EXT = {}; DICT[7] = {};
-    for (const L in j) EXT[L] = j[L].map(a => { DICT[7][a[0]] = [a[4], a[5], a[6], [], a[7], ""]; return {h: a[0], p: a[1], v: a[2], hv: a[3], L: 7, base: +L, ext: true}; });
+    for (const L in j) EXT[L] = j[L].map(a => { DICT[7][a[0]] = [a[4], a[5], a[6], [], a[7], ""]; return (BYK["x~" + a[0]] = {h: a[0], p: a[1], v: a[2], hv: a[3], k: "x~" + a[0], L: 7, base: +L, ext: true}); });
     EXTALL = Object.values(EXT).flat(); EXTALL.forEach(w => { BYH[w.h] = BYH[w.h] || w; }); SEARCH = null; return EXT;
   }).catch(() => { EXT = {}; return EXT; }); }
 function searchIndex(){ if (SEARCH) return SEARCH;
@@ -1826,7 +1876,7 @@ let curWord = null, wordFrom = "chars", wdLang = "vi", wordWriters = [];
 async function openWord(h, from){
   searchIndex(); if (!BYK[h] && !BYH[h]) await extLoad(); const w = BYK[h] || BYH[h]; if (!w) return openChar(h, from);
   curWord = w; if (from && from !== "word") wordFrom = from;
-  const d = (await dictLv(w.L))[w.k || w.h] || ["", [], "", []];
+  const d = (await dictLv(w.L))[w.ext ? w.h : (w.k || w.h)] || ["", [], "", []];
   show("word");
   $("wd-han").innerHTML = [...w.h].map(c => `<button data-c="${c}" aria-label="Xem chữ ${c}">${c}</button>`).join("");
   $("wd-py").textContent = w.p;
@@ -2079,4 +2129,80 @@ loadData().then(() => {
   try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", paint); } catch(e){}
   paint();
 })();
+
+// ===== Flashcard: chọn bộ thẻ theo cấp độ / theo chủ đề
+var deckLbl = "", studyBack = "today", deckId = null, deckShown = 120;
+var DK = (() => { try { return Object.assign({m: "lv", lv: 1, tlv: 0, ext: true}, JSON.parse(localStorage.getItem("hsk-deck") || "{}")); } catch(e){ return {m: "lv", lv: 1, tlv: 0, ext: true}; } })();
+const dkSave = () => { try { localStorage.setItem("hsk-deck", JSON.stringify(DK)); } catch(e){} };
+var TOPICS = null, topicsP = null;
+function topicsLoad(){ return topicsP ||= Promise.all([fetch("data/topics.json").then(r => r.json()), extLoad()]).then(([j]) => {
+    const by = {}; j.topics.forEach(([id]) => by[id] = []);
+    for (const k in j.w) if (BYK[k]) by[j.w[k]]?.push(BYK[k]);
+    for (const h in j.x){ const w = BYK["x~" + h]; if (w) by[j.x[h]]?.push(w); }
+    for (const id in by) by[id].sort((a, b) => a.L - b.L);
+    return TOPICS = {list: j.topics, by};
+  }).catch(() => (TOPICS = {list: [], by: {}})); }
+const dkStat = ws => { const kn = ws.filter(isKnown).length, lr = ws.filter(w => S.cards[w.k]).length; return {n: ws.length, kn, lr, p: ws.length ? kn / ws.length * 100 : 0}; };
+const dkTile = (id, ic, name, ws, cls = "") => { const st = dkStat(ws);
+  return `<button class="dk ${cls}" data-deck="${id}">${ic ? `<span class="ic">${ic}</span>` : ""}<b>${name}</b><small>${st.n} từ · thuộc ${st.kn}</small><span class="bar"><i style="width:${st.p}%"></i></span></button>`; };
+function topicWords(id){
+  const ws = (TOPICS?.by[id] || []).filter(w => w.ext ? DK.ext && (!DK.tlv || DK.tlv === 6) : (!DK.tlv || w.L === DK.tlv));
+  return ws; }
+function deckOf(id){
+  const [t, a] = id.split(":");
+  if (t === "lv") return {title: `Toàn bộ HSK ${a}`, tag: `HSK ${a}`, words: BYLV[a] || []};
+  if (t === "ls"){ const [L, i] = a.split("-"); return {title: `HSK ${L} · Bài ${+i + 1}`, tag: `HSK ${L}`, words: WORDS.filter(w => w.lk === a)}; }
+  const tp = TOPICS?.list.find(x => x[0] === a) || [a, a, ""];
+  return {title: tp[1], tag: "Chủ đề" + (DK.tlv ? ` · HSK ${DK.tlv}` : ""), words: topicWords(a), topic: true};
+}
+async function renderDecks(){
+  const due = WORDS.filter(isDue).length + Object.values(BYK).filter(w => w.ext && isDue(w)).length;
+  $("dk-today").textContent = due ? `Ôn tập hôm nay · ${due} thẻ đến hạn` : "Học tiếp theo lộ trình";
+  $("dk-mode").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === DK.m));
+  if (DK.m === "lv"){
+    $("dk-lvs").innerHTML = `<div class="seg">${Array.from({length: MAXLV}, (_, i) => `<button data-lv="${i+1}" aria-pressed="${DK.lv === i+1}">HSK ${i+1}</button>`).join("")}</div>`;
+    const L = DK.lv, ws = BYLV[L] || [], nl = Math.ceil(ws.length / LESSON);
+    $("dk-body").innerHTML = `<div class="dk-grid">${dkTile("lv:" + L, "全", `Toàn bộ HSK ${L}`, ws, "whole")}</div>
+      <h3 style="margin:4px 0 0">Theo bài (${nl} bài, mỗi bài ${LESSON} từ)</h3>
+      <div class="dk-grid small">${Array.from({length: nl}, (_, i) => dkTile(`ls:${L}-${i}`, "", `Bài ${i+1}`, ws.slice(i * LESSON, (i+1) * LESSON))).join("")}</div>`;
+  } else {
+    $("dk-lvs").innerHTML = `<div class="seg"><button data-tlv="0" aria-pressed="${!DK.tlv}">Tất cả</button>${Array.from({length: MAXLV}, (_, i) => `<button data-tlv="${i+1}" aria-pressed="${DK.tlv === i+1}">HSK ${i+1}</button>`).join("")}</div>
+      <label class="hint" style="display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="dk-ext" ${DK.ext ? "checked" : ""}> Thêm từ thông dụng ngoài HSK 1–6</label>`;
+    $("dk-body").innerHTML = `<p class="muted">Đang tải chủ đề…</p>`;
+    await topicsLoad(); if (DK.m !== "tp") return;
+    const tiles = TOPICS.list.map(([id, name, ic]) => { const ws = topicWords(id); return ws.length ? dkTile("tp:" + id, ic, name, ws) : ""; }).join("");
+    $("dk-body").innerHTML = `<p class="dk-note">Các chủ đề do HSK Từng Bước tự phân loại theo nghĩa của từ, không thuộc tài liệu HSK gốc, nên có thể còn vài từ xếp chưa khéo. ${DK.ext && (!DK.tlv || DK.tlv === 6) ? "Từ ngoài HSK 1–6 (HSK 7–9) được đánh dấu “mở rộng” và chỉ hiện khi chọn Tất cả hoặc HSK 6." : ""}</p>
+      <div class="dk-grid">${tiles || `<p class="muted">Chưa có chủ đề nào cho cấp này.</p>`}</div>`;
+  }
+}
+$("dk-mode").onclick = e => { const b = e.target.closest("[data-m]"); if (!b) return; DK.m = b.dataset.m; dkSave(); renderDecks(); };
+$("dk-lvs").onclick = e => { const b = e.target.closest("button"); if (!b) return; if (b.dataset.lv) DK.lv = +b.dataset.lv; else if (b.dataset.tlv) DK.tlv = +b.dataset.tlv; else return; dkSave(); renderDecks(); };
+$("dk-lvs").onchange = e => { if (e.target.id === "dk-ext"){ DK.ext = e.target.checked; dkSave(); renderDecks(); } };
+$("dk-body").onclick = e => { const b = e.target.closest("[data-deck]"); if (!b) return; deckId = b.dataset.deck; deckShown = 120; show("deck"); };
+$("dk-today").onclick = () => startStudy();
+function renderDeck(){
+  if (!deckId) return show("decks");
+  const d = deckOf(deckId), st = dkStat(d.words);
+  $("dk-tag").textContent = d.tag; $("dk-title").textContent = d.title;
+  $("dk-sub").textContent = `${st.n} từ · đã thuộc ${st.kn} · đang học ${st.lr - st.kn} · chưa học ${st.n - st.lr}`;
+  $("dk-pbar").style.width = st.p + "%";
+  const due = d.words.filter(isDue).length, nw = d.words.filter(w => !S.cards[w.k]).length;
+  $("dk-hint").textContent = due || nw ? `Mỗi lượt: ${due ? `${due} thẻ đến hạn ôn, ` : ""}${Math.min(10, nw)} từ mới.` : "Bạn đã học hết bộ này. Học tiếp sẽ ôn ngẫu nhiên 10 từ.";
+  $("dk-words").innerHTML = d.words.slice(0, deckShown).map(w => { const c = S.cards[w.k], kn = (c?.box || 0) >= 2;
+    return `<button data-w="${w.k}"><span class="h">${w.h}</span><span class="p">${w.p}</span><span class="st">${w.ext ? "mở rộng" : "HSK " + w.L}<i class="${kn ? "on" : c ? "mid" : ""}" title="${kn ? "Đã thuộc" : c ? "Đang học" : "Chưa học"}"></i></span><span class="v">${w.v.split(/;\s*/)[0]}</span></button>`; }).join("");
+  $("dk-more").hidden = d.words.length <= deckShown;
+}
+$("dk-more").onclick = () => { deckShown += 200; renderDeck(); };
+$("dk-words").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "deck"); };
+$("dk-start").onclick = () => { const d = deckOf(deckId); startDeck(d.words, d.title); };
+function startDeck(ws, label){
+  resetSession(); rollDay();
+  const due = ws.filter(isDue), nw = ws.filter(w => !S.cards[w.k]).slice(0, 10);
+  Q = [...due.map(w => ({w, isNew: false})), ...nw.map(w => ({w, isNew: true}))];
+  if (!Q.length) Q = shuffle(ws).slice(0, 10).map(w => ({w, isNew: false}));
+  if (!Q.length) return toast("Bộ thẻ này chưa có từ");
+  qi = 0; sessionNew = 0; sessionRev = 0; deckLbl = label; studyBack = "deck";
+  show("study"); renderCard();
+}
+$("study-x").onclick = () => show(studyBack === "deck" ? "deck" : "today");
 </script>
