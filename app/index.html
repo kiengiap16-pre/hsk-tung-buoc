@@ -438,7 +438,7 @@ nav.tabs[hidden]{display:none!important}
 
 <div class="wrap">
   <header class="top">
-    <div class="brand"><img class="seal" src="logo.svg" alt="" width="38" height="38"><div><h1>HSK Từng Bước</h1><div class="muted" style="font-size:.82rem">Lộ trình HSK 3.0 · Cấp 1–6</div></div></div>
+    <div class="brand"><img class="seal" src="logo.svg" alt="" width="38" height="38"><div><h1>HSK Từng Bước</h1><div class="muted" style="font-size:.82rem">Học tiếng Trung HSK 3.0 · Cấp 1–6</div></div></div>
     <div class="topr"><div class="streak" id="streak"></div><button class="acct" id="acct" hidden aria-haspopup="dialog">Đăng nhập</button></div>
   </header>
 
@@ -755,7 +755,7 @@ nav.tabs[hidden]{display:none!important}
   <section id="v-pinyin" hidden>
     <div class="ctop"><button class="back" data-go="path">← Lộ trình</button><span class="pill" id="py-status"></span></div>
     <div class="panel">
-      <span class="eyebrow">Bước 1</span>
+      <span class="eyebrow">Nền tảng</span>
       <h2>Pinyin và thanh điệu</h2>
       <p class="muted" style="margin:0">Pinyin là cách viết âm tiếng Trung bằng chữ Latin. Mỗi âm tiết có một thanh điệu, đổi thanh là đổi nghĩa. Bấm vào từng thẻ để nghe.</p>
       <div class="tones" id="tones"></div>
@@ -772,7 +772,7 @@ nav.tabs[hidden]{display:none!important}
     </div>
     <div class="panel">
       <h2>Kiểm tra: nhận ra thanh điệu</h2>
-      <p class="muted" style="margin:0">Đúng từ 8/10 câu là hoàn thành Bước 1.</p>
+      <p class="muted" style="margin:0">Đúng từ 8/10 câu là hoàn thành phần thanh điệu.</p>
       <button class="primary" id="py-quiz">Làm bài 10 câu</button>
     </div>
   </section>
@@ -781,7 +781,7 @@ nav.tabs[hidden]{display:none!important}
   <section id="v-rad" hidden>
     <div class="ctop"><button class="back" data-go="path">← Lộ trình</button><span class="pill" id="rad-status"></span></div>
     <div class="panel">
-      <span class="eyebrow">Bước 2</span>
+      <span class="eyebrow">Nền tảng</span>
       <h2>52 bộ thủ thông dụng</h2>
       <p class="muted" style="margin:0">Bộ thủ là những "mảnh ghép" tạo nên chữ Hán. Biết bộ thủ thì nhìn chữ lạ cũng đoán được nó nói về gì. Chạm vào một bộ để xem cách viết và chữ ví dụ.</p>
       <div class="bar"><i id="rad-bar" style="width:0"></i></div>
@@ -801,7 +801,7 @@ nav.tabs[hidden]{display:none!important}
     </div>
     <div class="panel">
       <h2>Kiểm tra bộ thủ</h2>
-      <p class="muted" style="margin:0">Mỗi câu trả lời đúng đánh dấu bộ đó là đã nhớ. Nhớ từ 40/52 bộ là hoàn thành Bước 2.</p>
+      <p class="muted" style="margin:0">Mỗi câu trả lời đúng đánh dấu bộ đó là đã nhớ. Nhớ từ 40/52 bộ là hoàn thành phần bộ thủ.</p>
       <button class="primary" id="rad-quiz">Làm bài 10 câu</button>
     </div>
   </section>
@@ -1133,13 +1133,13 @@ const ICON_BOOK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none"
 function mapNodes(){
   const open = S.profile?.level === 1, u = [], ul = unlockLv();
   const vl = S.viewLv === 0 ? -1 : (S.viewLv || curLv());
-  u.push({unit:"Bước 1", title:"Pinyin và thanh điệu"});
+  u.push({unit:"Nền tảng", title:"Pinyin và thanh điệu"});
   u.push({id:"pinyin", g:"声", label:"Thanh điệu", sub: S.steps.pinyin ? `Tốt nhất ${S.steps.pinyin}/10` : "4 thanh + thanh nhẹ", p: Math.min(100,(S.steps.pinyin||0)/8*100), done: pyDone(), act:()=>show("pinyin")});
-  u.push({unit:"Bước 2", title:"52 bộ thủ thông dụng"});
+  u.push({unit:"Nền tảng", title:"52 bộ thủ thông dụng"});
   u.push({id:"rad", g:"部", label:"Bộ thủ", sub:`${radKnown()}/52 bộ`, p: radKnown()/40*100, done: radDone(), act:()=>show("rad")});
   for (let L = 1; L <= MAXLV; L++){
     const ws = BYLV[L] || [], seen = ws.filter(w => S.cards[w.h]).length, kn = ws.filter(isKnown).length;
-    u.push({unit: L === 1 ? "Bước 3" : "Bước 4", title:`HSK ${L}`, lv:L, prog:`${kn}/${ws.length} từ đã thuộc`, pct: ws.length ? seen/ws.length*100 : 0, lockedLv: false, chosen: L === S.lv, expanded: L === vl});
+    u.push({unit: `${ws.length} từ · ${lessonsOf(L).length} bài`, title:`HSK ${L}`, lv:L, prog:`${kn}/${ws.length} từ đã thuộc`, pct: ws.length ? seen/ws.length*100 : 0, lockedLv: false, chosen: L === S.lv, expanded: L === vl});
     if (L !== vl) continue;
     lessonsOf(L).forEach(i => {
       const lw = wordsOfLesson(L, i), s2 = lw.filter(w => S.cards[w.h]).length, k2 = lw.filter(isKnown).length;
@@ -1356,8 +1356,8 @@ function nextQ(){
   $("sheet").hidden = true;
   const T = `Đúng ${zScore}/${QZ.length} câu`;
   if (zKind === "tone"){ S.steps.pinyin = Math.max(S.steps.pinyin || 0, zScore); save();
-    showDone(T, zScore >= 8 ? "Bạn đã hoàn thành Bước 1. Tiếp theo là 52 bộ thủ thông dụng." : "Cần 8/10 để qua bước. Xem lại phần thanh điệu rồi thử lần nữa nhé."); return; }
-  if (zKind === "rad"){ showDone(T, `Bạn đã nhớ ${radKnown()}/52 bộ thủ.` + (radDone() ? " Bước 2 hoàn thành, chuyển sang HSK 1 thôi." : " Cần 40 bộ để qua bước.")); return; }
+    showDone(T, zScore >= 8 ? "Bạn đã hoàn thành phần thanh điệu. Có thể học tiếp 52 bộ thủ thông dụng." : "Cần 8/10 để hoàn thành. Xem lại phần thanh điệu rồi thử lần nữa nhé."); return; }
+  if (zKind === "rad"){ showDone(T, `Bạn đã nhớ ${radKnown()}/52 bộ thủ.` + (radDone() ? " Đã hoàn thành phần bộ thủ, giờ chọn cấp HSK để học thôi." : " Cần 40 bộ để hoàn thành.")); return; }
   if (zKey){ S.reviews = S.reviews || {}; S.reviews[zKey] = Math.max(S.reviews[zKey]||0, zScore); save();
     return showDone(T, zScore >= 8 ? "Bạn đã qua bài ôn tập này, bài tiếp theo đã mở." : "Cần 8/10 để qua bài ôn tập. Ôn lại rồi thử lần nữa nhé."); }
   if (zPlacement){ let start = 1; while (start < MAXLV && (zLvScore[start]||0) >= 3) start++;
