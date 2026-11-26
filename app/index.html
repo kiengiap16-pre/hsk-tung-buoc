@@ -517,6 +517,14 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
       <label class="search"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg><input id="dq" type="search" placeholder="Chữ Hán, pinyin, tiếng Việt, Hán Việt hoặc English" aria-label="Tra từ" autocomplete="off"></label>
       <div class="dres" id="dres"></div>
     </div>
+    <div class="panel" id="ext-panel">
+      <span class="eyebrow">Mở rộng vốn từ</span>
+      <h2>Từ ghép phổ biến theo cấp</h2>
+      <div class="lvchips" id="ext-lv"></div>
+      <p class="muted" style="margin:0" id="ext-note"></p>
+      <div class="dres" id="ext-list"></div>
+      <button type="button" id="ext-more" hidden>Xem thêm</button>
+    </div>
     <div class="panel">
       <span class="eyebrow">Học mặt chữ và cách viết</span>
       <h2>Chữ Hán theo cấp</h2>
@@ -1096,7 +1104,20 @@ fetch("data/audio.json").then(r => r.json()).then(j => { AUD = j; }).catch(() =>
 function say(h, p){
   const f = AUD && AUD.w && AUD.w[h];
   if (f){ try { if (audEl) audEl.pause(); audEl = new Audio("audio/" + f); audEl.play().catch(() => speak(h)); return; } catch(e){} }
+  if (p && sayChain(h, p)) return;
   speak(h);
+}
+// Từ chưa có file riêng: nối các âm tiết ghi âm người thật, đã tính biến điệu (3-3, 不, 一)
+let chainId = 0;
+function sayChain(h, p){
+  const syls = AUD && AUD.py && segPy(p); if (!syls || !syls.length || syls.length !== [...h].length) return false;
+  const {eff} = sandhiNotes(h, syls), keys = syls.map((x, i) => x.b + (eff[i] || 5));
+  if (!keys.every(k => AUD.py.includes(k))) return false;
+  const id = ++chainId, els = keys.map(k => { const a = new Audio(`audio/py/${k}.mp3`); a.preload = "auto"; return a; });
+  if (audEl) audEl.pause();
+  const play = i => { if (id !== chainId || i >= els.length) return; audEl = els[i];
+    els[i].onended = () => play(i + 1); els[i].play().catch(() => { if (i === 0) speak(h); }); };
+  play(0); return true;
 }
 function saySyl(syl){ // âm tiết pinyin có số thanh, ví dụ "ma3"
   if (AUD && AUD.py && AUD.py.includes(syl)){ try { if (audEl) audEl.pause(); audEl = new Audio(`audio/py/${syl}.mp3`); audEl.play(); return true; } catch(e){} }
@@ -1217,8 +1238,10 @@ const strokesOfLv = L => STROKES[L] || (STROKES[L] = fetch(`data/strokes${L}.jso
 const strokeOf = async c => { const L = CHARS[c]?.L || 1; return (await strokesOfLv(L))[c] || (await strokesOfLv(1))[c]; };
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const wordsWith = c => WORDS.filter(w => w.h.includes(c));
+const wchip = x => `<button data-w="${x.h}"><b>${x.h}</b>${x.p} · ${x.v.split(/[;,]/)[0]} <span class="lvb">${lvTxt(x)}</span></button>`;
 const charKnown = c => wordsWith(c).some(isKnown);
 function renderChars(){
+  if (!extLv) extLv = Math.min(MAXLV, S.charLv || curLv()); renderExt();
   const L = S.charLv || curLv();
   $("char-lv").innerHTML = [...Array(MAXLV).keys()].map(i => `<button data-clv="${i+1}" class="${i+1===L?"on":""}">HSK ${i+1}</button>`).join("");
   $("chargrid").innerHTML = Object.values(CHARS).filter(ch => ch.L === L).map(ch =>
@@ -1272,7 +1295,9 @@ function openChar(c, from){
   }
   $("ch-origin").innerHTML = makeOrigin(ch) || `Chưa có dữ liệu nguồn gốc cho chữ ${ch.c}.`;
   $("ch-tip").value = S.tips[c] || makeTip(ch);
-  $("ch-words").innerHTML = wordsWith(c).sort((a, b) => a.L - b.L || a.h.length - b.h.length).slice(0, 30).map(x => `<button data-w="${x.h}"><b>${x.h}</b>${x.p} · ${x.v.split(/[;,]/)[0]} <span class="lvb">${x.L}</span></button>`).join("");
+  $("ch-words").innerHTML = wordsWith(c).sort((a, b) => a.L - b.L || a.h.length - b.h.length).slice(0, 30).map(wchip).join("");
+  extLoad().then(() => { if (curChar?.c !== c) return; const xs = EXTALL.filter(x => x.h.includes(c)).slice(0, 12);
+    if (xs.length) $("ch-words").insertAdjacentHTML("beforeend", `<p class="hint" style="width:100%;margin:6px 0 0">Từ ghép mở rộng (HSK 7–9)</p>` + xs.map(wchip).join("")); });
   $("ch-msg").textContent = "";
   drawWriter(ch);
 }
@@ -1474,9 +1499,17 @@ const dictLv = L => DICT[L] ? Promise.resolve(DICT[L]) : fetch(`data/dict${L}.js
 const BYH = {}; // tra nhanh theo chữ Hán
 const unacc = t => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase();
 let SEARCH = null;
+// Từ ghép mở rộng: từ HSK 3.0 cấp 7–9 chỉ gồm chữ đã học ở cấp 1–6 (EXT[cấp chữ khó nhất] = [...])
+var EXT = null, EXTALL = [], extP = null;
+const lvTxt = w => w.ext ? "7–9" : w.L;
+function extLoad(){ return extP ||= fetch("data/ext.json").then(r => r.json()).then(j => {
+    EXT = {}; DICT[7] = {};
+    for (const L in j) EXT[L] = j[L].map(a => { DICT[7][a[0]] = [a[4], a[5], a[6], [], a[7], ""]; return {h: a[0], p: a[1], v: a[2], hv: a[3], L: 7, base: +L, ext: true}; });
+    EXTALL = Object.values(EXT).flat(); EXTALL.forEach(w => { BYH[w.h] = BYH[w.h] || w; }); SEARCH = null; return EXT;
+  }).catch(() => { EXT = {}; return EXT; }); }
 function searchIndex(){ if (SEARCH) return SEARCH;
   WORDS.forEach(w => BYH[w.h] = BYH[w.h] || w);
-  return SEARCH = WORDS.map(w => ({w, py: unacc(w.p).replace(/\s/g, ""), vi: unacc(w.v), hv: unacc(w.hv)})); }
+  return SEARCH = WORDS.concat(EXTALL).map(w => ({w, py: unacc(w.p).replace(/\s/g, ""), vi: unacc(w.v), hv: unacc(w.hv)})); }
 function lookup(q){
   q = q.trim(); if (!q) return [];
   const idx = searchIndex(), u = unacc(q), uz = u.replace(/\s/g, ""), han = /[\u4e00-\u9fff]/.test(q), out = [];
@@ -1495,8 +1528,8 @@ function lookup(q){
 }
 function renderResults(){
   const q = $("dq").value, r = lookup(q);
-  $("dres").innerHTML = !q.trim() ? "" : r.length ? r.map(w => `<button class="drow" data-w="${w.h}"><span class="h">${w.h}</span><span class="m"><b>${w.p}</b><span>${w.v}</span></span><span class="lvb">HSK ${w.L}</span></button>`).join("")
-    : `<p class="muted" style="margin:0">Chưa có từ này trong HSK 1–6. Thử gõ chữ Hán, pinyin không dấu (ví dụ "xuexi") hoặc nghĩa tiếng Việt.</p>`;
+  $("dres").innerHTML = !q.trim() ? "" : r.length ? r.map(w => `<button class="drow" data-w="${w.h}"><span class="h">${w.h}</span><span class="m"><b>${w.p}</b><span>${w.v}</span></span><span class="lvb">HSK ${lvTxt(w)}</span></button>`).join("")
+    : `<p class="muted" style="margin:0">Chưa có từ này trong HSK 1–9. Thử gõ chữ Hán, pinyin không dấu (ví dụ "xuexi") hoặc nghĩa tiếng Việt.</p>`;
 }
 // --- tách pinyin thành âm tiết, rồi thành thanh mẫu + vận mẫu + thanh điệu
 const PY_MARK = {"\u0304":1,"\u0301":2,"\u030c":3,"\u0300":4};
@@ -1543,7 +1576,7 @@ function sandhiNotes(h, syls){
 }
 let curWord = null, wordFrom = "chars", wdLang = "vi", wordWriters = [];
 async function openWord(h, from){
-  searchIndex(); const w = BYH[h]; if (!w) return openChar(h, from);
+  searchIndex(); if (!BYH[h]) await extLoad(); const w = BYH[h]; if (!w) return openChar(h, from);
   curWord = w; if (from && from !== "word") wordFrom = from;
   const d = (await dictLv(w.L))[w.h] || ["", [], "", []];
   show("word");
@@ -1551,7 +1584,7 @@ async function openWord(h, from){
   $("wd-py").textContent = w.p;
   $("wd-star").textContent = S.stars[w.h] ? "★" : "☆"; $("wd-star").classList.toggle("on", !!S.stars[w.h]);
   const card = S.cards[w.h];
-  $("wd-tags").innerHTML = [`<span class="lvb">HSK ${w.L}</span>`, w.hv ? `<span class="pill" style="border:1px solid var(--line)">Hán Việt: <b>${w.hv}</b></span>` : "",
+  $("wd-tags").innerHTML = [w.ext ? `<span class="lvb" title="Từ HSK 3.0 cấp 7–9, ghép từ các chữ đã học đến HSK ${w.base}">HSK 7–9 · mở rộng</span>` : `<span class="lvb">HSK ${w.L}</span>`, w.hv ? `<span class="pill" style="border:1px solid var(--line)">Hán Việt: <b>${w.hv}</b></span>` : "",
     ...d[1].map(x => `<span class="pill" style="border:1px solid var(--line)">${x}</span>`), d[2] ? `<span class="pill" style="border:1px solid var(--line)">Phồn thể ${d[2]}</span>` : "",
     d[4] ? (() => { const f = d[4], n = f <= 300 ? 5 : f <= 1500 ? 4 : f <= 5000 ? 3 : f <= 15000 ? 2 : 1; return `<span class="pill" style="border:1px solid var(--line)" title="Thứ hạng tần suất ${f}">${["","Ít gặp","Khá ít gặp","Thường gặp","Phổ biến","Rất phổ biến"][n]}<span class="pop">${[1,2,3,4,5].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span></span>`; })() : "",
     `<span class="pill" style="border:1px solid var(--line)">${card ? (card.box >= 2 ? "Đã thuộc" : "Đang học") : "Chưa học"}</span>`].join("");
@@ -1577,9 +1610,11 @@ async function openWord(h, from){
   $("wd-partsp").hidden = w.h.length < 2 && !CHARS[w.h];
   $("wd-parts").innerHTML = uniq.map(c => { const ch = CHARS[c] || COMP[c]; return `<button class="wpart" data-c="${c}"><span class="h">${c}</span><span><b>${ch.py || ""}</b> · ${ch.hv || ""}<small>${(ch.m || "").split(/[;,]/)[0]}</small></span></button>`; }).join("");
   // từ ghép theo cấp
+  await extLoad();
   const comp = uniq.map(c => { const ws = WORDS.filter(x => x.h !== w.h && x.h.includes(c)).sort((a, b) => a.L - b.L || a.h.length - b.h.length);
-    if (!ws.length) return ""; const shown = ws.slice(0, 12);
-    return `<div class="comp"><h3><b>${c}</b> có trong ${ws.length} từ HSK</h3><div class="wchips">${shown.map(x => `<button data-w="${x.h}"><b>${x.h}</b>${x.p} · ${x.v.split(/[;,]/)[0]} <span class="lvb">${x.L}</span></button>`).join("")}</div></div>`; }).join("");
+    const xs = EXTALL.filter(x => x.h !== w.h && x.h.includes(c));
+    if (!ws.length && !xs.length) return "";
+    return `<div class="comp"><h3><b>${c}</b> có trong ${ws.length} từ HSK 1–6${xs.length ? ` và ${xs.length} từ mở rộng` : ""}</h3>${ws.length ? `<div class="wchips">${ws.slice(0, 12).map(wchip).join("")}</div>` : ""}${xs.length ? `<p class="hint" style="margin:8px 0 4px">Mở rộng (HSK 7–9, phổ biến nhất trước)</p><div class="wchips">${xs.slice(0, 10).map(wchip).join("")}</div>` : ""}</div>`; }).join("");
   $("wd-compp").hidden = !comp; $("wd-comp").innerHTML = comp;
   // cách viết: một ô cho mỗi chữ, chạy thứ tự nét
   const wc = [...w.h].filter(c => CHARS[c]);
@@ -1594,7 +1629,18 @@ async function openWord(h, from){
   window.scrollTo(0, 0);
 }
 $("dq").addEventListener("input", () => { clearTimeout(renderResults.t); renderResults.t = setTimeout(renderResults, 120); });
-$("dq").addEventListener("focus", () => { for (let L = 1; L <= MAXLV; L++) dictLv(L); }, {once: true});
+$("dq").addEventListener("focus", () => { for (let L = 1; L <= MAXLV; L++) dictLv(L); extLoad().then(() => { if ($("dq").value.trim()) renderResults(); }); }, {once: true});
+var extLv = 0, extN = 20;
+async function renderExt(){
+  await extLoad(); const list = EXT[extLv] || [], top = WORDS.filter(w => w.L === extLv && [...w.h].length > 1);
+  $("ext-lv").innerHTML = Array.from({length: MAXLV}, (_, i) => `<button data-l="${i+1}" class="${i+1 === extLv ? "on" : ""}">HSK ${i+1}</button>`).join("");
+  $("ext-note").innerHTML = `HSK ${extLv} có ${top.length} từ ghép trong bài học. Dưới đây thêm <b>${list.length}</b> từ ghép thông dụng (thuộc HSK 3.0 cấp 7–9) chỉ dùng những chữ bạn đã gặp đến HSK ${extLv}, xếp theo độ phổ biến. Chạm để xem nghĩa, phát âm, cách viết.`;
+  $("ext-list").innerHTML = list.slice(0, extN).map(w => `<button class="drow" data-w="${w.h}"><span class="h">${w.h}</span><span class="m"><b>${w.p}</b><span>${w.v}</span></span><span class="lvb">${w.hv}</span></button>`).join("");
+  $("ext-more").hidden = extN >= list.length; $("ext-more").textContent = `Xem thêm (còn ${Math.max(0, list.length - extN)} từ)`;
+}
+$("ext-lv").onclick = e => { const b = e.target.closest("[data-l]"); if (!b) return; extLv = +b.dataset.l; extN = 20; renderExt(); };
+$("ext-more").onclick = () => { extN += 40; renderExt(); };
+$("ext-list").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "chars"); };
 $("dres").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "chars"); };
 $("wd-back").onclick = () => { show(wordFrom); if (wordFrom === "study") renderCard(); };
 $("wd-say").onclick = () => curWord && say(curWord.h, curWord.p);
