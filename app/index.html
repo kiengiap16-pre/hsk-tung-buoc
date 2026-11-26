@@ -402,7 +402,7 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 @media (max-width:420px){.big{font-size:3.8rem}.plan .stat .n{font-size:1.25rem}}
 /* ---- Bố cục máy tính: thanh bên trái chứa chức năng, nội dung giữa, cột phải thống kê ---- */
 nav.tabs[hidden]{display:none!important}
-.side-brand,.rail,nav.tabs .side-acct{display:none}
+.side-brand,.rail,nav.tabs .side-acct,nav.tabs .side-theme{display:none}
 @media (min-width:700px){
   body:not(.focus){padding-left:112px;padding-bottom:40px}
   nav.tabs{top:0;bottom:0;right:auto;width:96px;border-top:0;border-right:2px solid var(--line);padding:20px 10px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
@@ -414,6 +414,11 @@ nav.tabs[hidden]{display:none!important}
   .side-brand img{width:44px;height:44px;flex-shrink:0}
   .side-brand span{display:none}
   body:not(.focus) header.top .brand{visibility:hidden}
+  nav.tabs .side-theme{display:flex;margin-top:auto;align-self:center;align-items:center;justify-content:center;gap:6px;width:auto;padding:6px 10px;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:.72rem;font-weight:600}
+  nav.tabs .side-theme span{display:none}
+  nav.tabs .side-theme:hover{background:var(--accent-soft);color:var(--ink)}
+  nav.tabs .side-theme+.side-acct:not([hidden]){margin-top:0}
+  header.top .themebtn{display:none}
   nav.tabs .side-acct:not([hidden]){display:grid;margin-top:auto}
 }
 @media (min-width:1100px){
@@ -424,6 +429,8 @@ nav.tabs[hidden]{display:none!important}
   .side-brand{justify-content:flex-start;padding:0 8px}
   .side-brand span{display:inline}
   nav.tabs .side-acct:not([hidden]){display:flex}
+  nav.tabs .side-theme{align-self:flex-start;margin-left:8px}
+  nav.tabs .side-theme span{display:inline}
   body:not(.focus) .wrap{max-width:1000px;display:grid;grid-template-columns:minmax(0,600px) 320px;gap:0 44px;justify-content:center;align-items:start;padding-top:24px}
   body:not(.focus) .wrap>*{grid-column:1}
   body:not(.focus) header.top{display:none}
@@ -849,6 +856,7 @@ nav.tabs[hidden]{display:none!important}
     <button data-v="quiz"><span class="ic">考</span>Kiểm tra</button>
     <button data-v="path"><span class="ic">路</span>Lộ trình</button>
   </div>
+  <button type="button" class="side-theme" data-theme-btn="label" aria-label="Đổi giao diện"></button>
   <button type="button" class="side-acct" id="side-acct" hidden><span class="ic">我</span><span id="side-acct-l">Tài khoản</span></button>
 </nav>
 <div class="sheet" id="sheet" hidden><div class="in"><div class="msg"><b id="sheet-t"></b><span id="sheet-d"></span></div><button id="sheet-next">Tiếp tục</button></div></div>
@@ -1105,7 +1113,7 @@ function show(v){
   $("tabs").hidden = ["setup","study","quiz","gpractice","wpractice"].includes(v); // đang làm bài thì ẩn thanh tab cho tập trung
   document.body.classList.toggle("focus", $("tabs").hidden); renderRail();
   const tab = v === "done" ? "study" : (v === "char" || v === "word") ? "chars" : (v === "gpractice" || v === "greview") ? "grammar" : v === "wpractice" ? "write" : (v === "pinyin" || v === "rad") ? "path" : v;
-  document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.v === tab));
+  document.querySelectorAll("#tabs button[data-v]").forEach(b => b.setAttribute("aria-current", b.dataset.v === tab));
   if (v === "today") renderToday();
   if (v === "path") renderPath();
   if (v === "grammar") renderGrammar();
@@ -1664,7 +1672,7 @@ async function openRad(g){
   $("rad-detail").scrollIntoView({behavior:"smooth", block:"start"});
 }
 // ===== 5. GẮN SỰ KIỆN
-document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+document.querySelectorAll("#tabs button[data-v]").forEach(b => b.onclick = () => {
   const v = b.dataset.v; if (v === "study") startStudy(); else if (v === "chars") show("chars"); else if (v === "quiz") startQuiz(); else show(v);
 });
 $("btn-start").onclick = () => {
@@ -2059,7 +2067,7 @@ loadData().then(() => {
   function paint(){
     const t = cur(), m = document.querySelector('meta[name="theme-color"]');
     if (m) m.content = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#E3EED4";
-    document.querySelectorAll("[data-theme-btn]").forEach(b => { b.innerHTML = ICON[t]; b.title = b.ariaLabel = "Giao diện: " + NAME[t] + " (bấm để đổi)"; });
+    document.querySelectorAll("[data-theme-btn]").forEach(b => { b.innerHTML = ICON[t] + (b.dataset.themeBtn === "label" ? `<span>Giao diện: ${NAME[t]}</span>` : ""); b.title = b.ariaLabel = "Giao diện: " + NAME[t] + " (bấm để đổi)"; });
     document.querySelectorAll("[data-theme-set]").forEach(b => b.setAttribute("aria-pressed", b.dataset.themeSet === t));
   }
   window.setTheme = t => { document.documentElement.dataset.theme = t; try { localStorage.setItem("hsk-theme", t); } catch(e){} paint(); };
