@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="vi">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8">
+<title>HSK Từng Bước</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Serif+SC:wght@500;700&display=swap">
+<style>
+/* Bố cục: trang vở luyện chữ. Ô điền tự (田字格) là hoạ tiết xuyên suốt; hero là một chữ Hán lớn tự viết từng nét */
+:root{
+  --leaf:#E3EED4; --sage:#AEC3B0; --moss:#6B9071; --fern:#375534; --forest:#0F2A1D;
+  --bg:var(--leaf); --paper:#F4F8EE; --ink:var(--forest); --soft:#375534; --line:#C3D4BF; --grid:rgba(55,85,52,.22);
+  --am:#0F2A1D; --yi:#5B8462; --btn:#375534; --btn-ink:#F4F8EE; --band:#0F2A1D; --band-ink:#E3EED4; --band-soft:#AEC3B0;
+  --font:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --han:"Noto Serif SC","Songti SC","SimSun",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F2A1D; --paper:#163526; --ink:#E3EED4; --soft:#AEC3B0; --line:#2C4A37; --grid:rgba(174,195,176,.18);
+  --am:#E3EED4; --yi:#8FB896; --btn:#AEC3B0; --btn-ink:#0F2A1D; --band:#E3EED4; --band-ink:#0F2A1D; --band-soft:#375534; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F2A1D; --paper:#163526; --ink:#E3EED4; --soft:#AEC3B0; --line:#2C4A37; --grid:rgba(174,195,176,.18);
+  --am:#E3EED4; --yi:#8FB896; --btn:#AEC3B0; --btn-ink:#0F2A1D; --band:#E3EED4; --band-ink:#0F2A1D; --band-soft:#375534; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(2.1rem,5.4vw,3.9rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.1rem;font-weight:700}
+p{margin:0}
+.lead{font-size:clamp(1.02rem,1.6vw,1.18rem);color:var(--soft);max-width:34em}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.han{font-family:var(--han)}
+a{color:inherit}
+.btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;border-radius:14px;padding:14px 22px;background:var(--btn);color:var(--btn-ink);box-shadow:0 5px 0 color-mix(in srgb,var(--btn) 55%,#000);transition:transform .12s,box-shadow .12s}
+.btn:hover{transform:translateY(-1px)} .btn:active{transform:translateY(3px);box-shadow:0 2px 0 color-mix(in srgb,var(--btn) 55%,#000)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:none;border:2px solid var(--line)}
+.btn:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--yi);outline-offset:3px}
+/* thanh trên */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;text-decoration:none}
+.seal{width:36px;height:36px;border-radius:9px;background:var(--btn);color:var(--btn-ink);display:grid;place-items:center;font-family:var(--han);font-size:20px}
+nav.links{display:flex;gap:22px;font-weight:600;font-size:.92rem}
+nav.links a{text-decoration:none;color:var(--soft)} nav.links a:hover{color:var(--ink)}
+header .btn{padding:10px 16px;font-size:.9rem;box-shadow:0 3px 0 color-mix(in srgb,var(--btn) 55%,#000)}
+@media (max-width:760px){nav.links{display:none}}
+/* hero */
+.hero{padding-block:56px 64px}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:48px;align-items:center}
+@media (max-width:860px){.hero .wrap{grid-template-columns:1fr;gap:36px}}
+.hero-copy{display:grid;gap:22px;min-width:0}
+.hero h1 .mark{background:linear-gradient(transparent 62%,color-mix(in srgb,var(--yi) 45%,transparent) 0)}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap}
+.note{font-size:.85rem;color:var(--soft)}
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:28px;padding:22px;display:grid;gap:16px;box-shadow:0 30px 60px -30px rgba(15,42,29,.35)}
+.tzg{position:relative;aspect-ratio:1;max-width:100%;border:2px solid var(--yi);border-radius:6px}
+.tzg svg.lines{position:absolute;inset:0;width:100%;height:100%}
+.tzg svg.lines line{stroke:var(--yi);stroke-opacity:.55;stroke-width:.6;stroke-dasharray:2.5 2.5}
+.tzg svg.char{position:absolute;inset:6%;width:88%;height:88%}
+.tzg svg.char path{transition:opacity .25s}
+.tzg .replay{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:1.1rem;cursor:pointer}
+.sheet-meta{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.sheet-meta .py{font-size:2rem;font-weight:800;line-height:1}
+.sheet-meta .vi{font-weight:600}
+.sheet-meta .hv{font-size:.85rem;color:var(--soft)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--soft);border-top:1px solid var(--line);padding-top:12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+/* dải số liệu */
+.band{background:var(--band);color:var(--band-ink)}
+.band .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding-block:28px}
+@media (max-width:700px){.band .wrap{grid-template-columns:repeat(2,1fr)}}
+.band b{display:block;font-size:clamp(1.6rem,3.2vw,2.3rem);font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.band span{font-size:.85rem;color:var(--band-soft);font-weight:600}
+section.blk{padding-block:76px}
+.head{display:grid;gap:12px;margin-bottom:36px;max-width:40em}
+/* lộ trình */
+.route{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;position:relative}
+@media (max-width:900px){.route{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.route{grid-template-columns:1fr}}
+.stop{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:20px;display:grid;gap:10px;align-content:start}
+.stop .num{display:flex;align-items:center;gap:10px}
+.stop .dot{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-family:var(--han);font-size:1.5rem;background:var(--btn);color:var(--btn-ink);box-shadow:0 4px 0 color-mix(in srgb,var(--btn) 55%,#000)}
+.stop .tag{font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--soft)}
+.stop p{color:var(--soft);font-size:.95rem}
+.levels{margin-top:28px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:8px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)}
+th{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)}
+tr:last-child td{border-bottom:0}
+td .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;min-width:80px}
+td .bar i{display:block;height:100%;background:var(--yi)}
+td.lv{font-weight:800}
+caption{caption-side:bottom;text-align:left;font-size:.8rem;color:var(--soft);padding:10px 14px}
+/* tính năng */
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:900px){.feats{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.feats{grid-template-columns:1fr}}
+.feat{border:1px solid var(--line);border-radius:22px;padding:20px;display:grid;gap:12px;align-content:start;background:var(--paper)}
+.feat.wide{grid-column:span 2;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:20px}
+.feat.full{grid-column:1/-1;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)}
+@media (max-width:900px){.feat.full{grid-template-columns:1fr}}
+@media (max-width:560px){.feat.wide{grid-column:auto;grid-template-columns:1fr}}
+.feat p{color:var(--soft);font-size:.95rem}
+.demo{background:var(--bg);border-radius:16px;padding:14px;display:grid;gap:8px;min-width:0}
+/* minh hoạ nhỏ trong thẻ tính năng */
+.mini-parts{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center}
+.mini-parts div{border:1px solid var(--line);border-radius:12px;padding:8px;background:var(--paper)}
+.mini-parts .hz{font-family:var(--han);font-size:2rem;line-height:1.2}
+.mini-parts small{display:block;font-size:.72rem;color:var(--soft)}
+.c-am{color:var(--am)} .c-yi{color:var(--yi)}
+.flash{display:grid;gap:6px;text-align:center}
+.flash .h{font-family:var(--han);font-size:2.2rem;line-height:1.1}
+.flash .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.flash .row span{border-radius:10px;padding:6px;font-size:.8rem;font-weight:700}
+.flash .no{background:#F3DED5;color:#A2452D} .flash .yes{background:color-mix(in srgb,var(--yi) 25%,var(--paper));color:var(--ink)}
+.path{display:grid;justify-items:center;gap:4px}
+.path .n{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-family:var(--han);background:var(--btn);color:var(--btn-ink);box-shadow:0 3px 0 color-mix(in srgb,var(--btn) 55%,#000)}
+.path .n.off{background:var(--line);color:var(--soft);box-shadow:none}
+.path .n.done{background:var(--yi)}
+.hud{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hud div{background:var(--paper);border-radius:12px;padding:8px 10px;font-size:.78rem;color:var(--soft)}
+.hud b{display:block;font-size:1.15rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.ok-bar{border-radius:12px;padding:10px 12px;background:color-mix(in srgb,var(--yi) 25%,var(--paper));border-top:2px solid var(--yi);font-size:.85rem}
+.ok-bar b{color:var(--yi);display:block}
+.place{display:grid;gap:6px;font-size:.8rem}
+.place .r{display:grid;grid-template-columns:48px 1fr 28px;gap:8px;align-items:center}
+.place .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden} .place .bar i{display:block;height:100%;background:var(--yi)}
+/* một buổi học */
+.day{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--paper)}
+@media (max-width:760px){.day{grid-template-columns:1fr}}
+.day div{padding:22px;display:grid;gap:8px;align-content:start;border-right:1px solid var(--line)}
+.day div:last-child{border-right:0}
+@media (max-width:760px){.day div{border-right:0;border-bottom:1px solid var(--line)} .day div:last-child{border-bottom:0}}
+.day .min{font-size:.78rem;font-weight:800;letter-spacing:.1em;color:var(--yi)}
+.day p{color:var(--soft);font-size:.95rem}
+/* câu hỏi */
+.faq{display:grid;gap:10px;max-width:780px}
+details{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:4px 18px}
+summary{cursor:pointer;font-weight:700;padding-block:14px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::after{content:"+";font-size:1.3rem;line-height:1;color:var(--soft)}
+details[open] summary::after{content:"–"}
+details p{color:var(--soft);padding-bottom:16px}
+/* kêu gọi cuối */
+.final{background:var(--band);color:var(--band-ink);border-radius:32px;padding:clamp(28px,6vw,64px);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:center;position:relative;overflow:hidden}
+@media (max-width:760px){.final{grid-template-columns:1fr}}
+.final p{color:var(--band-soft)}
+.final .btn{background:var(--band-ink);color:var(--band);box-shadow:0 5px 0 color-mix(in srgb,var(--band-ink) 50%,#000)}
+.final .ghostchar{position:absolute;right:-20px;top:-40px;font-family:var(--han);font-size:16rem;line-height:1;opacity:.07;pointer-events:none}
+footer{padding-block:40px 56px;color:var(--soft);font-size:.82rem}
+footer .wrap{display:grid;gap:10px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="seal" aria-hidden="true">汉</span>HSK Từng Bước</a>
+    <nav class="links" aria-label="Mục lục"><a href="#lo-trinh">Lộ trình</a><a href="#tinh-nang">Tính năng</a><a href="#mot-ngay">Một buổi học</a><a href="#hoi-dap">Hỏi đáp</a></nav>
+    <a class="btn" href="app/">Vào học</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="eyebrow">Tiếng Trung chuẩn HSK 3.0 · cho người Việt</span>
+        <h1>Học tiếng Trung <span class="mark">từng bước</span>, từ pinyin đến HSK 6</h1>
+        <p class="lead">Mỗi ngày 10 phút. Bắt đầu từ thanh điệu và 52 bộ thủ, rồi đi qua 5.363 từ vựng HSK 1–6, mỗi từ có nghĩa tiếng Việt và âm Hán Việt. Mỗi chữ Hán đều tập viết được từng nét.</p>
+        <div class="cta-row">
+          <a class="btn" href="app/">Bắt đầu học miễn phí →</a>
+          <a class="btn ghost" href="#lo-trinh">Xem lộ trình</a>
+        </div>
+        <p class="note">Không cần tài khoản. Tiến độ lưu ngay trên trình duyệt của bạn.</p>
+      </div>
+      <div class="sheet" aria-label="Ví dụ trang học chữ 想">
+        <div class="tzg">
+          <svg class="lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="50" y1="0" x2="50" y2="100"/><line x1="0" y1="50" x2="100" y2="50"/><line x1="0" y1="0" x2="100" y2="100"/><line x1="100" y1="0" x2="0" y2="100"/></svg>
+          <svg class="char" id="hero-char" viewBox="0 0 1024 1024" role="img" aria-label="Chữ 想 viết theo thứ tự nét"><g transform="translate(0,900) scale(1,-1)" id="strokes"></g></svg>
+          <button class="replay" id="replay" aria-label="Xem lại thứ tự nét">↻</button>
+        </div>
+        <div class="sheet-meta">
+          <div><div class="py">xiǎng</div><div class="vi">muốn · nghĩ · nhớ</div></div>
+          <div class="hv">Hán Việt <b>tưởng</b> · HSK 1 · 13 nét</div>
+        </div>
+        <div class="legend"><span><i style="background:var(--am)"></i>Phần âm <span class="han c-am">相</span> xiāng · tương</span><span><i style="background:var(--yi)"></i>Phần ý <span class="han c-yi">心</span> tim, lòng</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="band">
+    <div class="wrap">
+      <div><b>5.363</b><span>từ vựng HSK 1–6</span></div>
+      <div><b>1.799</b><span>chữ Hán có thứ tự nét</span></div>
+      <div><b>52</b><span>bộ thủ thông dụng</span></div>
+      <div><b>10 phút</b><span>mỗi ngày là đủ bắt đầu</span></div>
+    </div>
+  </div>
+
+  <section class="blk" id="lo-trinh">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Lộ trình</span>
+        <h2>Bốn chặng, đi đúng thứ tự</h2>
+        <p class="lead">Nắm âm trước, nhận mặt chữ sau, rồi mới học từ. Mỗi chặng mở khi bạn xong chặng trước. Nếu đã biết tiếng Trung, bạn làm bài xếp cấp để vào thẳng cấp phù hợp.</p>
+      </div>
+      <div class="route">
+        <div class="stop"><div class="num"><span class="dot">声</span><span class="tag">BƯỚC 1</span></div><h3>Pinyin và thanh điệu</h3><p>4 thanh và thanh nhẹ có hình đường giọng, 21 thanh mẫu và các vần. Những âm người Việt hay đọc sai được đánh dấu riêng.</p></div>
+        <div class="stop"><div class="num"><span class="dot">部</span><span class="tag">BƯỚC 2</span></div><h3>52 bộ thủ thông dụng</h3><p>Học các "mảnh ghép" của chữ Hán: 氵 là nước, 扌 là tay, 讠 là lời nói. Nhớ 40/52 bộ là qua chặng.</p></div>
+        <div class="stop"><div class="num"><span class="dot">一</span><span class="tag">BƯỚC 3</span></div><h3>Giáo trình HSK 1</h3><p>500 từ đầu tiên, chia bài 20 từ, xếp từ thông dụng nhất. Cứ 5 bài có một bài ôn tập.</p></div>
+        <div class="stop"><div class="num"><span class="dot">六</span><span class="tag">BƯỚC 4</span></div><h3>Lên dần HSK 2 → 6</h3><p>Học xong cấp nào thì cấp sau tự mở. Chọn mục tiêu HSK 2, 4 hay 6 để web tính quãng đường còn lại.</p></div>
+      </div>
+      <div class="levels">
+        <table>
+          <caption>Số từ mới, chữ Hán và âm tiết mỗi cấp theo chuẩn GF 0025-2021. Cột "trong web" là số từ có trong bộ dữ liệu đang dùng.</caption>
+          <thead><tr><th>Cấp</th><th>Từ mới</th><th>Chữ Hán mới</th><th>Âm tiết mới</th><th>Trong web</th><th style="width:28%">Tích luỹ</th></tr></thead>
+          <tbody id="lvrows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk" id="tinh-nang" style="padding-top:0">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Tính năng</span>
+        <h2>Học như chơi, nhưng nhớ thật</h2>
+      </div>
+      <div class="feats">
+        <div class="feat wide">
+          <div style="display:grid;gap:10px">
+            <h3>Trang chữ Hán: nhìn, hiểu, viết</h3>
+            <p>Xem thứ tự nét chạy động rồi tự viết bằng ngón tay hoặc chuột, sai nét sẽ được nhắc. Chữ hình thanh được tách làm hai màu: phần âm gợi cách đọc, phần ý gợi nghĩa. Kèm gợi ý đọc theo pinyin và Hán Việt, nguồn gốc chữ và mẹo nhớ bạn tự sửa được.</p>
+          </div>
+          <div class="demo">
+            <div class="mini-parts"><div><span class="hz c-am">相</span><small>xiāng · tương</small></div><span>+</span><div><span class="hz c-yi">心</span><small>xīn · tâm</small></div></div>
+            <p style="font-size:.85rem;color:var(--soft);text-align:center">Biết <span class="han c-am">相</span> là đoán được <span class="han">想</span> đọc gần giống: tương → tưởng</p>
+          </div>
+        </div>
+        <div class="feat">
+          <div class="demo flash"><span class="h">学习</span><span style="font-weight:700">xuéxí · học tập</span><div class="row"><span class="no">Chưa nhớ</span><span class="yes">Nhớ rồi</span></div></div>
+          <h3>Flashcard ôn đúng lúc</h3>
+          <p>Từ bạn nhớ được giãn lịch ôn 1, 2, 4, 7, 15 ngày. Từ chưa nhớ quay lại ngay trong buổi học.</p>
+        </div>
+        <div class="feat">
+          <div class="demo path"><span class="n done">✓</span><span class="n">你</span><span class="n off">考</span></div>
+          <h3>Bản đồ bài học</h3>
+          <p>Mỗi nút tròn là một bài. Vòng quanh nút cho biết bạn đã thuộc bao nhiêu phần, nút "Bắt đầu" chỉ bài kế tiếp.</p>
+        </div>
+        <div class="feat">
+          <div class="demo hud"><div><b>12</b>ngày liên tiếp</div><div><b>50/50</b>XP hôm nay</div></div>
+          <h3>XP và chuỗi ngày</h3>
+          <p>Mỗi câu đúng được 10 XP. Đặt mục tiêu XP theo thời gian bạn có: 5, 10 hoặc 20 phút mỗi ngày.</p>
+        </div>
+        <div class="feat">
+          <div class="demo"><div class="ok-bar"><b>Chính xác! +10 XP</b>想 (xiǎng) nghĩa là: muốn, nghĩ, nhớ</div></div>
+          <h3>Biết ngay đúng sai</h3>
+          <p>Trả lời xong là có thanh phản hồi kèm âm báo và đáp án đúng, không phải chờ cuối bài.</p>
+        </div>
+        <div class="feat wide full">
+          <div class="demo place">
+            <div class="r"><span>HSK 1</span><span class="bar"><i style="width:100%"></i></span><span>4/4</span></div>
+            <div class="r"><span>HSK 2</span><span class="bar"><i style="width:75%"></i></span><span>3/4</span></div>
+            <div class="r"><span>HSK 3</span><span class="bar"><i style="width:25%"></i></span><span>1/4</span></div>
+          </div>
+          <div style="display:grid;gap:10px"><h3>Bài xếp cấp 24 câu</h3>
+          <p>Đã học tiếng Trung rồi? Trả lời 4 câu mỗi cấp, từ HSK 1 lên HSK 6. Cấp nào đúng dưới 3/4 là nơi bạn bắt đầu, các cấp thấp hơn được mở sẵn.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk" id="mot-ngay" style="padding-top:0">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Một buổi học 10 phút</span>
+        <h2>Ôn cũ, học mới, kiểm tra</h2>
+      </div>
+      <div class="day">
+        <div><span class="min">PHÚT 0–3</span><h3>Ôn thẻ đến hạn</h3><p>Web đưa ra những từ đến lịch ôn hôm nay trước, để từ cũ không bị quên.</p></div>
+        <div><span class="min">PHÚT 3–8</span><h3>Học 8 từ mới</h3><p>Lật thẻ, nghe phát âm, chạm vào từng chữ để xem cấu tạo và tập viết.</p></div>
+        <div><span class="min">PHÚT 8–10</span><h3>Kiểm tra nhanh</h3><p>Trắc nghiệm nghĩa với phản hồi ngay. Câu sai được đưa lại vào hàng ôn.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk" id="hoi-dap" style="padding-top:0">
+    <div class="wrap">
+      <div class="head"><span class="eyebrow">Hỏi đáp</span><h2>Trước khi bắt đầu</h2></div>
+      <div class="faq">
+        <details><summary>Có mất phí không?</summary><p>Không. Web miễn phí và không cần tạo tài khoản.</p></details>
+        <details><summary>Tiến độ học được lưu ở đâu?</summary><p>Ngay trên trình duyệt bạn đang dùng. Nếu đổi máy, dùng chế độ ẩn danh hoặc xoá dữ liệu trình duyệt thì tiến độ sẽ bắt đầu lại từ đầu.</p></details>
+        <details><summary>HSK 3.0 khác HSK cũ thế nào?</summary><p>HSK 3.0 (chuẩn GF 0025-2021) có 9 cấp thay vì 6, chia ba giai đoạn sơ, trung, cao cấp. Mỗi cấp đo bằng số âm tiết, số chữ Hán và số từ. Riêng HSK 1 đã có 500 từ, nhiều hơn hẳn HSK 1 cũ (150 từ).</p></details>
+        <details><summary>Nghĩa tiếng Việt lấy từ đâu?</summary><p>Từ điển mở CVDICT (CC BY-SA 4.0), các từ cơ bản được soạn lại cho dễ hiểu. Âm Hán Việt lấy từ dữ liệu hanviet-pinyin-words, thứ tự nét và cấu tạo chữ từ Make Me a Hanzi. Bạn nên đối chiếu thêm với giáo trình.</p></details>
+        <details><summary>Có phát âm không?</summary><p>Có, web dùng giọng đọc tiếng Trung có sẵn trên máy. Phần lớn điện thoại và máy tính đều có, một số máy cần cài thêm giọng tiếng Trung trong phần cài đặt.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk" style="padding-top:0">
+    <div class="wrap">
+      <div class="final">
+        <span class="ghostchar" aria-hidden="true">学</span>
+        <div style="display:grid;gap:12px;position:relative">
+          <h2>Chữ đầu tiên chỉ cần một nét</h2>
+          <p><span class="han">一</span> (yī) là một nét ngang. Bắt đầu từ đó, mỗi ngày thêm vài chữ.</p>
+        </div>
+        <a class="btn" href="app/" style="position:relative">Vào học ngay →</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><b>HSK Từng Bước</b> · web học tiếng Trung theo chuẩn HSK 3.0 cấp 1–6.</span>
+    <span>Nguồn dữ liệu: danh sách từ complete-hsk-vocabulary; nghĩa tiếng Việt CVDICT của Phong Phan (CC BY-SA 4.0, dịch từ CC-CEDICT); âm Hán Việt hanviet-pinyin-words (MIT); thứ tự nét và cấu tạo chữ Make Me a Hanzi / Hanzi Writer.</span>
+  </div>
+</footer>
+
+<script>
+// Chữ 想: 13 nét (dữ liệu Make Me a Hanzi). Nét 10–13 là phần ý 心, tô màu xanh lá
+const STROKES = ["M 378 600 Q 403 607 431 612 Q 473 622 479 629 Q 488 636 483 645 Q 476 655 448 663 Q 424 666 380 652 L 338 638 Q 220 611 165 604 Q 129 598 155 582 Q 197 558 249 573 Q 280 580 319 587 L 378 600 Z", "M 376 537 Q 376 567 378 600 L 380 652 Q 380 730 396 782 Q 403 795 401 806 Q 395 813 351 842 Q 332 855 315 844 Q 311 840 316 827 Q 337 794 338 709 Q 338 675 338 638 L 333 518 Q 333 424 315 361 Q 306 330 326 278 Q 330 265 337 261 Q 343 257 348 262 Q 355 266 363 283 Q 372 302 371 328 Q 371 352 375 509 L 376 537 Z", "M 319 587 Q 265 479 123 317 Q 117 307 128 306 Q 143 303 251 408 Q 294 451 333 518 C 385 606 333 614 319 587 Z", "M 375 509 Q 442 449 451 447 Q 452 447 454 447 Q 461 447 466 457 Q 469 467 463 489 Q 459 505 434 519 Q 409 529 380 537 Q 377 538 376 537 C 346 537 353 529 375 509 Z", "M 563 703 Q 553 716 527 725 Q 518 729 508 725 Q 501 721 506 709 Q 527 654 525 501 Q 525 450 514 399 Q 501 348 535 309 Q 545 296 554 308 Q 561 320 564 332 L 567 362 Q 567 374 568 452 L 568 479 Q 568 527 568 561 L 569 590 Q 569 668 572 677 C 574 693 574 693 563 703 Z", "M 725 348 Q 726 341 732 333 Q 745 305 754 306 Q 767 307 783 339 Q 796 364 796 384 Q 784 474 786 613 Q 786 653 808 688 Q 818 704 810 713 Q 783 735 739 753 Q 727 756 642 724 Q 606 714 563 703 C 534 696 543 671 572 677 Q 641 692 713 708 Q 716 708 720 706 Q 730 681 735 615 Q 736 429 727 382 L 725 348 Z", "M 568 561 Q 640 576 692 584 Q 714 588 705 601 Q 695 614 671 617 Q 638 620 569 590 C 541 578 539 555 568 561 Z", "M 568 452 Q 569 452 572 452 Q 642 462 695 469 Q 717 473 709 485 Q 699 498 675 503 Q 650 506 568 479 C 539 470 538 451 568 452 Z", "M 564 332 Q 655 344 725 348 C 755 350 754 370 727 382 Q 726 383 720 385 Q 699 389 567 362 C 538 356 534 328 564 332 Z", "M 229 227 Q 201 160 163 98 Q 141 62 160 26 Q 167 7 191 20 Q 215 38 230 72 Q 254 121 257 164 Q 261 200 255 226 Q 249 236 243 237 Q 233 236 229 227 Z", "M 325 196 Q 340 85 420 27 Q 516 -39 719 -40 Q 762 -36 798 -23 Q 825 -13 828 3 Q 834 13 798 45 Q 746 105 709 164 Q 699 183 692 177 Q 686 171 701 86 Q 701 41 692 33 Q 677 27 642 25 Q 476 28 410 97 Q 380 125 369 175 Q 362 200 350 207 Q 337 214 328 211 Q 322 210 325 196 Z", "M 481 225 Q 529 165 559 152 Q 574 148 583 161 Q 590 173 588 189 Q 576 238 496 261 L 495 262 Q 479 266 470 264 Q 463 263 465 251 Q 466 239 481 225 Z", "M 751 243 Q 796 209 849 158 Q 865 139 882 137 Q 889 136 897 147 Q 907 160 892 203 Q 880 240 813 259 Q 773 269 750 273 Q 740 277 739 265 Q 740 252 751 243 Z"];
+const SEM = [9,10,11,12];
+const g = document.getElementById("strokes");
+g.innerHTML = STROKES.map((d,i) => `<path d="${d}" fill="var(${SEM.includes(i) ? "--yi" : "--am"})"></path>`).join("");
+const paths = [...g.querySelectorAll("path")];
+let timers = [];
+function play(){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  timers.forEach(clearTimeout); timers = [];
+  paths.forEach(p => p.style.opacity = .12);   // chỉ làm mờ, chữ vẫn nhìn thấy
+  paths.forEach((p,i) => timers.push(setTimeout(() => p.style.opacity = 1, 300 + i*260)));
+}
+document.getElementById("replay").onclick = play;
+setTimeout(play, 700);
+
+// Bảng cấp: số liệu chuẩn + số từ có trong web
+const LV = [[1,500,300,269,506],[2,772,300,199,750],[3,973,300,140,953],[4,1000,300,116,972],[5,1071,300,98,1059],[6,1140,300,86,1123]];
+const total = LV.reduce((a,r) => a + r[1], 0); let acc = 0;
+document.getElementById("lvrows").innerHTML = LV.map(([L,w,c,s,inweb]) => { acc += w;
+  return `<tr><td class="lv">HSK ${L}</td><td>${w.toLocaleString("vi-VN")}</td><td>${c}</td><td>${s}</td><td>${inweb.toLocaleString("vi-VN")}</td><td><div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center"><span class="bar"><i style="width:${acc/total*100}%"></i></span><span>${acc.toLocaleString("vi-VN")}</span></div></td></tr>`; }).join("");
+</script>
