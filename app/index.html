@@ -204,6 +204,8 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 .jump a{font-size:.8rem;color:var(--muted);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:4px 10px}
 .jump a:hover{color:var(--accent);border-color:var(--accent)}
 [id^="wd-sec"],#wd-partsp,#wd-compp{scroll-margin-top:12px}
+.gp .gc{background:var(--accent-soft);border-radius:10px;padding:8px 10px;font-size:.95rem}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit}
 .pop{display:inline-flex;gap:3px;vertical-align:middle;margin-left:4px}.pop i{width:7px;height:7px;border-radius:99px;background:var(--line)}.pop i.on{background:var(--gold)}
 .wwrite{display:flex;flex-wrap:wrap;gap:12px}
 .wbox{display:grid;gap:6px;justify-items:center;text-align:center;font-size:.8rem;color:var(--muted)}
@@ -546,7 +548,7 @@ nav.tabs[hidden]{display:none!important}
     <div class="card" id="card" tabindex="0" role="button" aria-label="Lật thẻ">
       <div class="inner">
         <div class="face front"><span class="tag" id="c-topic"></span><div class="big" id="c-han"></div><span class="hint">Chạm để xem nghĩa</span></div>
-        <div class="face back"><div class="big" id="c-han2" style="font-size:2.4rem"></div><div class="py" id="c-py"></div><div class="hint" id="c-hv"></div><div class="vi" id="c-vi"></div><button class="speak" id="btn-speak" type="button">Nghe phát âm</button><div class="chips" id="c-chips"></div></div>
+        <div class="face back"><div class="big" id="c-han2" style="font-size:2.4rem"></div><div class="py" id="c-py"></div><div class="hint" id="c-hv"></div><div class="vi" id="c-vi"></div><div class="hint zh" id="c-ex" style="max-width:34ch;text-align:center"></div><button class="speak" id="btn-speak" type="button">Nghe phát âm</button><div class="chips" id="c-chips"></div></div>
       </div>
     </div>
     <div class="row">
@@ -747,7 +749,7 @@ nav.tabs[hidden]{display:none!important}
   <!-- BÀI TẬP TỔNG HỢP -->
   <section id="v-greview" hidden>
     <div class="ctop"><button class="back" data-go="grammar">← Ngữ pháp</button></div>
-    <div class="panel"><span class="eyebrow">Theo tài liệu HSK 1–3</span><h2>Bài tập tổng hợp</h2><p class="hint" style="margin:0">Tự làm ra giấy hoặc nói to trước, rồi bấm “Xem đáp án” để so sánh. Phần sắp xếp câu thì chạm từng mảnh theo thứ tự.</p></div>
+    <div class="panel"><span class="eyebrow">Ôn tập HSK 1–3</span><h2>Bài tập tổng hợp</h2><p class="hint" style="margin:0">Tự làm ra giấy hoặc nói to trước, rồi bấm “Xem đáp án” để so sánh. Phần sắp xếp câu thì chạm từng mảnh theo thứ tự.</p></div>
     <div id="gr-body"></div>
   </section>
 
@@ -817,7 +819,7 @@ nav.tabs[hidden]{display:none!important}
       <span class="eyebrow">Chuẩn HSK 3.0 (áp dụng từ 2021)</span>
       <h2>9 cấp, chia 3 giai đoạn</h2>
       <p class="muted" style="margin:0">Mỗi cấp đo bằng ba chỉ số: số âm tiết, số chữ Hán và số từ vựng mới. Web hiện có đủ từ vựng cấp 1 đến 6.</p>
-      <p class="hint" style="margin:0">Nguồn: số liệu các cấp theo chuẩn 《国际中文教育中文水平等级标准》 GF 0025-2021. Danh sách từ HSK 3.0 cấp 1–6: bộ dữ liệu mở complete-hsk-vocabulary (drkameleon). Nghĩa tiếng Việt: từ điển CVDICT của Phong Phan (CC BY-SA 4.0, dịch từ CC-CEDICT), riêng các từ cơ bản do Claude soạn lại. Âm Hán Việt: dữ liệu hanviet-pinyin-words (MIT). Cấu tạo chữ và thứ tự nét: Make Me a Hanzi / Hanzi Writer. Mẹo nhớ là bản nháp do Claude viết. Nên đối chiếu lại với giáo trình.</p>
+      <p class="hint" style="margin:0">Nguồn: danh sách từ vựng HSK 1–6 (nghĩa, Hán Việt, từ loại, ví dụ) và đề cương ngữ pháp theo tài liệu HSK 3.0 (11-2025) của cô Trần Mỹ Hạnh, Meiday Chinese (facebook.com/tranmyhanh101198, tài liệu miễn phí, không dùng để kinh doanh). Cấp 7–9 theo chuẩn GF 0025-2021. Nghĩa tiếng Anh, phồn thể, tần suất: complete-hsk-vocabulary (drkameleon). Từ ghép mở rộng 7–9: nghĩa từ CVDICT của Phong Phan (CC BY-SA 4.0), âm Hán Việt hanviet-pinyin-words (MIT). Cấu tạo chữ và thứ tự nét: Make Me a Hanzi / Hanzi Writer. Mẹo nhớ là bản nháp do Claude viết. Nên đối chiếu lại với giáo trình.</p>
     </div>
     <div class="levels" id="levels"></div>
     <div class="panel">
@@ -850,8 +852,10 @@ nav.tabs[hidden]{display:none!important}
 <script type="module" src="account.js?v=6"></script>
 <script>
 // ===== 1. DỮ LIỆU: từ vựng HSK 3.0 cấp 1–6 nằm trong thư mục data/ (mỗi cấp một file), tải khi mở web
-// Mỗi từ: [chữ Hán, pinyin, nghĩa tiếng Việt, Hán Việt]. Mỗi cấp chia thành bài 20 từ, xếp theo độ thông dụng.
-let WORDS = [];            // tất cả từ đã tải, mỗi từ {h,p,v,hv,L,ls,lk}
+// Mỗi từ: [chữ Hán, pinyin, nghĩa tiếng Việt, Hán Việt, ví dụ, khoá thẻ nếu chữ lặp lại ở cấp khác]. Danh sách theo tài liệu HSK 3.0 của cô Mỹ Hạnh (11-2025).
+// Mỗi cấp chia thành bài 20 từ, xếp theo độ thông dụng.
+let WORDS = [];            // tất cả từ đã tải, mỗi từ {h,p,v,hv,ex,k,L,ls,lk}
+const BYK = {};            // tra theo khoá thẻ
 const BYLV = {};           // BYLV[L] = danh sách từ của cấp L
 const LESSON = 20;         // số từ mỗi bài
 const MAXLV = 6;
@@ -860,7 +864,7 @@ async function loadData(){
   for (let L = 1; L <= MAXLV; L++) files.push(fetch(`data/hsk${L}.json`).then(r => r.json()));
   const [cj, ...lv] = await Promise.all(files);
   lv.forEach((list, i) => { const L = i + 1;
-    BYLV[L] = list.map(([h,p,v,hv], j) => ({h, p, v, hv, L, ls: Math.floor(j / LESSON), lk: L + "-" + Math.floor(j / LESSON)}));
+    BYLV[L] = list.map(([h,p,v,hv,ex,k], j) => (BYK[k || h] = {h, p, v, hv, ex: ex || "", k: k || h, L, ls: Math.floor(j / LESSON), lk: L + "-" + Math.floor(j / LESSON)}));
   });
   WORDS = Object.values(BYLV).flat();
   CJ = cj;
@@ -874,10 +878,10 @@ async function loadData(){
 }
 const lessonsOf = L => { const n = Math.ceil((BYLV[L] || []).length / LESSON); return [...Array(n).keys()]; };
 const wordsOfLesson = (L, i) => (BYLV[L] || []).slice(i * LESSON, (i + 1) * LESSON);
-const LEVELS = [
-  ["Sơ cấp",[[1,269,300,500],[2,199,300,772],[3,140,300,973]]],
-  ["Trung cấp",[[4,116,300,1000],[5,98,300,1071],[6,86,300,1140]]],
-  ["Cao cấp",[["7–9",202,1200,5636]]]
+const LEVELS = [ // [cấp, số từ theo tài liệu]; số chữ Hán mới tính từ dữ liệu
+  ["Sơ cấp",[[1,300],[2,200],[3,500]]],
+  ["Trung cấp",[[4,1000],[5,1600],[6,1800]]],
+  ["Cao cấp",[["7–9",5636]]]
 ];
 const NEW_PER_DAY = {5:5,10:8,20:15};
 const INTERVAL = [0,1,2,4,7,15]; // số ngày chờ trước lần ôn tiếp theo, theo "hộp" ghi nhớ
@@ -1033,15 +1037,15 @@ function touchStreak(){
 }
 
 // ===== 3. GỢI Ý BÀI: ôn thẻ đến hạn trước, rồi lấy từ mới theo thứ tự chủ đề hợp mục tiêu
-const isDue = w => { const c = S.cards[w.h]; return c && c.due <= todayStr() && c.box < 5; };
-const isKnown = w => (S.cards[w.h]?.box || 0) >= 2;
+const isDue = w => { const c = S.cards[w.k]; return c && c.due <= todayStr() && c.box < 5; };
+const isKnown = w => (S.cards[w.k]?.box || 0) >= 2;
 // Mọi cấp đều mở. S.lv = cấp người học tự chọn (0/trống = Tự động theo lộ trình gợi ý)
-const autoLv = () => { for (let L = S.start || 1; L <= MAXLV; L++) if ((BYLV[L] || []).some(w => !S.cards[w.h])) return L; return MAXLV; };
+const autoLv = () => { for (let L = S.start || 1; L <= MAXLV; L++) if ((BYLV[L] || []).some(w => !S.cards[w.k])) return L; return MAXLV; };
 const curLv = () => S.lv || autoLv();
 const unlockLv = () => MAXLV;
 function newWords(){
-  if (S.lv) return (BYLV[S.lv] || []).filter(w => !S.cards[w.h]);   // chỉ học từ mới của cấp đã chọn
-  const st = S.start || 1, ws = WORDS.filter(w => !S.cards[w.h]);    // tự động: từ cấp bắt đầu trở lên, rồi cấp thấp hơn
+  if (S.lv) return (BYLV[S.lv] || []).filter(w => !S.cards[w.k]);   // chỉ học từ mới của cấp đã chọn
+  const st = S.start || 1, ws = WORDS.filter(w => !S.cards[w.k]);    // tự động: từ cấp bắt đầu trở lên, rồi cấp thấp hơn
   return [...ws.filter(w => w.L >= st), ...ws.filter(w => w.L < st)]; }
 function setLv(L){ S.lv = L || 0; S.viewLv = L || autoLv(); S.charLv = L || S.charLv; save(); wrLv = 0; extLv = 0; }
 function dailyNew(){ return NEW_PER_DAY[S.profile?.minutes || 10]; }
@@ -1138,11 +1142,11 @@ function mapNodes(){
   u.push({unit:"Nền tảng", title:"52 bộ thủ thông dụng"});
   u.push({id:"rad", g:"部", label:"Bộ thủ", sub:`${radKnown()}/52 bộ`, p: radKnown()/40*100, done: radDone(), act:()=>show("rad")});
   for (let L = 1; L <= MAXLV; L++){
-    const ws = BYLV[L] || [], seen = ws.filter(w => S.cards[w.h]).length, kn = ws.filter(isKnown).length;
+    const ws = BYLV[L] || [], seen = ws.filter(w => S.cards[w.k]).length, kn = ws.filter(isKnown).length;
     u.push({unit: `${ws.length} từ · ${lessonsOf(L).length} bài`, title:`HSK ${L}`, lv:L, prog:`${kn}/${ws.length} từ đã thuộc`, pct: ws.length ? seen/ws.length*100 : 0, lockedLv: false, chosen: L === S.lv, expanded: L === vl});
     if (L !== vl) continue;
     lessonsOf(L).forEach(i => {
-      const lw = wordsOfLesson(L, i), s2 = lw.filter(w => S.cards[w.h]).length, k2 = lw.filter(isKnown).length;
+      const lw = wordsOfLesson(L, i), s2 = lw.filter(w => S.cards[w.k]).length, k2 = lw.filter(isKnown).length;
       u.push({id:`${L}-${i}`, g: lw[0].h[0], label:`Bài ${i+1}`, sub:`${lw.slice(0,3).map(w=>w.h).join(" · ")}`, p: k2/lw.length*100, done: s2 === lw.length, act:()=>startStudy(0, `${L}-${i}`)});
       if ((i + 1) % 5 === 0 || i === lessonsOf(L).length - 1){
         const from = Math.floor(i / 5) * 5, key = `${L}-r${from}`;
@@ -1213,17 +1217,17 @@ function renderCard(){
   $("card").classList.remove("flipped");
   $("c-topic").textContent = `HSK ${w.L} · Bài ${w.ls+1}`;
   $("c-hv").textContent = w.hv ? "Hán Việt: " + w.hv : "";
-  $("c-han").textContent = w.h; $("c-han2").textContent = w.h; $("c-py").textContent = w.p; $("c-vi").textContent = w.v;
-  $("c-chips").innerHTML = `<button type="button" data-w="${w.h}">Chi tiết từ ›</button>` + [...new Set(w.h)].filter(c => CHARS[c]).map(c => `<button type="button" data-c="${c}" aria-label="Xem chữ ${c}">${c} ›</button>`).join("");
+  $("c-han").textContent = w.h; $("c-han2").textContent = w.h; $("c-py").textContent = w.p; $("c-vi").textContent = w.v; $("c-ex").textContent = w.ex ? "Ví dụ: " + w.ex : "";
+  $("c-chips").innerHTML = `<button type="button" data-w="${w.k}">Chi tiết từ ›</button>` + [...new Set(w.h)].filter(c => CHARS[c]).map(c => `<button type="button" data-c="${c}" aria-label="Xem chữ ${c}">${c} ›</button>`).join("");
   $("study-label").textContent = isNew ? "Từ mới" : "Ôn tập";
   $("study-count").textContent = `${qi+1} / ${Q.length}`;
 }
 function grade(ok){
   const {w,isNew} = Q[qi];
-  const c = S.cards[w.h] || {box:0,due:todayStr()};
+  const c = S.cards[w.k] || {box:0,due:todayStr()};
   c.box = ok ? Math.min(5, c.box+1) : 0;
   c.due = addDays(todayStr(), ok ? INTERVAL[c.box] : 0);
-  S.cards[w.h] = c;
+  S.cards[w.k] = c;
   rollDay();
   if (isNew){ S.day.newDone++; sessionNew++; } else { S.day.reviewDone++; sessionRev++; }
   if (!ok) Q.push({w,isNew:false}); // chưa nhớ thì gặp lại cuối lượt
@@ -1244,7 +1248,7 @@ setTimeout(() => ["wd-say","quiz-say","btn-speak","ch-say"].forEach(id => { cons
 function say(h, p){
   const now = Date.now(), again = lastSay.h === h && now - lastSay.at < 8000;
   const slow = again ? !lastSay.slow : false; lastSay = {h, at: now, slow};
-  const f = AUD && AUD.w && AUD.w[h];
+  const f = AUD && AUD.w && !(p && AUD.multi?.includes(h) && sayChainOk(h, p)) && AUD.w[h];
   if (slow) toast("Đọc chậm");
   if (f){ try { if (audEl) audEl.pause(); audEl = new Audio("audio/" + f);
     if (slow){ audEl.preservesPitch = true; audEl.playbackRate = 0.7; }
@@ -1252,6 +1256,7 @@ function say(h, p){
   if (p && sayChain(h, p, slow)) return;
   speak(h, slow);
 }
+const sayChainOk = (h, p) => { const syls = AUD?.py && segPy(p); return !!(syls && syls.length === [...h].length && syls.every(x => AUD.py.includes(x.b + (x.t || 5)))); };
 // Từ chưa có file riêng: nối các âm tiết ghi âm người thật, đã tính biến điệu (3-3, 不, 一)
 let chainId = 0;
 function sayChain(h, p, slow){
@@ -1286,7 +1291,7 @@ function startQuiz(placement=false, kind="word", pool=null, key=null){
     else { QZ = shuffle(RADS).slice(0,10).map(r => ({kind, h:r.g, p:"Bộ " + r.hv, ans:r.m, r})); $("quiz-label").textContent = "Kiểm tra bộ thủ"; }
     zi = 0; zScore = 0; show("quiz"); renderQ(); return;
   }
-  const seen = WORDS.filter(w => S.cards[w.h]);
+  const seen = WORDS.filter(w => S.cards[w.k]);
   if (placement){ // bài xếp cấp: mỗi cấp 4 từ thông dụng, từ dễ đến khó
     QZ = []; for (let L = 1; L <= MAXLV; L++) QZ.push(...shuffle((BYLV[L] || []).slice(0, 150)).slice(0, 4));
   } else QZ = shuffle(pool || (seen.length < 4 ? BYLV[curLv()] : seen)).slice(0,10);
@@ -1336,8 +1341,8 @@ function answer(btn){
   if (!ok) btn.classList.add("wrong");
   $("quiz-py").hidden = false;
   if (ok) zScore++;
-  const c = S.cards[w.h];
-  if (zPlacement){ if (ok){ S.cards[w.h] = {box:3, due:addDays(todayStr(),4)}; zLvScore[w.L] = (zLvScore[w.L]||0) + 1; } }
+  const c = S.cards[w.k];
+  if (zPlacement){ if (ok){ S.cards[w.k] = {box:3, due:addDays(todayStr(),4)}; zLvScore[w.L] = (zLvScore[w.L]||0) + 1; } }
   else if (c){ c.box = ok ? Math.min(5,c.box+1) : 0; c.due = addDays(todayStr(), ok ? INTERVAL[c.box] : 0); }
   if (ok) addXP(10);
   touchStreak(); save(); renderStreak();
@@ -1371,9 +1376,9 @@ $("levels").onclick = e => { const b = e.target.closest("[data-pick]"); if (!b) 
 function renderPath(){
   $("steps").innerHTML = stepsHtml();
   const known = WORDS.filter(isKnown).length;
-  $("levels").innerHTML = LEVELS.map(([band, rows]) => `<div class="band">${band}</div>` + rows.map(([n,s,c,v]) => {
+  $("levels").innerHTML = LEVELS.map(([band, rows]) => `<div class="band">${band}</div>` + rows.map(([n,v]) => { const c = Object.values(CHARS).filter(x => x.L === n).length;
     const on = n === curLv(), ws = BYLV[n] || [];
-    return `<div class="lv ${on?"on":""}" ${ws.length ? `data-pick="${n}" role="button" tabindex="0" title="Chọn học HSK ${n}"` : ""}><div class="num">Cấp ${n}</div><div><div><b>${v.toLocaleString("vi-VN")}</b> từ mới · ${c.toLocaleString("vi-VN")} chữ Hán · ${s} âm tiết</div><div class="sub">${ws.length ? `${on ? "Đang học · " : ""}đã thuộc ${ws.filter(isKnown).length}/${ws.length} từ` : "Chưa có trong web"}</div></div></div>`;
+    return `<div class="lv ${on?"on":""}" ${ws.length ? `data-pick="${n}" role="button" tabindex="0" title="Chọn học HSK ${n}"` : ""}><div class="num">Cấp ${n}</div><div><div><b>${v.toLocaleString("vi-VN")}</b> từ mới${c ? ` · ${c.toLocaleString("vi-VN")} chữ Hán mới` : ""}</div><div class="sub">${ws.length ? `${on ? "Đang học · " : ""}đã thuộc ${ws.filter(isKnown).length}/${ws.length} từ` : "Chưa có trong web"}</div></div></div>`;
   }).join("")).join("");
 }
 
@@ -1384,7 +1389,7 @@ const strokesOfLv = L => STROKES[L] || (STROKES[L] = fetch(`data/strokes${L}.jso
 const strokeOf = async c => { const L = CHARS[c]?.L || 1; return (await strokesOfLv(L))[c] || (await strokesOfLv(1))[c]; };
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const wordsWith = c => WORDS.filter(w => w.h.includes(c));
-const wchip = x => `<button data-w="${x.h}"><b>${x.h}</b>${x.p} · ${x.v.split(/[;,]/)[0]} <span class="lvb">${lvTxt(x)}</span></button>`;
+const wchip = x => `<button data-w="${x.k || x.h}"><b>${x.h}</b>${x.p} · ${x.v.split(/[;,]/)[0]} <span class="lvb">${lvTxt(x)}</span></button>`;
 const charKnown = c => wordsWith(c).some(isKnown);
 function renderChars(){
   if (!extLv) extLv = Math.min(MAXLV, S.charLv || curLv()); renderExt();
@@ -1415,7 +1420,7 @@ function openChar(c, from){
   $("ch-py").textContent = ch.py; $("ch-mean").textContent = ch.m.split(", ").join(" · "); $("ch-hv").textContent = ch.hv;
   $("ch-star").textContent = S.stars[c] ? "★" : "☆"; $("ch-star").classList.toggle("on", !!S.stars[c]);
   // lịch ôn: lấy từ thẻ flashcard của từ chứa chữ này
-  const cards = wordsWith(c).map(w => S.cards[w.h]).filter(Boolean);
+  const cards = wordsWith(c).map(w => S.cards[w.k]).filter(Boolean);
   if (!cards.length) $("ch-due").textContent = "Chưa học";
   else { const due = cards.map(x => x.due).sort()[0]; const diff = Math.round((new Date(due) - new Date(todayStr()))/864e5);
     $("ch-due").textContent = "Ôn lại: " + (diff <= 0 ? "hôm nay" : diff === 1 ? "ngày mai" : `sau ${diff} ngày`); }
@@ -1743,7 +1748,7 @@ function lookup(q){
 }
 function renderResults(){
   const q = $("dq").value, r = lookup(q);
-  $("dres").innerHTML = !q.trim() ? "" : r.length ? r.map(w => `<button class="drow" data-w="${w.h}"><span class="h">${w.h}</span><span class="m"><b>${w.p}</b><span>${w.v}</span></span><span class="lvb">HSK ${lvTxt(w)}</span></button>`).join("")
+  $("dres").innerHTML = !q.trim() ? "" : r.length ? r.map(w => `<button class="drow" data-w="${w.k || w.h}"><span class="h">${w.h}</span><span class="m"><b>${w.p}</b><span>${w.v}</span></span><span class="lvb">HSK ${lvTxt(w)}</span></button>`).join("")
     : `<p class="muted" style="margin:0">Chưa có từ này trong HSK 1–9. Thử gõ chữ Hán, pinyin không dấu (ví dụ "xuexi") hoặc nghĩa tiếng Việt.</p>`;
 }
 // --- tách pinyin thành âm tiết, rồi thành thanh mẫu + vận mẫu + thanh điệu
@@ -1804,14 +1809,14 @@ function sandhiNotes(h, syls){
 }
 let curWord = null, wordFrom = "chars", wdLang = "vi", wordWriters = [];
 async function openWord(h, from){
-  searchIndex(); if (!BYH[h]) await extLoad(); const w = BYH[h]; if (!w) return openChar(h, from);
+  searchIndex(); if (!BYK[h] && !BYH[h]) await extLoad(); const w = BYK[h] || BYH[h]; if (!w) return openChar(h, from);
   curWord = w; if (from && from !== "word") wordFrom = from;
-  const d = (await dictLv(w.L))[w.h] || ["", [], "", []];
+  const d = (await dictLv(w.L))[w.k || w.h] || ["", [], "", []];
   show("word");
   $("wd-han").innerHTML = [...w.h].map(c => `<button data-c="${c}" aria-label="Xem chữ ${c}">${c}</button>`).join("");
   $("wd-py").textContent = w.p;
   $("wd-star").textContent = S.stars[w.h] ? "★" : "☆"; $("wd-star").classList.toggle("on", !!S.stars[w.h]);
-  const card = S.cards[w.h];
+  const card = S.cards[w.k];
   $("wd-tags").innerHTML = [w.ext ? `<span class="lvb" title="Từ HSK 3.0 cấp 7–9, ghép từ các chữ đã học đến HSK ${w.base}">HSK 7–9 · mở rộng</span>` : `<span class="lvb">HSK ${w.L}</span>`, w.hv ? `<span class="pill" style="border:1px solid var(--line)">Hán Việt: <b>${w.hv}</b></span>` : "",
     ...d[1].map(x => `<span class="pill" style="border:1px solid var(--line)">${x}</span>`), d[2] ? `<span class="pill" style="border:1px solid var(--line)">Phồn thể ${d[2]}</span>` : "",
     d[4] ? (() => { const f = d[4], n = f <= 300 ? 5 : f <= 1500 ? 4 : f <= 5000 ? 3 : f <= 15000 ? 2 : 1; return `<span class="pill" style="border:1px solid var(--line)" title="Thứ hạng tần suất ${f}">${["","Ít gặp","Khá ít gặp","Thường gặp","Phổ biến","Rất phổ biến"][n]}<span class="pop">${[1,2,3,4,5].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span></span>`; })() : "",
@@ -1823,7 +1828,9 @@ async function openWord(h, from){
   };
   $("wd-l-vi").onclick = () => { wdLang = "vi"; renderSenses(); }; $("wd-l-en").onclick = () => { wdLang = "en"; renderSenses(); };
   renderSenses();
-  $("wd-extra").textContent = d[3]?.length ? "Lượng từ đi kèm: " + d[3].join(", ") : "";
+  const alt = w.ext ? [] : WORDS.filter(x => x.h === w.h && x !== w);
+  $("wd-extra").innerHTML = (w.ex ? `<b>Ví dụ:</b> <span class="zh">${w.ex}</span><br>` : "") + (d[3]?.length ? "Lượng từ đi kèm: " + d[3].join(", ") + "<br>" : "")
+    + (alt.length ? "Cách dùng khác: " + alt.map(x => `<button class="linkbtn" data-w="${x.k}">${x.p} · ${x.v.split(/;\s*/)[0]} (HSK ${x.L})</button>`).join(" ") : "");
   // phát âm chi tiết
   const syls = segPy(w.p) || [], chars = [...w.h.replace(/儿$/, syls.length < w.h.length ? "" : "儿")];
   const {eff, notes} = sandhiNotes(w.h, syls);
@@ -1877,13 +1884,14 @@ $("wd-han").onclick = e => { const b = e.target.closest("[data-c]"); if (b && CH
 $("wd-parts").onclick = e => { const b = e.target.closest("[data-c]"); if (b && CHARS[b.dataset.c]) openChar(b.dataset.c, "word"); };
 $("wd-write").onclick = e => { const b = e.target.closest("button[data-c]"); if (b) return openChar(b.dataset.c, "word"); const x = e.target.closest(".bx"); if (x) wordWriters[+x.dataset.i]?.animateCharacter(); };
 $("ch-words").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "char"); };
+$("wd-extra").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w); };
 $("wd-comp").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w); };
 $("wd-pron").onclick = e => { const b = e.target.closest(".syl"); if (!b) return; if (!(b.dataset.syl && saySyl(b.dataset.syl))) speak(b.dataset.c); };
 
 // ===== 5d. NGỮ PHÁP: bài học theo cấp, luyện tập tự sinh, bài tập tổng hợp
 let GRAM = null, gLv = 1;
 const loadGram = () => GRAM ? Promise.resolve(GRAM) : fetch("data/grammar.json").then(r => r.json()).then(j => GRAM = j);
-const gKey = (L, i) => L + "-" + i;
+const gKey = (L, i) => "v2-" + L + "-" + i; // v2: đề cương ngữ pháp mới theo tài liệu HSK 3.0 (11-2025)
 // tách câu thành từ theo từ điển HSK (ghép dài nhất), dùng cho pinyin và bài sắp xếp câu
 function segZh(t){
   searchIndex(); const out = []; let i = 0;
@@ -1910,7 +1918,7 @@ function renderGrammar(){
     $("g-notes").innerHTML = (G.notes[gLv] || []).map(n => `<div class="gnote"><h3>${n.t}</h3><p>${n.d}</p>${n.ex.map(e => `<p><span class="zh">${e.zh}</span> <span class="muted">${e.vi}</span></p>`).join("")}</div>`).join("");
     $("g-list").innerHTML = pts.map((p, i) => { const on = !!S.gram[gKey(gLv, i)];
       return `<div class="panel gp"><div class="gt"><div class="st"><span class="n">${i + 1}.</span>${p.t}</div><button class="ok" data-i="${i}" aria-pressed="${on}">${on ? "✓ Đã hiểu" : "Đã hiểu"}</button></div>
-      <div>${p.d}</div>
+      ${p.c ? `<div class="gc"><span class="eyebrow">Theo tài liệu</span> <span class="zh">${p.c}</span></div>` : ""}<div>${p.d}</div>
       <div class="ex"><div class="zh">${markKey(p.zh, p.k)}</div><div class="py">${zhPy(p.zh)}</div><div class="vi">${p.vi}</div><button class="say" data-zh="${p.zh}" aria-label="Nghe câu ví dụ"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg></button></div></div>`; }).join("");
     $("g-src").textContent = G.src;
   });
@@ -2010,7 +2018,7 @@ $("g-review").onclick = () => { show("greview"); renderReview(); };
 // thẻ gợi ý ngữ pháp trên trang Hôm nay
 function renderGToday(){
   loadGram().then(G => { S.gram = S.gram || {};
-    const L = Math.min(3, Math.max(1, curLv())), pts = G.levels[L] || [], i = pts.findIndex((_, n) => !S.gram[gKey(L, n)]);
+    const L = Math.min(MAXLV, Math.max(1, curLv())), pts = G.levels[L] || [], i = pts.findIndex((_, n) => !S.gram[gKey(L, n)]);
     const el = $("g-today"); if (i < 0){ el.hidden = true; return; }
     el.hidden = false; el.innerHTML = `<span class="ic">法</span><span><small>Ngữ pháp hôm nay · HSK ${L}</small><b>${pts[i].t}</b><small>${pts[i].zh} ${pts[i].vi}</small></span><span aria-hidden="true">›</span>`;
     el.onclick = () => { gLv = L; show("grammar"); setTimeout(() => document.querySelectorAll("#g-list .gp")[i]?.scrollIntoView({block: "center"}), 150); };
