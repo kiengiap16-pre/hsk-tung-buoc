@@ -115,6 +115,12 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
 .opt:disabled{opacity:1}
 .opt.right{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .opt.wrong{background:var(--cinnabar-soft);border-color:var(--cinnabar);color:var(--cinnabar)}
+.opt{display:grid;gap:4px;justify-items:center}
+.opt .oh{font-size:.9rem;color:var(--muted);font-weight:500}
+.opt .oh b{font-family:var(--font-han);font-size:1.35rem;color:var(--ink);font-weight:700;margin-right:4px}
+.opt.right .oh b{color:var(--accent)}.opt.wrong .oh b{color:var(--cinnabar)}
+.opt.done{cursor:pointer}
+button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;place-items:center;color:var(--accent)}
 /* path */
 .levels{display:grid;gap:8px}
 .lv{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:center;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
@@ -387,6 +393,7 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
     <div class="panel" style="justify-items:center;text-align:center">
       <span class="hint" id="quiz-q">Chữ này nghĩa là gì?</span>
       <div class="big" id="quiz-han"></div>
+      <button class="say" id="quiz-say" aria-label="Nghe đọc"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg></button>
       <div class="py" id="quiz-py" hidden></div>
     </div>
     <div class="opts" id="quiz-opts"></div>
@@ -544,8 +551,8 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.2/dist/hanzi-writer.min.js"></script>
-<script src="firebase-config.js?v=3"></script>
-<script type="module" src="account.js?v=3"></script>
+<script src="firebase-config.js?v=4"></script>
+<script type="module" src="account.js?v=4"></script>
 <script>
 // ===== 1. DỮ LIỆU: từ vựng HSK 3.0 cấp 1–6 nằm trong thư mục data/ (mỗi cấp một file), tải khi mở web
 // Mỗi từ: [chữ Hán, pinyin, nghĩa tiếng Việt, Hán Việt]. Mỗi cấp chia thành bài 20 từ, xếp theo độ thông dụng.
@@ -897,6 +904,18 @@ function grade(ok){
   } else renderCard();
 }
 function flip(){ $("card").classList.toggle("flipped"); }
+// Phát âm: ưu tiên file ghi âm (người thật hoặc giọng chuẩn tạo sẵn), không có thì nhờ trình duyệt đọc
+let AUD = null, audEl = null;
+fetch("data/audio.json").then(r => r.json()).then(j => { AUD = j; }).catch(() => {});
+function say(h, p){
+  const f = AUD && AUD.w && AUD.w[h];
+  if (f){ try { if (audEl) audEl.pause(); audEl = new Audio("audio/" + f); audEl.play().catch(() => speak(h)); return; } catch(e){} }
+  speak(h);
+}
+function saySyl(syl){ // âm tiết pinyin có số thanh, ví dụ "ma3"
+  if (AUD && AUD.py && AUD.py.includes(syl)){ try { if (audEl) audEl.pause(); audEl = new Audio(`audio/py/${syl}.mp3`); audEl.play(); return true; } catch(e){} }
+  return false;
+}
 function speak(text){
   try { const u = new SpeechSynthesisUtterance(text); u.lang = "zh-CN"; u.rate = .8; speechSynthesis.cancel(); speechSynthesis.speak(u); }
   catch(e){ toast("Trình duyệt này chưa hỗ trợ đọc tiếng Trung"); }
@@ -929,9 +948,11 @@ function renderQ(){
     $("quiz-han").textContent = w.kind === "tone" ? w.p : w.h; $("quiz-han").style.fontFamily = w.kind === "tone" ? "var(--font-ui)" : "";
     $("quiz-py").textContent = w.kind === "tone" ? `${w.h} · bấm nghe` : w.p; $("quiz-py").hidden = w.kind !== "tone"; $("btn-next").hidden = true;
     $("quiz-count").textContent = `${zi+1} / ${QZ.length}`; $("quiz-bar").style.width = (zi/QZ.length*100) + "%";
-    const pool = w.kind === "tone" ? ["thanh 1","thanh 2","thanh 3","thanh 4","thanh nhẹ"] : shuffle(RADS.filter(r => r.m !== w.ans)).slice(0,3).map(r => r.m).concat(w.ans);
+    const rads = w.kind === "rad" ? shuffle(RADS.filter(r => r.m !== w.ans)).slice(0,3).concat(w.r) : [];
+    const pool = w.kind === "tone" ? ["thanh 1","thanh 2","thanh 3","thanh 4","thanh nhẹ"] : rads.map(r => r.m);
     const opts = w.kind === "tone" ? pool : shuffle(pool);
-    $("quiz-opts").innerHTML = opts.map((o,i) => `<button class="opt" id="opt${i}" data-h="${o}" ${w.kind==="tone"&&i===4?'style="grid-column:1/-1"':""}>${o[0].toUpperCase()+o.slice(1)}</button>`).join("");
+    const glyph = o => { const r = rads.find(x => x.m === o); return r ? `<span class="oh" hidden><b>${r.g}</b> bộ ${r.hv}</span>` : ""; };
+    $("quiz-opts").innerHTML = opts.map((o,i) => `<button class="opt" id="opt${i}" data-h="${o}" ${w.kind==="tone"&&i===4?'style="grid-column:1/-1"':""}><span>${o[0].toUpperCase()+o.slice(1)}</span>${glyph(o)}</button>`).join("");
     return;
   }
   $("quiz-q").textContent = "Chữ này nghĩa là gì?"; $("quiz-han").style.fontFamily = "";
@@ -940,13 +961,14 @@ function renderQ(){
   $("quiz-bar").style.width = (zi/QZ.length*100) + "%";
   const wrong = shuffle((BYLV[w.L] || WORDS).filter(x => x.h !== w.h && x.v !== w.v)).slice(0,3);
   const opts = shuffle([w, ...wrong]);
-  $("quiz-opts").innerHTML = opts.map((o,i) => `<button class="opt" id="opt${i}" data-h="${o.h}">${o.v}</button>`).join("") + (zPlacement ? `<button class="opt" id="opt-skip" data-h="" style="grid-column:1/-1">Tôi không biết</button>` : "");
+  $("quiz-opts").innerHTML = opts.map((o,i) => `<button class="opt" id="opt${i}" data-h="${o.h}" data-p="${o.p}"><span>${o.v}</span><span class="oh" hidden><b>${o.h}</b> ${o.p}</span></button>`).join("") + (zPlacement ? `<button class="opt" id="opt-skip" data-h="" style="grid-column:1/-1">Tôi không biết</button>` : "");
 }
 function answer(btn){
   const w = QZ[zi];
   if (w.kind){
     const ok = btn.dataset.h === w.ans;
     document.querySelectorAll(".opt").forEach(b => { b.disabled = true; if (b.dataset.h === w.ans) b.classList.add("right"); });
+    revealOpts();
     if (!ok) btn.classList.add("wrong");
     if (ok) zScore++;
     if (w.kind === "rad" && ok) S.rad[w.h] = 1;
@@ -957,6 +979,7 @@ function answer(btn){
   }
   const ok = btn.dataset.h === w.h;
   document.querySelectorAll(".opt").forEach(b => { b.disabled = true; if (b.dataset.h === w.h) b.classList.add("right"); });
+  revealOpts();
   if (!ok) btn.classList.add("wrong");
   $("quiz-py").hidden = false;
   if (ok) zScore++;
@@ -967,6 +990,12 @@ function answer(btn){
   touchStreak(); save(); renderStreak();
   feedback(ok, `${w.h} (${w.p}) nghĩa là: ${w.v}`, zi+1 >= QZ.length);
 }
+// Sau khi trả lời: hiện chữ Hán + pinyin của mọi đáp án, bấm vào đáp án để nghe
+function revealOpts(){
+  document.querySelectorAll("#quiz-opts .oh").forEach(x => x.hidden = false);
+  document.querySelectorAll("#quiz-opts .opt[data-p]").forEach(b => { b.disabled = false; b.classList.add("done"); b.setAttribute("aria-label", `Nghe ${b.dataset.h}`); });
+}
+function quizSay(){ const w = QZ[zi]; if (w) say(w.h, w.p); }
 function nextQ(){
   zi++;
   if (zi < QZ.length) return renderQ();
@@ -1208,12 +1237,13 @@ $("btn-start").onclick = () => {
 $("btn-go").onclick = () => startStudy();
 $("card").onclick = flip;
 $("card").onkeydown = e => { if (e.key === "Enter") flip(); };
-$("btn-speak").onclick = e => { e.stopPropagation(); speak(Q[qi].w.h); };
+$("btn-speak").onclick = e => { e.stopPropagation(); say(Q[qi].w.h, Q[qi].w.p); };
 $("btn-again").onclick = () => grade(false);
 $("btn-ok").onclick = () => grade(true);
 $("btn-more").onclick = () => show("today");
 $("btn-quiz2").onclick = () => startQuiz(false, zKind);
-$("quiz-opts").onclick = e => { const b = e.target.closest(".opt"); if (b && !b.disabled) answer(b); };
+$("quiz-opts").onclick = e => { const b = e.target.closest(".opt"); if (!b || b.disabled) return; if (b.classList.contains("done")) say(b.dataset.h, b.dataset.p); else answer(b); };
+$("quiz-say").onclick = quizSay;
 $("btn-next").onclick = nextQ;
 $("sheet-next").onclick = () => { $("sheet").hidden = true; nextQ(); };
 $("map").onclick = e => { const u = e.target.closest("[data-lv]");
@@ -1222,8 +1252,8 @@ $("map").onclick = e => { const u = e.target.closest("[data-lv]");
   if (n.locked) return toast(n.lvLock ? "Cấp này chưa mở" : "Hoàn thành bài trước để mở bài này"); n.act(); };
 $("char-lv").onclick = e => { const b = e.target.closest("[data-clv]"); if (b){ S.charLv = +b.dataset.clv; save(); renderChars(); } };
 document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g && !g.disabled) show(g.dataset.go); });
-$("tones").onclick = e => { const b = e.target.closest("[data-say]"); if (b) speak(b.dataset.say); };
-$("quiz-py").onclick = () => { const w = QZ[zi]; if (w && w.kind === "tone") speak(w.h); };
+$("tones").onclick = e => { const b = e.target.closest("[data-say]"); if (!b) return; const t = TONES.find(x => x.c === b.dataset.say); if (!(t && saySyl("ma" + (t.n || 5)))) say(b.dataset.say); };
+$("quiz-py").onclick = () => { const w = QZ[zi]; if (w && w.kind === "tone") say(w.h, w.p); };
 $("py-quiz").onclick = () => startQuiz(false, "tone");
 $("rad-quiz").onclick = () => startQuiz(false, "rad");
 $("radgrid").onclick = e => { const b = e.target.closest("button"); if (b) openRad(b.dataset.g); };
@@ -1234,7 +1264,7 @@ $("chargrid").onclick = e => { const b = e.target.closest("button"); if (b) open
 $("c-chips").onclick = e => { e.stopPropagation(); const b = e.target.closest("button"); if (b) openChar(b.dataset.c, "study"); };
 $("ch-back").onclick = () => { if (writer) writer.cancelQuiz(); show(prevView); if (prevView === "study") renderCard(); };
 $("ch-star").onclick = () => { const c = curChar.c; if (S.stars[c]) delete S.stars[c]; else S.stars[c] = 1; save(); $("ch-star").textContent = S.stars[c] ? "★" : "☆"; $("ch-star").classList.toggle("on", !!S.stars[c]); toast(S.stars[c] ? "Đã đánh dấu sao" : "Đã bỏ sao"); };
-$("ch-say").onclick = () => speak(curChar.c);
+$("ch-say").onclick = () => say(curChar.c);
 $("ch-replay").onclick = animate; $("ch-anim").onclick = animate; $("ch-write").onclick = practice;
 $("ch-tip-save").onclick = () => { S.tips[curChar.c] = $("ch-tip").value; save(); toast("Đã lưu mẹo nhớ của bạn"); };
 $("ch-tip-reset").onclick = () => { delete S.tips[curChar.c]; save(); $("ch-tip").value = makeTip(curChar); toast("Đã khôi phục bản nháp"); };
