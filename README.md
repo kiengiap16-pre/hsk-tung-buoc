@@ -8,3 +8,6 @@ Web học tiếng Trung theo chuẩn HSK 3.0 cấp 1–6.
 Đây là trang tĩnh, đưa lên GitHub Pages, Netlify hoặc Cloudflare Pages là chạy, không cần cài gì thêm.
 
 Nguồn dữ liệu: complete-hsk-vocabulary; CVDICT của Phong Phan (CC BY-SA 4.0, dịch từ CC-CEDICT); hanviet-pinyin-words (MIT); Make Me a Hanzi / Hanzi Writer.
+
+## Tài khoản (tuỳ chọn)
+Đăng nhập Google/Apple dùng Firebase. Cấu hình ở `app/firebase-config.js`; khi để `null`, web chạy như cũ và không hiện nút đăng nhập. Tiến độ người đã đăng nhập lưu ở Firestore, mục `users/{uid}`.

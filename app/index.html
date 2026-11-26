@@ -41,6 +41,19 @@ header.top{display:flex;align-items:center;justify-content:space-between;gap:12p
 .seal{width:38px;height:38px;border-radius:9px;background:var(--accent);color:var(--surface);display:grid;place-items:center;font-family:var(--font-han);font-size:22px;font-weight:700}
 .streak{font-size:.85rem;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
 .streak b{color:var(--gold);font-size:1.05rem}
+.topr{display:flex;align-items:center;gap:10px}
+.acct{padding:7px 12px;font-size:.85rem;border-radius:99px;max-width:9.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct.on{background:var(--accent);color:var(--surface);border-color:var(--accent);width:36px;height:36px;padding:0;display:grid;place-items:center}
+dialog#acct-dlg{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);padding:0;width:min(400px,calc(100vw - 32px))}
+dialog#acct-dlg::backdrop{background:rgba(15,42,29,.55)}
+.acct-box{display:grid;gap:12px;padding:18px}
+.acct-box p{margin:0}
+.acct-head{display:flex;justify-content:space-between;align-items:center}
+.acct-head h2{margin:0;font-size:1.15rem}
+.acct-head .x{border:0;background:none;padding:6px 8px}
+#acct-out,#acct-in{display:grid;gap:10px}
+.sso{display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
+.acct-err{color:var(--cinnabar);font-size:.85rem}
 section{display:grid;gap:14px;padding-block:8px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px;align-content:start}
 button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 14px;font-weight:600}
@@ -249,8 +262,26 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
 <div class="wrap">
   <header class="top">
     <div class="brand"><div class="seal" aria-hidden="true">汉</div><div><h1>HSK Từng Bước</h1><div class="muted" style="font-size:.82rem">Lộ trình HSK 3.0 · Cấp 1–6</div></div></div>
-    <div class="streak" id="streak"></div>
+    <div class="topr"><div class="streak" id="streak"></div><button class="acct" id="acct" hidden aria-haspopup="dialog">Đăng nhập</button></div>
   </header>
+
+  <!-- TÀI KHOẢN: chỉ hiện khi đã cấu hình Firebase (xem account.js) -->
+  <dialog id="acct-dlg" aria-labelledby="acct-title">
+    <form method="dialog" class="acct-box">
+      <div class="acct-head"><h2 id="acct-title">Tài khoản</h2><button class="x" value="close" aria-label="Đóng">✕</button></div>
+      <div id="acct-out">
+        <p class="muted">Đăng nhập để lưu tiến độ học lên mạng và học tiếp trên mọi thiết bị. Không đăng nhập vẫn học được, tiến độ lưu trên trình duyệt này.</p>
+        <button type="button" class="sso" id="login-google"><svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3A12 12 0 1 1 24 12a11.9 11.9 0 0 1 8.4 3.3l5.7-5.7A20 20 0 1 0 44 24c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8A12 12 0 0 1 24 12a11.9 11.9 0 0 1 8.4 3.3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/><path fill="#4CAF50" d="M24 44a20 20 0 0 0 13.5-5.2l-6.2-5.3A12 12 0 0 1 12.7 28l-6.5 5A20 20 0 0 0 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4 5.5l6.2 5.3C37 39.2 44 34 44 24c0-1.2-.1-2.3-.4-3.5z"/></svg>Tiếp tục với Google</button>
+        <button type="button" class="sso" id="login-apple" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4.1zM13.9 5c.7-.9 1.2-2 1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3.1-1.5z"/></svg>Tiếp tục với Apple</button>
+      </div>
+      <div id="acct-in" hidden>
+        <p>Đang đăng nhập: <b id="acct-name"></b></p>
+        <p class="muted" id="acct-sync">Tiến độ được tự động lưu lên mạng.</p>
+        <button type="button" id="logout">Đăng xuất</button>
+      </div>
+      <p class="acct-err" id="acct-err" hidden></p>
+    </form>
+  </dialog>
 
   <div class="loading" id="loading" hidden><div class="big pop" style="color:var(--accent)">汉</div><span>Đang tải từ vựng HSK 1–6…</span></div>
 
@@ -492,6 +523,8 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.2/dist/hanzi-writer.min.js"></script>
+<script src="firebase-config.js"></script>
+<script type="module" src="account.js"></script>
 <script>
 // ===== 1. DỮ LIỆU: từ vựng HSK 3.0 cấp 1–6 nằm trong thư mục data/ (mỗi cấp một file), tải khi mở web
 // Mỗi từ: [chữ Hán, pinyin, nghĩa tiếng Việt, Hán Việt]. Mỗi cấp chia thành bài 20 từ, xếp theo độ thông dụng.
@@ -668,7 +701,7 @@ const KEY = "hsk-tung-buoc-v1";
 const todayStr = () => new Date().toISOString().slice(0,10);
 const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); };
 function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch(e){ return null; } }
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+function save(){ S.updated = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} try { window.HSK_onSave && window.HSK_onSave(S); } catch(e){} }
 let S = load() || { profile:null, cards:{}, streak:{last:null,count:0}, day:{date:null,newDone:0,reviewDone:0} };
 function rollDay(){ if (S.day.date !== todayStr()) S.day = {date:todayStr(), newDone:0, reviewDone:0}; }
 function touchStreak(){
@@ -1197,6 +1230,15 @@ document.addEventListener("keydown", e => {
 });
 
 // ===== 6. KHỞI ĐỘNG: tải dữ liệu từ thư mục data/ rồi mới vẽ giao diện
+// Cầu nối cho account.js (đăng nhập + lưu lên mạng)
+window.HSK = {
+  get: () => S,
+  set: n => { S = n; S.stars = S.stars || {}; S.tips = S.tips || {}; S.steps = S.steps || {pinyin:0}; S.rad = S.rad || {};
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){}
+    renderStreak(); if (!WORDS.length) return; const cur = VIEWS.find(v => !$("v-"+v).hidden);
+    if (!S.profile) show("setup"); else if (!cur || ["setup","today","path","chars"].includes(cur)) show(cur && cur !== "setup" ? cur : "today"); },
+  toast: m => toast(m)
+};
 renderStreak();
 $("loading").hidden = false;
 loadData().then(() => {
