@@ -51,7 +51,18 @@ dialog#acct-dlg::backdrop{background:rgba(15,42,29,.55)}
 .acct-head{display:flex;justify-content:space-between;align-items:center}
 .acct-head h2{margin:0;font-size:1.15rem}
 .acct-head .x{border:0;background:none;padding:6px 8px}
-#acct-out,#acct-in{display:grid;gap:10px}
+#acct-out,#acct-in,#acct-user{display:grid;gap:10px}
+.uname-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.uname{font-weight:700;font-size:1.1rem;overflow-wrap:anywhere}
+button.link{border:0;background:none;padding:4px 0;color:var(--muted);text-decoration:underline;font-weight:600;font-size:.85rem;justify-self:center}
+.uname-in{display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:var(--bg)}
+.uname-in:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.uname-in span{color:var(--muted);font-weight:700}
+.uname-in input{flex:1;min-width:0;border:0;background:none;color:var(--ink);font:inherit;padding:11px 0;outline:none}
+.uname-msg{font-size:.85rem;min-height:1.2em;color:var(--muted)}
+.uname-msg.ok{color:var(--accent)}.uname-msg.bad{color:var(--cinnabar)}
+.uname-sug{display:flex;flex-wrap:wrap;gap:6px}
+.uname-sug button{padding:5px 10px;border-radius:99px;font-size:.82rem}
 .sso{display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
 .acct-err{color:var(--cinnabar);font-size:.85rem}
 section{display:grid;gap:14px;padding-block:8px}
@@ -275,9 +286,19 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
         <button type="button" class="sso" id="login-apple" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4.1zM13.9 5c.7-.9 1.2-2 1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3.1-1.5z"/></svg>Tiếp tục với Apple</button>
       </div>
       <div id="acct-in" hidden>
-        <p>Đang đăng nhập: <b id="acct-name"></b></p>
+        <div class="uname-row"><span class="uname" id="acct-handle"></span><button type="button" class="link" id="uname-edit">Đổi username</button></div>
+        <p class="muted" style="font-size:.85rem">Tài khoản: <span id="acct-name"></span></p>
         <p class="muted" id="acct-sync">Tiến độ được tự động lưu lên mạng.</p>
         <button type="button" id="logout">Đăng xuất</button>
+      </div>
+      <div id="acct-user" hidden>
+        <p><b>Chọn username của bạn</b></p>
+        <p class="muted" style="font-size:.85rem">Đây là tên mọi người sẽ thấy, giống Instagram. Dùng chữ thường không dấu, số, dấu chấm hoặc gạch dưới, 3 đến 20 ký tự.</p>
+        <label class="uname-in"><span>@</span><input id="uname" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="20" aria-describedby="uname-msg"></label>
+        <p class="uname-msg" id="uname-msg" aria-live="polite"></p>
+        <div class="uname-sug" id="uname-sug"></div>
+        <button type="button" class="primary" id="uname-save" disabled>Lưu username</button>
+        <button type="button" class="link" id="uname-later">Để sau</button>
       </div>
       <p class="acct-err" id="acct-err" hidden></p>
     </form>
@@ -523,8 +544,8 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
 <div class="toast" id="toast" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.2/dist/hanzi-writer.min.js"></script>
-<script src="firebase-config.js?v=2"></script>
-<script type="module" src="account.js?v=2"></script>
+<script src="firebase-config.js?v=3"></script>
+<script type="module" src="account.js?v=3"></script>
 <script>
 // ===== 1. DỮ LIỆU: từ vựng HSK 3.0 cấp 1–6 nằm trong thư mục data/ (mỗi cấp một file), tải khi mở web
 // Mỗi từ: [chữ Hán, pinyin, nghĩa tiếng Việt, Hán Việt]. Mỗi cấp chia thành bài 20 từ, xếp theo độ thông dụng.
