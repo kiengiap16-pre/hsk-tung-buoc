@@ -1173,19 +1173,27 @@ function flip(){ $("card").classList.toggle("flipped"); }
 // Phát âm: ưu tiên file ghi âm (người thật hoặc giọng chuẩn tạo sẵn), không có thì nhờ trình duyệt đọc
 let AUD = null, audEl = null;
 fetch("data/audio.json").then(r => r.json()).then(j => { AUD = j; }).catch(() => {});
+// Bấm lần 1: đọc tốc độ tự nhiên. Bấm lại cùng từ trong vòng 8 giây: đọc chậm (giữ nguyên cao độ), lần sau lại bình thường.
+let lastSay = {h: "", at: 0, slow: false};
+setTimeout(() => ["wd-say","quiz-say","btn-speak","ch-say"].forEach(id => { const b = document.getElementById(id); if (b) b.title = "Bấm để nghe, bấm lần nữa để nghe chậm"; }), 0);
 function say(h, p){
+  const now = Date.now(), again = lastSay.h === h && now - lastSay.at < 8000;
+  const slow = again ? !lastSay.slow : false; lastSay = {h, at: now, slow};
   const f = AUD && AUD.w && AUD.w[h];
-  if (f){ try { if (audEl) audEl.pause(); audEl = new Audio("audio/" + f); audEl.play().catch(() => speak(h)); return; } catch(e){} }
-  if (p && sayChain(h, p)) return;
-  speak(h);
+  if (slow) toast("Đọc chậm");
+  if (f){ try { if (audEl) audEl.pause(); audEl = new Audio("audio/" + f);
+    if (slow){ audEl.preservesPitch = true; audEl.playbackRate = 0.7; }
+    audEl.play().catch(() => speak(h, slow)); return; } catch(e){} }
+  if (p && sayChain(h, p, slow)) return;
+  speak(h, slow);
 }
 // Từ chưa có file riêng: nối các âm tiết ghi âm người thật, đã tính biến điệu (3-3, 不, 一)
 let chainId = 0;
-function sayChain(h, p){
+function sayChain(h, p, slow){
   const syls = AUD && AUD.py && segPy(p); if (!syls || !syls.length || syls.length !== [...h].length) return false;
   const {eff} = sandhiNotes(h, syls), keys = syls.map((x, i) => x.b + (eff[i] || 5));
   if (!keys.every(k => AUD.py.includes(k))) return false;
-  const id = ++chainId, els = keys.map(k => { const a = new Audio(`audio/py/${k}.mp3`); a.preload = "auto"; return a; });
+  const id = ++chainId, els = keys.map(k => { const a = new Audio(`audio/py/${k}.mp3`); a.preload = "auto"; if (slow){ a.preservesPitch = true; a.playbackRate = 0.75; } return a; });
   if (audEl) audEl.pause();
   const play = i => { if (id !== chainId || i >= els.length) return; audEl = els[i];
     els[i].onended = () => play(i + 1); els[i].play().catch(() => { if (i === 0) speak(h); }); };
@@ -1195,8 +1203,8 @@ function saySyl(syl){ // âm tiết pinyin có số thanh, ví dụ "ma3"
   if (AUD && AUD.py && AUD.py.includes(syl)){ try { if (audEl) audEl.pause(); audEl = new Audio(`audio/py/${syl}.mp3`); audEl.play(); return true; } catch(e){} }
   return false;
 }
-function speak(text){
-  try { const u = new SpeechSynthesisUtterance(text); u.lang = "zh-CN"; u.rate = .8; speechSynthesis.cancel(); speechSynthesis.speak(u); }
+function speak(text, slow){
+  try { const u = new SpeechSynthesisUtterance(text); u.lang = "zh-CN"; u.rate = slow ? .5 : .8; speechSynthesis.cancel(); speechSynthesis.speak(u); }
   catch(e){ toast("Trình duyệt này chưa hỗ trợ đọc tiếng Trung"); }
 }
 
@@ -1638,13 +1646,26 @@ function splitSyl(b){
 }
 const VI_INI = Object.fromEntries(INITIALS.map(x => [x[0], x[1]]));
 const VI_FIN = Object.fromEntries(FINALS.map(x => [x[0], x[1]]).concat([["iou","iêu"],["uei","uây"],["uen","uân"],["iong","iung"],["üan","oen (môi tròn)"],["ün","uyn"],["-i",""]]));
+// Quy tắc biến điệu (giống hệt bộ tạo file âm thanh): A一A/A不A thanh nhẹ; 一 (giữ yī khi là số đếm, thứ tự, cuối từ);
+// 不 + thanh 4 -> bú; thanh 3 + thanh 3 -> 2 + 3 (ba thanh 3: 2-2-3, hoặc 3-2-3 nếu là 1 + từ 2 chữ); thanh 3 trước thanh khác: nửa thanh 3
 function sandhiNotes(h, syls){
-  const t = syls.map(x => x.t), notes = [], eff = t.slice();
-  for (let i = t.length-2; i >= 0; i--) if (eff[i] === 3 && eff[i+1] === 3){ eff[i] = 2; notes.push(`${h[i]} đứng trước một thanh 3 nên đọc thành thanh 2`); }
-  [...h].forEach((c, i) => { if (i+1 >= t.length) return;
-    if (c === "不" && t[i] === 4 && t[i+1] === 4){ eff[i] = 2; notes.push("不 đứng trước thanh 4 nên đọc thành bú"); }
-    if (c === "一" && t[i] === 1 && !"第初".includes(h[i-1] || "")){ eff[i] = t[i+1] === 4 ? 2 : 4; notes.push(`一 đứng trước ${pyName(t[i+1])} nên đọc thành ${eff[i] === 2 ? "yí" : "yì"}`); } });
-  return {eff, notes};
+  const H = [...h], o = syls.map(x => x.t || 5), t = o.slice(), n = t.length, notes = [], NUMS = "零一二三四五六七八九十百千万两";
+  for (let i = 1; i < n-1; i++) if ("一不".includes(H[i]) && H[i-1] === H[i+1] && ["yi","bu"].includes(syls[i].b)){ t[i] = 5; notes.push(`${H[i]} kẹp giữa hai chữ giống nhau (${H[i-1]}${H[i]}${H[i+1]}) nên đọc nhẹ`); }
+  for (let i = 0; i < n-1; i++){
+    if (H[i] !== "一" || syls[i].b !== "yi" || t[i] !== 1) continue;
+    if (i > 0 && ("第初期".includes(H[i-1]) || NUMS.includes(H[i-1]))) { notes.push(`一 ở đây là số thứ tự/đếm nên giữ yī`); continue; }
+    if (NUMS.includes(H[i+1]) || "月号楼层".includes(H[i+1]) || h.slice(i, i+3) === "一年级"){ notes.push(`一 dùng để đếm số, chỉ thứ tự nên giữ yī`); continue; }
+    if (o[i+1] === 5) continue;
+    t[i] = o[i+1] === 4 ? 2 : 4; notes.push(`一 đứng trước ${pyName(o[i+1])} nên đọc thành ${t[i] === 2 ? "yí" : "yì"}`);
+  }
+  for (let i = 0; i < n-1; i++) if (H[i] === "不" && syls[i].b === "bu" && t[i] === 4 && o[i+1] === 4){ t[i] = 2; notes.push("不 đứng trước thanh 4 nên đọc thành bú"); }
+  if (n === 3 && o.every(x => x === 3)){
+    const oneTwo = BYH[h.slice(1)] && !BYH[h.slice(0, 2)];
+    if (oneTwo){ t[1] = 2; notes.push(`Ba thanh 3 theo nhóm ${H[0]} + ${h.slice(1)}: chỉ ${H[1]} đọc thành thanh 2`); }
+    else { t[0] = t[1] = 2; notes.push(`Ba thanh 3 liền nhau: ${H[0]} và ${H[1]} đọc thành thanh 2`); }
+  } else for (let i = 0; i < n-1; i++) if (o[i] === 3 && t[i] === 3 && o[i+1] === 3){ t[i] = 2; notes.push(`${H[i]} đứng trước một thanh 3 nên đọc thành thanh 2`); }
+  for (let i = 0; i < n-1; i++) if (t[i] === 3) notes.push(`${H[i]} không đứng cuối nên đọc nửa thanh 3 (chỉ hạ giọng xuống, không lên lại)`);
+  return {eff: t.map(x => x === 5 ? 0 : x), notes};
 }
 let curWord = null, wordFrom = "chars", wdLang = "vi", wordWriters = [];
 async function openWord(h, from){
