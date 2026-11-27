@@ -1446,9 +1446,11 @@ function startQuiz(placement=false, kind="word", pool=null, key=null, test=null)
 function renderQ(){
   const w = QZ[zi];
   if (w.kind){
-    $("quiz-q").textContent = w.kind === "tone" ? "Âm tiết này mang thanh mấy?" : "Bộ thủ này nghĩa là gì?";
-    $("quiz-han").textContent = w.kind === "tone" ? w.p : w.h; $("quiz-han").style.fontFamily = w.kind === "tone" ? "var(--font-ui)" : "";
-    $("quiz-py").textContent = w.kind === "tone" ? `${w.h} · bấm nghe` : w.p; $("quiz-py").hidden = w.kind !== "tone"; $("btn-next").hidden = true;
+    $("quiz-q").textContent = w.kind === "tone" ? "Nghe và chọn thanh điệu đúng" : "Bộ thủ này nghĩa là gì?";
+    $("quiz-han").textContent = w.h; $("quiz-han").style.fontFamily = "";
+    // bài thanh điệu: hiện chữ Hán + pinyin chưa có dấu, tự đọc to; trả lời xong mới hiện dấu thanh
+    $("quiz-py").textContent = w.kind === "tone" ? pyTone(w.p).base : w.p; $("quiz-py").hidden = w.kind !== "tone"; $("btn-next").hidden = true;
+    if (w.kind === "tone") setTimeout(() => { if (QZ[zi] === w) say(w.h, w.p); }, 250);
     $("quiz-count").textContent = `${zi+1} / ${QZ.length}`; $("quiz-bar").style.width = (zi/QZ.length*100) + "%";
     const rads = w.kind === "rad" ? shuffle(RADS.filter(r => r.m !== w.ans)).slice(0,3).concat(w.r) : [];
     const pool = w.kind === "tone" ? ["thanh 1","thanh 2","thanh 3","thanh 4","thanh nhẹ"] : rads.map(r => r.m);
@@ -1475,6 +1477,7 @@ function answer(btn){
     if (ok) zScore++;
     if (w.kind === "rad" && ok) S.rad[w.h] = 1;
     if (ok) addXP(10);
+    if (w.kind === "tone") $("quiz-py").textContent = w.p;
     $("quiz-py").hidden = false; touchStreak(); save(); renderStreak();
     feedback(ok, w.kind === "tone" ? `${w.p} là ${w.ans} (chữ ${w.h})` : `${w.h} là bộ ${w.p.replace("Bộ ","")}: ${w.ans}`, zi+1 >= QZ.length);
     return;
