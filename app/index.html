@@ -97,7 +97,7 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border
 nav.tabs .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
 nav.tabs button{white-space:nowrap;letter-spacing:-.01em;border:0;background:transparent;padding:8px 2px;font-size:.72rem;font-weight:500;color:var(--muted);display:grid;gap:2px;justify-items:center}
 nav.tabs button .ic{font-family:var(--font-han);font-size:1.2rem;line-height:1}
-nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent-soft)}
+nav.tabs button[aria-current="true"]{color:var(--surface);background:var(--accent)}
 /* today */
 .plan{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .stat{background:var(--bg);border-radius:10px;padding:10px;display:grid;gap:2px}
@@ -424,7 +424,10 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 nav.tabs[hidden]{display:none!important}
 .side-brand,.rail,nav.tabs .side-acct,nav.tabs .side-theme,nav.tabs .side-set{display:none}
 .setbtn{font-size:1.05rem}
-.dict-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.dict-tabs{display:flex;width:100%}.dict-tabs button{flex:1;font-weight:700;padding:10px 8px}
+.dk:active,.wl button:active{background:var(--accent-soft);border-color:var(--accent)}
+nav.tabs button[aria-current="true"],nav.tabs button[aria-current="true"] .ic{background:var(--accent);color:var(--surface)!important}
+nav.tabs button[aria-current="true"] .ic{background:transparent}
 .ls-next{outline:2px solid var(--accent);outline-offset:-2px}
 .ls-acts .dk{min-height:118px}
 @media (min-width:700px){
@@ -433,7 +436,7 @@ nav.tabs[hidden]{display:none!important}
   nav.tabs .in{display:flex;flex-direction:column;gap:6px;max-width:none;margin:0}
   nav.tabs button{padding:10px 4px;border-radius:14px;border:2px solid transparent;font-size:.7rem}
   nav.tabs button:hover{background:var(--accent-soft)}
-  nav.tabs button[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  nav.tabs button[aria-current="true"]{border-color:var(--accent);background:var(--accent);color:var(--surface)}
   .side-brand{display:flex;justify-content:center;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:800;font-size:1.15rem}
   .side-brand img{width:44px;height:44px;flex-shrink:0}
   .side-brand span{display:none}
@@ -1214,7 +1217,7 @@ function show(v){
   if (v !== "quiz") $("sheet").hidden = true;
   $("tabs").hidden = ["setup","study","quiz","gpractice","wpractice"].includes(v); // đang làm bài thì ẩn thanh tab cho tập trung
   document.body.classList.toggle("focus", $("tabs").hidden); renderRail();
-  const tab = (v === "decks" || v === "tests" || (v === "deck" && deckBack !== "chars")) ? "decks" : (v === "char" || v === "word" || v === "deck") ? "chars" : (v === "gpractice" || v === "greview") ? "grammar" : v === "path" ? "path" : "today";
+  const tab = (v === "decks" || v === "tests" || (v === "deck" && deckBack !== "chars")) ? "decks" : (v === "chars" || v === "char" || v === "word" || v === "deck") ? "chars" : (v === "grammar" || v === "gpractice" || v === "greview") ? "grammar" : v === "path" ? "path" : "today";
   document.querySelectorAll("#tabs button[data-v]").forEach(b => b.setAttribute("aria-current", b.dataset.v === tab));
   document.querySelectorAll("#tabs [data-sv]").forEach(b => b.setAttribute("aria-current", b.dataset.sv === tab));
   if (v === "today") renderToday();
