@@ -111,14 +111,16 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
 .topic .pct{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .tag{display:inline-block;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
 /* card */
-.card{perspective:1200px;height:340px;cursor:pointer;position:relative;z-index:1;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.card{perspective:1200px;height:340px;cursor:pointer;position:relative;z-index:1;will-change:transform,opacity;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 /* quẹt thẻ kiểu dating app */
 .cstack{position:relative}
 .cstack::before{content:"";position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);transform:translateY(10px) scale(.95);opacity:.75}
-.card.anim{transition:transform .3s ease-out,opacity .3s ease-out}
-.card.enter{transform:scale(.92);opacity:0;transition:none}
+.card.anim{transition:transform .42s cubic-bezier(.34,1.4,.64,1),opacity .42s ease}
+.card.out{transition:transform .5s cubic-bezier(.22,.61,.36,1),opacity .45s ease}
+.card.enter{transform:translateY(10px) scale(.95);opacity:.6;transition:none}
 .card.enter .face{transition:none}
-.card.pop{transition:transform .22s ease-out,opacity .22s ease-out}
+.card.pop{transition:transform .35s cubic-bezier(.22,.61,.36,1),opacity .35s ease}
+.stamp{transition:opacity .12s linear}
 .stamp{position:absolute;top:22px;z-index:3;padding:4px 12px;border:3px solid currentColor;border-radius:10px;font-weight:800;font-size:1.1rem;letter-spacing:.04em;text-transform:uppercase;opacity:0;pointer-events:none;background:var(--surface)}
 .stamp.ok{left:20px;color:var(--accent);transform:rotate(-12deg)}
 .stamp.no{right:20px;color:var(--cinnabar);transform:rotate(12deg)}
@@ -1818,22 +1820,33 @@ $("btn-speak").onclick = e => { e.stopPropagation(); say(Q[qi].w.h, Q[qi].w.p); 
 $("btn-again").onclick = () => swipeOut(-1);
 $("btn-ok").onclick = () => swipeOut(1);
 // ===== Quẹt thẻ kiểu dating app: phải = Nhớ rồi, trái = Chưa nhớ
-let swBusy = false;
-function cardMove(dx, anim){
-  const c = $("card"); c.classList.toggle("anim", !!anim);
-  c.style.transform = dx ? `translateX(${dx}px) rotate(${dx / 16}deg)` : "";
-  const p = Math.min(1, Math.abs(dx) / 110);
+let swBusy = false, mvRaf = 0, mvDx = 0;
+const SW_DIST = 160; // quãng kéo để thẻ bay đi (px)
+function paintCard(dx){
+  const c = $("card"), p = Math.min(1, Math.abs(dx) / SW_DIST);
+  c.style.transform = dx ? `translateX(${dx}px) translateY(${Math.abs(dx) * 0.04}px) rotate(${dx / 20}deg)` : "";
+  c.style.opacity = dx ? String(1 - p * 0.55) : ""; // mờ dần khi quẹt xa
   $("st-ok").style.opacity = dx > 0 ? p : 0; $("st-no").style.opacity = dx < 0 ? p : 0;
+}
+function cardMove(dx, anim){
+  const c = $("card"); c.classList.remove("out"); c.classList.toggle("anim", !!anim);
+  if (anim){ cancelAnimationFrame(mvRaf); mvRaf = 0; paintCard(dx); return; }
+  mvDx = dx; if (!mvRaf) mvRaf = requestAnimationFrame(() => { mvRaf = 0; paintCard(mvDx); });
 }
 function swipeOut(dir){
   if (swBusy || $("v-study").hidden || !Q[qi]) return; swBusy = true;
-  const c = $("card"); cardMove(dir * Math.max(window.innerWidth, 700), true); c.style.opacity = "0";
+  cancelAnimationFrame(mvRaf); mvRaf = 0;
+  const c = $("card"), W = Math.max(window.innerWidth, 700) * 0.9;
+  c.classList.remove("anim"); c.classList.add("out");
+  c.style.transform = `translateX(${dir * W}px) translateY(40px) rotate(${dir * 28}deg)`; c.style.opacity = "0";
+  $("st-ok").style.opacity = dir > 0 ? 1 : 0; $("st-no").style.opacity = dir < 0 ? 1 : 0;
   setTimeout(() => {
-    c.classList.remove("anim"); c.classList.add("enter"); cardMove(0); c.style.opacity = "";
+    c.classList.remove("out"); c.classList.add("enter"); c.style.transform = ""; c.style.opacity = "";
+    $("st-ok").style.opacity = 0; $("st-no").style.opacity = 0;
     swBusy = false; grade(dir > 0);
     void c.offsetWidth; c.classList.remove("enter"); c.classList.add("pop");
-    setTimeout(() => c.classList.remove("pop"), 240);
-  }, 280);
+    setTimeout(() => c.classList.remove("pop"), 360);
+  }, 380);
 }
 // Kéo bằng chuột hoặc ngón tay
 let drag = null;
@@ -1845,12 +1858,13 @@ window.addEventListener("pointermove", e => {
   if (!drag || e.pointerId !== drag.id) return;
   const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
   if (!drag.on){
-    if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)){ drag.on = true; try { $("card").setPointerCapture(e.pointerId); } catch(_){} }
+    if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)){ drag.on = true; drag.x0 += Math.sign(dx) * 8; try { $("card").setPointerCapture(e.pointerId); } catch(_){} }
     else { if (Math.abs(dy) > 10) drag = null; return; }
   }
   e.preventDefault();
-  drag.pts.push([performance.now(), dx]); if (drag.pts.length > 5) drag.pts.shift();
-  cardMove(dx);
+  const x = e.clientX - drag.x0;
+  drag.pts.push([performance.now(), x]); if (drag.pts.length > 6) drag.pts.shift();
+  cardMove(x);
 }, {passive: false});
 const dragStop = e => {
   if (!drag || e.pointerId !== drag.id) return;
@@ -1858,7 +1872,7 @@ const dragStop = e => {
   dragEnd = performance.now();
   const dx = e.clientX - d.x0, a = d.pts[0], b = d.pts[d.pts.length - 1];
   const v = a && b && b[0] > a[0] ? (b[1] - a[1]) / (b[0] - a[0]) : 0; // px/ms
-  if (e.type !== "pointercancel" && (Math.abs(dx) > 100 || (Math.abs(v) > 0.5 && Math.abs(dx) > 30 && Math.sign(v) === Math.sign(dx)))) swipeOut(Math.sign(dx));
+  if (e.type !== "pointercancel" && (Math.abs(dx) > SW_DIST || (Math.abs(v) > 0.55 && Math.abs(dx) > 60 && Math.sign(v) === Math.sign(dx)))) swipeOut(Math.sign(dx));
   else cardMove(0, true);
 };
 window.addEventListener("pointerup", dragStop); window.addEventListener("pointercancel", dragStop);
@@ -1872,8 +1886,8 @@ window.addEventListener("wheel", e => {
   if (swBusy || now < wh.lock){ wh.lock = now + 250; return; } // bỏ qua đà quán tính sau một lần quẹt
   wh.dx -= e.deltaX * (e.deltaMode === 1 ? 16 : 1);
   cardMove(wh.dx); clearTimeout(wh.tm);
-  if (Math.abs(wh.dx) > 120){ const d = Math.sign(wh.dx); wh.dx = 0; wh.lock = now + 400; swipeOut(d); return; }
-  wh.tm = setTimeout(() => { wh.dx = 0; cardMove(0, true); }, 160);
+  if (Math.abs(wh.dx) > SW_DIST + 30){ const d = Math.sign(wh.dx); wh.dx = 0; wh.lock = now + 400; swipeOut(d); return; }
+  wh.tm = setTimeout(() => { wh.dx = 0; cardMove(0, true); }, 200);
 }, {passive: false, capture: true});
 $("btn-more").onclick = () => show(doneDeck ? "deck" : "today");
 $("btn-quiz2").onclick = () => startQuiz(false, zKind);
