@@ -128,7 +128,8 @@ nav.tabs button[aria-current="true"]{color:var(--surface);background:var(--accen
 .stamp.ok{left:20px;color:var(--accent);transform:rotate(-12deg)}
 .stamp.no{right:20px;color:var(--cinnabar);transform:rotate(12deg)}
 html:has(#v-study:not([hidden])){overscroll-behavior-x:none;overflow-x:clip}
-html:has(#v-study:not([hidden])) body{overscroll-behavior-x:none}
+html:has(#v-study:not([hidden])) body{overscroll-behavior-x:none;overflow-x:hidden}
+#v-study{overflow-x:clip}
 .card .back{overflow-y:auto;align-content:safe center}
 .card .back .vi{font-size:1.05rem;line-height:1.4}
 .card .face{position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;align-content:center;gap:8px;padding:20px;backface-visibility:hidden;transition:transform .45s ease}
@@ -1961,7 +1962,9 @@ $("btn-again").onclick = () => swipeOut(-1);
 $("btn-ok").onclick = () => swipeOut(1);
 // ===== Quẹt thẻ kiểu dating app: phải = Nhớ rồi, trái = Chưa nhớ
 let swBusy = false, mvRaf = 0, mvDx = 0;
-const SW_DIST = 160; // quãng kéo để thẻ bay đi (px)
+let SW_DIST = 160; // quãng kéo để thẻ bay đi (px); điện thoại màn hẹp thì ngắn hơn để quẹt phải bằng ngón cái vẫn đủ
+const swDist = () => (SW_DIST = Math.round(Math.min(160, Math.max(80, window.innerWidth * 0.24))));
+swDist(); window.addEventListener("resize", swDist);
 const NEXT_T = p => `translateY(${10 * (1 - p)}px) scale(${0.95 + 0.05 * p})`;
 function paintCard(dx){
   const c = $("card"), p = Math.min(1, Math.abs(dx) / SW_DIST);
@@ -2014,18 +2017,22 @@ window.addEventListener("pointermove", e => {
   e.preventDefault();
   const x = e.clientX - drag.x0;
   drag.pts.push([performance.now(), x]); if (drag.pts.length > 6) drag.pts.shift();
-  cardMove(x);
+  drag.x = x; drag.lx = e.clientX; cardMove(x);
 }, {passive: false});
 const dragStop = e => {
   if (!drag || e.pointerId !== drag.id) return;
   const d = drag; drag = null; if (!d.on) return;
   dragEnd = performance.now();
-  const dx = e.clientX - d.x0, a = d.pts[0], b = d.pts[d.pts.length - 1];
+  // pointercancel (trình duyệt điện thoại giành cử chỉ) có thể báo toạ độ 0: dùng vị trí kéo cuối cùng
+  const dx = e.type === "pointercancel" || !e.clientX && !e.clientY ? (d.x || 0) : e.clientX - d.x0, a = d.pts[0], b = d.pts[d.pts.length - 1];
   const v = a && b && b[0] > a[0] ? (b[1] - a[1]) / (b[0] - a[0]) : 0; // px/ms
-  if (e.type !== "pointercancel" && (Math.abs(dx) > SW_DIST || (Math.abs(v) > 0.55 && Math.abs(dx) > 60 && Math.sign(v) === Math.sign(dx)))) swipeOut(Math.sign(dx));
+  const lx = d.lx ?? 0, edge = dx > 0 ? lx > window.innerWidth - 28 : lx < 28; // ngón tay chạm sát mép màn hình
+  if ((Math.abs(dx) > SW_DIST || (edge && Math.abs(dx) > 50) || (Math.abs(v) > 0.55 && Math.abs(dx) > 60 && Math.sign(v) === Math.sign(dx)))) swipeOut(Math.sign(dx));
   else cardMove(0, true);
 };
 window.addEventListener("pointerup", dragStop); window.addEventListener("pointercancel", dragStop);
+// Điện thoại: đã kéo ngang thẻ thì không cho trình duyệt cuộn/vuốt trang (tránh bị huỷ cú quẹt)
+$("card").addEventListener("touchmove", e => { if (drag && drag.on && e.cancelable) e.preventDefault(); }, {passive: false});
 // Vuốt 2 ngón ngang trên touchpad (chặn luôn cử chỉ Quay lại của trình duyệt khi đang học thẻ)
 let wh = {dx: 0, lock: 0, tm: 0};
 window.addEventListener("wheel", e => {
