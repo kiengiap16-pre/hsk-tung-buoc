@@ -424,6 +424,7 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 nav.tabs[hidden]{display:none!important}
 .side-brand,.rail,nav.tabs .side-acct,nav.tabs .side-theme,nav.tabs .side-set{display:none}
 .setbtn{font-size:1.05rem}
+.ico{display:block;flex-shrink:0}.dm .ico{display:inline-block;vertical-align:-2px}
 .dict-tabs{display:flex;width:100%}.dict-tabs button{flex:1;font-weight:700;padding:10px 8px}
 .dk:active,.wl button:active{background:var(--accent-soft);border-color:var(--accent)}
 nav.tabs button[aria-current="true"],nav.tabs button[aria-current="true"] .ic{background:var(--accent);color:var(--surface)!important}
@@ -512,7 +513,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
 <div class="wrap">
   <header class="top">
     <div class="brand"><img class="seal" src="logo.svg" alt="" width="38" height="38"><div><h1>HSK Từng Bước</h1><div class="muted" style="font-size:.82rem">Học tiếng Trung HSK 3.0 · Cấp 1–6</div></div></div>
-    <div class="topr"><div class="streak" id="streak"></div><button type="button" class="themebtn" data-theme-btn aria-label="Đổi giao diện"></button><button type="button" class="themebtn setbtn" data-go="path" aria-label="Cài đặt">⚙</button><button class="acct" id="acct" hidden aria-haspopup="dialog">Đăng nhập</button></div>
+    <div class="topr"><div class="streak" id="streak"></div><button type="button" class="themebtn" data-theme-btn aria-label="Đổi giao diện"></button><button type="button" class="themebtn setbtn" data-go="path" aria-label="Cài đặt"><svg class="ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="acct" id="acct" hidden aria-haspopup="dialog">Đăng nhập</button></div>
   </header>
 
   <aside class="rail" id="rail" aria-label="Tiến độ của bạn"></aside>
@@ -690,7 +691,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
     <div class="panel" style="justify-items:center;text-align:center">
       <span class="hint" id="quiz-q">Chữ này nghĩa là gì?</span>
       <div class="big" id="quiz-han"></div>
-      <button class="say" id="quiz-say" aria-label="Nghe đọc"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg></button>
+      <button class="say" id="quiz-say" aria-label="Nghe đọc"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.5 9H3.5v6h3l4.5 4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18.5 6.2a8.2 8.2 0 0 1 0 11.6"/></svg></button>
       <div class="py" id="quiz-py" hidden></div>
     </div>
     <div class="opts" id="quiz-opts"></div>
@@ -746,7 +747,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
           <p class="writemsg" id="ch-msg"></p>
         </div>
         <div style="display:grid;gap:10px;min-width:0">
-          <div class="cpy"><span class="p" id="ch-py"></span><button id="ch-say" aria-label="Nghe phát âm">🔊</button></div>
+          <div class="cpy"><span class="p" id="ch-py"></span><button id="ch-say" aria-label="Nghe phát âm"><svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.5 9H3.5v6h3l4.5 4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18.5 6.2a8.2 8.2 0 0 1 0 11.6"/></svg></button></div>
           <div class="cmean" id="ch-mean"></div>
           <div class="chv">Hán Việt <b id="ch-hv"></b></div>
           <div class="tags" id="ch-tags"></div>
@@ -782,7 +783,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
     <div class="ctop"><button class="back" id="wd-back">← Quay lại</button><div class="r"><button class="iconbtn" id="wd-star" aria-label="Đánh dấu sao">☆</button></div></div>
     <div class="panel wd-head">
       <div class="wd-han" id="wd-han"></div>
-      <div class="wd-py"><span id="wd-py"></span><button class="say" id="wd-say" aria-label="Nghe cả từ"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg></button></div>
+      <div class="wd-py"><span id="wd-py"></span><button class="say" id="wd-say" aria-label="Nghe cả từ"><svg class="ico" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.5 9H3.5v6h3l4.5 4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18.5 6.2a8.2 8.2 0 0 1 0 11.6"/></svg></button></div>
       <div class="tags" id="wd-tags"></div>
       <nav class="jump" aria-label="Các mục"><a href="#wd-sec-mean">Nghĩa</a><a href="#wd-sec-pron">Phát âm</a><a href="#wd-sec-write">Cách viết</a><a href="#wd-partsp">Bóc tách</a><a href="#wd-compp">Từ ghép</a></nav>
     </div>
@@ -828,7 +829,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
     <div class="cardmeta"><button class="iconbtn" id="wp-x" data-go="lesson" aria-label="Thoát bài tập viết">✕</button><span id="wp-label" style="flex:1"></span><span id="wp-count"></span></div>
     <div class="bar"><i id="wp-bar" style="width:0"></i></div>
     <div class="panel wp">
-      <div class="wpinfo"><button class="iconbtn" id="wp-say" aria-label="Nghe phát âm">🔊</button><div><div class="wp-py" id="wp-py"></div><div class="muted" id="wp-mean"></div></div></div>
+      <div class="wpinfo"><button class="iconbtn" id="wp-say" aria-label="Nghe phát âm"><svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.5 9H3.5v6h3l4.5 4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18.5 6.2a8.2 8.2 0 0 1 0 11.6"/></svg></button><div><div class="wp-py" id="wp-py"></div><div class="muted" id="wp-mean"></div></div></div>
       <div class="box wpbox">
         <svg class="grid" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="100" height="100"/><line x1="50" y1="0" x2="50" y2="100" stroke-dasharray="3 3"/><line x1="0" y1="50" x2="100" y2="50" stroke-dasharray="3 3"/><line x1="0" y1="0" x2="100" y2="100" stroke-dasharray="2 4"/><line x1="100" y1="0" x2="0" y2="100" stroke-dasharray="2 4"/></svg>
         <div id="wp-writer"></div>
@@ -959,7 +960,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
     <button data-v="chars"><span class="ic">典</span>Từ điển</button>
     <button data-v="grammar"><span class="ic">法</span>Ngữ pháp</button>
   </div>
-  <button type="button" class="side-set" data-go="path" data-sv="path">⚙ <span>Cài đặt</span></button>
+  <button type="button" class="side-set" data-go="path" data-sv="path"><svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg> <span>Cài đặt</span></button>
   <button type="button" class="side-theme" data-theme-btn="label" aria-label="Đổi giao diện"></button>
   <button type="button" class="side-acct" id="side-acct" hidden><span class="ic">我</span><span id="side-acct-l">Tài khoản</span></button>
 </nav>
@@ -1847,7 +1848,7 @@ function renderPinyin(){
   $("py-status").textContent = pyDone() ? "Đã hoàn thành" : "Chưa hoàn thành";
   $("tones").innerHTML = TONES.map(t => `<button class="tone" data-say="${t.c}"><svg viewBox="0 0 100 50" aria-hidden="true"><line x1="0" y1="5" x2="100" y2="5"/><line x1="0" y1="25" x2="100" y2="25"/><line x1="0" y1="45" x2="100" y2="45"/><polyline points="${t.pts}"/></svg><span class="ts">${t.s}</span><span class="han">${t.c}</span><span class="muted">${t.n ? "Thanh " + t.n : "Thanh nhẹ"} · ${t.m}</span><span class="hint">${t.d}</span></button>`).join("");
   const cell = demo => ([a,b,w]) => { const d = demo[a], t = d === "er" ? 2 : 1;
-    return `<button class="syl ${w?"warn":""}" data-syl="${d}${t}" title="Bấm để nghe, bấm lần nữa để nghe chậm"><b>${a}</b><span>${b}</span><span class="dm">🔊 ${markPy(d, t)}</span></button>`; };
+    return `<button class="syl ${w?"warn":""}" data-syl="${d}${t}" title="Bấm để nghe, bấm lần nữa để nghe chậm"><b>${a}</b><span>${b}</span><span class="dm"><svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.5 9H3.5v6h3l4.5 4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18.5 6.2a8.2 8.2 0 0 1 0 11.6"/></svg> ${markPy(d, t)}</span></button>`; };
   $("initials").innerHTML = INITIALS.map(cell(PY_DEMO)).join(""); $("finals").innerHTML = FINALS.map(cell(FIN_DEMO)).join("");
 }
 function renderRad(){
@@ -2217,7 +2218,7 @@ function renderGrammar(){
     $("g-list").innerHTML = pts.map((p, i) => { const on = !!S.gram[gKey(gLv, i)];
       return `<div class="panel gp"><div class="gt"><div class="st"><span class="n">${i + 1}.</span>${p.t}</div><button class="ok" data-i="${i}" aria-pressed="${on}">${on ? "✓ Đã hiểu" : "Đã hiểu"}</button></div>
       ${p.c ? `<div class="gc"><span class="eyebrow">Theo tài liệu</span> <span class="zh">${p.c}</span></div>` : ""}<div>${p.d}</div>
-      <div class="ex"><div class="zh">${markKey(p.zh, p.k)}</div><div class="py">${zhPy(p.zh)}</div><div class="vi">${p.vi}</div><button class="say" data-zh="${p.zh}" aria-label="Nghe câu ví dụ"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg></button></div></div>`; }).join("");
+      <div class="ex"><div class="zh">${markKey(p.zh, p.k)}</div><div class="py">${zhPy(p.zh)}</div><div class="vi">${p.vi}</div><button class="say" data-zh="${p.zh}" aria-label="Nghe câu ví dụ"><svg class="ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6.5 9H3.5v6h3l4.5 4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18.5 6.2a8.2 8.2 0 0 1 0 11.6"/></svg></button></div></div>`; }).join("");
     $("g-src").textContent = G.src;
   });
 }
