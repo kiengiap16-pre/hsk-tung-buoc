@@ -1176,8 +1176,69 @@ function show(v){
   if (v === "write") renderWrite();
   if (v === "pinyin") renderPinyin();
   if (v === "rad") { renderRad(); $("rad-detail").hidden = true; }
+  navRecord(v);
   window.scrollTo(0,0);
 }
+// ===== Lịch sử trình duyệt: mỗi màn là một "trang" để nút Back / vuốt 2 ngón / vuốt cạnh màn hình quay về màn trước trong web
+const NAV_SESSION = ["study","quiz","gpractice","wpractice","done"]; // màn đang làm bài: thay thế nhau, không chồng thêm
+const NAV_PARENT = {study:"today", quiz:"today", done:"today", gpractice:"grammar", wpractice:"write"};
+const NAV_BOOT = Date.now() + "" + Math.random();
+let navIdx = 0, navStack = [], navMode = null, navModeT = 0, curCharKey = null;
+function navState(v){
+  const st = {hv: v, i: navIdx, b: NAV_BOOT};
+  if (v === "char" && curCharKey) st.c = curCharKey;
+  if (v === "word" && curWord) st.w = curWord.k || curWord.h;
+  return st;
+}
+function navUrl(st){
+  if (NAV_SESSION.includes(st.hv) || st.hv === "setup") return location.pathname + location.search;
+  return location.pathname + location.search + "#" + st.hv + (st.c ? "/" + encodeURIComponent(st.c) : st.w ? "/" + encodeURIComponent(st.w) : "");
+}
+function navRecord(v){
+  const cur = navStack[navIdx], restoring = navMode && Date.now() - navModeT < 3000; navMode = null;
+  let replace = restoring || !cur || !history.state || history.state.b !== NAV_BOOT;
+  if (!replace && cur.hv === v && v !== "char" && v !== "word") replace = true;                // bấm lại đúng màn đang mở
+  if (!replace && NAV_SESSION.includes(cur.hv) && NAV_SESSION.includes(v)) replace = true;     // bài học → kết quả
+  if (!replace && NAV_SESSION.includes(cur.hv) && v !== "char" && v !== "word") replace = true; // thoát bài: Back không quay lại bài đã xong
+  if (!replace) navIdx++;
+  const st = navState(v);
+  if (!replace && cur && cur.hv === v && cur.c === st.c && cur.w === st.w){ navIdx--; return; }
+  navStack.length = navIdx; navStack[navIdx] = st;
+  try { history[replace ? "replaceState" : "pushState"](st, "", navUrl(st)); } catch(e){}
+}
+// Nút "← Quay lại" trong web: nếu màn trước đúng là màn cần về thì lùi lịch sử luôn (khỏi chồng thêm trang)
+function navBack(v, after){
+  const prev = navStack[navIdx - 1];
+  if (navIdx > 0 && prev && prev.hv === v && history.state && history.state.b === NAV_BOOT) history.back();
+  else { show(v); if (after) after(); }
+}
+function navOpen(st, fromOld){
+  navMode = "replace"; navModeT = Date.now();
+  let v = st.hv;
+  if (NAV_SESSION.includes(v) && (fromOld || (v === "study" && !(Q && Q[qi])))) v = NAV_PARENT[v];
+  if (v === "char" && st.c && CHARS[st.c]) openChar(st.c);
+  else if (v === "word" && st.w) openWord(st.w);
+  else if (VIEWS.includes(v) && v !== "char" && v !== "word" && (v !== "setup" || !S.profile)){ show(v); if (v === "study") renderCard(); }
+  else show(S.profile ? "today" : "setup");
+}
+function navFromHash(){ // "#word/你好" → {hv:"word", w:"你好"}
+  const m = location.hash.slice(1).split("/"), hv = m[0], arg = m[1] ? decodeURIComponent(m.slice(1).join("/")) : "";
+  if (!hv || !VIEWS.includes(hv) || NAV_SESSION.includes(hv) || hv === "setup") return null;
+  return {hv, c: hv === "char" ? arg : undefined, w: hv === "word" ? arg : undefined};
+}
+addEventListener("hashchange", () => { // người dùng tự sửa/dán link #... trên cùng trang
+  if ((history.state && history.state.hv) || !WORDS.length || !S.profile) return;
+  const st = navFromHash(); if (!st) return;
+  navIdx++; navStack.length = navIdx; navOpen(st, true);
+});
+addEventListener("popstate", e => {
+  const st = e.state; if (!st || !st.hv || !WORDS.length) return;
+  try { if (writer) writer.cancelQuiz(); } catch(err){}
+  navIdx = st.i || 0;
+  if (st.b !== NAV_BOOT){ navStack = []; navStack[navIdx] = st; }
+  else navStack[navIdx] = st;
+  navOpen(st, st.b !== NAV_BOOT);
+});
 function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,1800); }
 // Cột phải (máy tính màn rộng): chuỗi ngày, XP, mục tiêu hôm nay, tài khoản
 function renderRail(){
@@ -1485,7 +1546,7 @@ function partCard(cls, lbl, x){
 }
 function openChar(c, from){
   const ch = CHARS[c]; if (!ch) return;
-  curChar = ch; if (from) prevView = from;
+  curChar = ch; curCharKey = c; if (from) prevView = from;
   show("char");
   $("ch-py").textContent = ch.py; $("ch-mean").textContent = ch.m.split(", ").join(" · "); $("ch-hv").textContent = ch.hv;
   $("ch-star").textContent = S.stars[c] ? "★" : "☆"; $("ch-star").classList.toggle("on", !!S.stars[c]);
@@ -1754,7 +1815,8 @@ $("map").onclick = e => { const u = e.target.closest("[data-lv]");
   const b = e.target.closest("[data-node]"); if (!b) return; const n = NODES[+b.dataset.node];
   n.act(); };
 $("char-lv").onclick = e => { const b = e.target.closest("[data-clv]"); if (b){ S.charLv = +b.dataset.clv; save(); renderChars(); } };
-document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g && !g.disabled) show(g.dataset.go); });
+document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (!g || g.disabled) return;
+  if (g.matches(".back, .cardmeta .iconbtn")) navBack(g.dataset.go); else show(g.dataset.go); });
 $("tones").onclick = e => { const b = e.target.closest("[data-say]"); if (!b) return; const t = TONES.find(x => x.c === b.dataset.say); if (!(t && saySyl("ma" + (t.n || 5)))) say(b.dataset.say); };
 $("quiz-py").onclick = () => { const w = QZ[zi]; if (w && w.kind === "tone") say(w.h, w.p); };
 $("py-quiz").onclick = () => startQuiz(false, "tone");
@@ -1765,7 +1827,7 @@ $("rd-know").onclick = () => { S.rad[curRad.g] = 1; save(); renderRad(); $("rd-k
 $("rd-ex").onclick = e => { const b = e.target.closest("button[data-c]"); if (b) openChar(b.dataset.c, "rad"); };
 $("chargrid").onclick = e => { const b = e.target.closest("button"); if (b) openChar(b.dataset.c, "chars"); };
 $("c-chips").onclick = e => { e.stopPropagation(); const b = e.target.closest("button"); if (!b) return; if (b.dataset.w) openWord(b.dataset.w, "study"); else openChar(b.dataset.c, "study"); };
-$("ch-back").onclick = () => { if (writer) writer.cancelQuiz(); show(prevView); if (prevView === "study") renderCard(); };
+$("ch-back").onclick = () => { if (writer) writer.cancelQuiz(); navBack(prevView, () => { if (prevView === "study") renderCard(); }); };
 $("ch-star").onclick = () => { const c = curChar.c; if (S.stars[c]) delete S.stars[c]; else S.stars[c] = 1; save(); $("ch-star").textContent = S.stars[c] ? "★" : "☆"; $("ch-star").classList.toggle("on", !!S.stars[c]); toast(S.stars[c] ? "Đã đánh dấu sao" : "Đã bỏ sao"); };
 $("ch-say").onclick = () => say(curChar.c);
 $("ch-replay").onclick = animate; $("ch-anim").onclick = animate; $("ch-write").onclick = practice;
@@ -1947,7 +2009,7 @@ $("ext-lv").onclick = e => { const b = e.target.closest("[data-l]"); if (!b) ret
 $("ext-more").onclick = () => { extN += 40; renderExt(); };
 $("ext-list").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "chars"); };
 $("dres").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "chars"); };
-$("wd-back").onclick = () => { show(wordFrom); if (wordFrom === "study") renderCard(); };
+$("wd-back").onclick = () => navBack(wordFrom, () => { if (wordFrom === "study") renderCard(); });
 $("wd-say").onclick = () => curWord && say(curWord.h, curWord.p);
 $("wd-star").onclick = () => { const h = curWord.h; if (S.stars[h]) delete S.stars[h]; else S.stars[h] = 1; save(); $("wd-star").textContent = S.stars[h] ? "★" : "☆"; $("wd-star").classList.toggle("on", !!S.stars[h]); };
 $("wd-han").onclick = e => { const b = e.target.closest("[data-c]"); if (b && CHARS[b.dataset.c]) openChar(b.dataset.c, "word"); };
@@ -2109,7 +2171,10 @@ renderStreak();
 $("loading").hidden = false;
 loadData().then(() => {
   $("loading").hidden = true;
-  if (S.profile) show("today"); else show("setup");
+  // Mở thẳng link có #màn (vd. #word/你好) hoặc tải lại trang: về đúng màn đó
+  const hs = navFromHash();
+  if (S.profile && hs) navOpen(hs, true);
+  else if (S.profile) show("today"); else show("setup");
 }).catch(() => { $("loading").innerHTML = "<b>Không tải được dữ liệu từ vựng.</b><span>Hãy tải lại trang. Nếu bạn mở file trên máy, cần chạy qua một máy chủ web nhỏ (xem hướng dẫn).</span>"; });
 
 // ===== Giao diện: Sáng (mặc định) / Tối / Theo máy. Lưu trên từng máy.
