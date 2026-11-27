@@ -627,9 +627,17 @@ nav.tabs[hidden]{display:none!important}
     </div>
   </section>
 
+  <!-- KIỂM TRA: CHỌN BÀI -->
+  <section id="v-tests" hidden>
+    <div class="dk-top"><h2>Kiểm tra</h2></div>
+    <p class="dk-note">Mỗi bài 10 câu: nhìn chữ Hán, chọn nghĩa đúng. Điểm cao nhất của từng bài được lưu lại.</p>
+    <div class="dk-bar" id="ts-lvs"></div>
+    <div id="ts-body" style="display:grid;gap:12px"></div>
+  </section>
+
   <!-- QUIZ -->
   <section id="v-quiz" hidden>
-    <div class="cardmeta"><button class="iconbtn" data-go="today" aria-label="Thoát bài kiểm tra">✕</button><span id="quiz-label" style="flex:1">Kiểm tra nhanh</span><span id="quiz-count"></span></div>
+    <div class="cardmeta"><button class="iconbtn" id="quiz-x" data-go="today" aria-label="Thoát bài kiểm tra">✕</button><span id="quiz-label" style="flex:1">Kiểm tra nhanh</span><span id="quiz-count"></span></div>
     <div class="bar"><i id="quiz-bar" style="width:0"></i></div>
     <div class="panel" style="justify-items:center;text-align:center">
       <span class="hint" id="quiz-q">Chữ này nghĩa là gì?</span>
@@ -915,7 +923,7 @@ nav.tabs[hidden]{display:none!important}
 
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.2/dist/hanzi-writer.min.js"></script>
 <script src="firebase-config.js?v=5"></script>
-<script type="module" src="account.js?v=6"></script>
+<script type="module" src="account.js?v=7"></script>
 <script>
 // ===== 1. DỮ LIỆU: từ vựng HSK 3.0 cấp 1–6 nằm trong thư mục data/ (mỗi cấp một file), tải khi mở web
 // Mỗi từ: [chữ Hán, pinyin, nghĩa tiếng Việt, Hán Việt, ví dụ, khoá thẻ nếu chữ lặp lại ở cấp khác]. Danh sách theo tài liệu HSK 3.0 của cô Mỹ Hạnh (11-2025).
@@ -1148,9 +1156,11 @@ function feedback(ok, detail, last){
   $("sheet-d").textContent = detail;
   $("sheet-next").textContent = last ? "Xem kết quả" : "Tiếp tục"; $("sheet-next").focus();
 }
-let doneDeck = false;
+let doneDeck = false, doneFromTest = false;
 function showDone(title, txt, deck=false){
-  doneDeck = deck; $("btn-more").textContent = deck ? "Quay lại bộ thẻ" : "Tiếp tục lộ trình";
+  const t = typeof doneTest !== "undefined" && doneTest; doneTest = false; doneFromTest = t;
+  doneDeck = deck; $("btn-more").textContent = deck ? "Quay lại bộ thẻ" : t ? "Chọn bài kiểm tra khác" : "Tiếp tục lộ trình";
+  $("btn-quiz2").textContent = t ? "Làm lại bài này" : "Làm thêm bài kiểm tra";
   $("done-title").textContent = title; $("done-txt").textContent = txt;
   const acc = sessionAll ? Math.round(sessionOK/sessionAll*100) + "%" : "–";
   $("done-stats").innerHTML = `<div><span>XP nhận</span><b>+${sessionXP}</b></div><div><span>Chính xác</span><b>${acc}</b></div><div><span>Chuỗi ngày</span><b>${S.streak.count || 0}</b></div>`;
@@ -1159,16 +1169,17 @@ function showDone(title, txt, deck=false){
 
 // ===== 4. GIAO DIỆN
 const $ = id => document.getElementById(id);
-const VIEWS = ["setup","today","decks","deck","study","done","quiz","path","chars","char","pinyin","rad","word","grammar","gpractice","greview","write","wpractice"];
+const VIEWS = ["setup","today","decks","deck","study","done","quiz","tests","path","chars","char","pinyin","rad","word","grammar","gpractice","greview","write","wpractice"];
 function show(v){
   VIEWS.forEach(x => $("v-"+x).hidden = x !== v);
   if (v !== "quiz") $("sheet").hidden = true;
   $("tabs").hidden = ["setup","study","quiz","gpractice","wpractice"].includes(v); // đang làm bài thì ẩn thanh tab cho tập trung
   document.body.classList.toggle("focus", $("tabs").hidden); renderRail();
-  const tab = (v === "done" || v === "decks" || v === "deck") ? "study" : (v === "char" || v === "word") ? "chars" : (v === "gpractice" || v === "greview") ? "grammar" : v === "wpractice" ? "write" : (v === "pinyin" || v === "rad") ? "path" : v;
+  const tab = (v === "done" || v === "decks" || v === "deck") ? "study" : (v === "char" || v === "word") ? "chars" : (v === "gpractice" || v === "greview") ? "grammar" : v === "wpractice" ? "write" : (v === "pinyin" || v === "rad") ? "path" : v === "tests" ? "quiz" : v;
   document.querySelectorAll("#tabs button[data-v]").forEach(b => b.setAttribute("aria-current", b.dataset.v === tab));
   if (v === "today") renderToday();
   if (v === "decks") renderDecks();
+  if (v === "tests") renderTests();
   if (v === "deck") renderDeck();
   if (v === "path") renderPath();
   if (v === "grammar") renderGrammar();
@@ -1181,7 +1192,7 @@ function show(v){
 }
 // ===== Lịch sử trình duyệt: mỗi màn là một "trang" để nút Back / vuốt 2 ngón / vuốt cạnh màn hình quay về màn trước trong web
 const NAV_SESSION = ["study","quiz","gpractice","wpractice","done"]; // màn đang làm bài: thay thế nhau, không chồng thêm
-const NAV_PARENT = {study:"today", quiz:"today", done:"today", gpractice:"grammar", wpractice:"write"};
+const NAV_PARENT = {study:"today", quiz:"tests", done:"today", gpractice:"grammar", wpractice:"write"};
 const NAV_BOOT = Date.now() + "" + Math.random();
 let navIdx = 0, navStack = [], navMode = null, navModeT = 0, curCharKey = null;
 function navState(v){
@@ -1412,14 +1423,16 @@ function speak(text, slow){
 // --- quiz (cũng dùng làm bài xếp trình độ)
 let QZ = [], zi = 0, zScore = 0, zPlacement = false, zLvScore = {};
 const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
-let zKind = "word", zKey = null;
-function startQuiz(placement=false, kind="word", pool=null, key=null){
+let zKind = "word", zKey = null, zTest = null, zTestArgs = null, doneTest = false;
+function startQuiz(placement=false, kind="word", pool=null, key=null, test=null){
   sheetMode = "q";
-  zPlacement = placement; zKind = kind; zKey = key; resetSession(); $("sheet").hidden = true;
+  zPlacement = placement; zKind = kind; zKey = key; zTest = test ? test.id : null; zTestArgs = test ? [placement, kind, pool, key, test] : null;
+  $("quiz-x").dataset.go = test ? "tests" : "today"; resetSession(); $("sheet").hidden = true;
   if (kind !== "word"){
     if (kind === "tone"){ const syl = Object.values(CHARS).filter(c => c.L === 1 && c.py).map(c => ({h:c.py, c:c.c}));
       QZ = shuffle(syl).slice(0,10).map(o => ({kind, h:o.c, p:o.h, ans: pyName(pyTone(o.h).t)})); $("quiz-label").textContent = "Nhận ra thanh điệu"; }
     else { QZ = shuffle(RADS).slice(0,10).map(r => ({kind, h:r.g, p:"Bộ " + r.hv, ans:r.m, r})); $("quiz-label").textContent = "Kiểm tra bộ thủ"; }
+    if (test) $("quiz-label").textContent = test.label;
     zi = 0; zScore = 0; show("quiz"); renderQ(); return;
   }
   const seen = WORDS.filter(w => S.cards[w.k]);
@@ -1427,15 +1440,17 @@ function startQuiz(placement=false, kind="word", pool=null, key=null){
     QZ = []; for (let L = 1; L <= MAXLV; L++) QZ.push(...shuffle((BYLV[L] || []).slice(0, 150)).slice(0, 4));
   } else QZ = shuffle(pool || (seen.length < 4 ? BYLV[curLv()] : seen)).slice(0,10);
   zi = 0; zScore = 0; zLvScore = {};
-  $("quiz-label").textContent = placement ? "Xếp cấp: HSK 1 → 6" : pool ? "Ôn tập bài" : (seen.length < 4 ? `Thử sức với từ HSK ${curLv()}` : "Ôn từ bạn đã học");
+  $("quiz-label").textContent = placement ? "Xếp cấp: HSK 1 → 6" : test ? test.label : pool ? "Ôn tập bài" : (seen.length < 4 ? `Thử sức với từ HSK ${curLv()}` : "Ôn từ bạn đã học");
   show("quiz"); renderQ();
 }
 function renderQ(){
   const w = QZ[zi];
   if (w.kind){
-    $("quiz-q").textContent = w.kind === "tone" ? "Âm tiết này mang thanh mấy?" : "Bộ thủ này nghĩa là gì?";
-    $("quiz-han").textContent = w.kind === "tone" ? w.p : w.h; $("quiz-han").style.fontFamily = w.kind === "tone" ? "var(--font-ui)" : "";
-    $("quiz-py").textContent = w.kind === "tone" ? `${w.h} · bấm nghe` : w.p; $("quiz-py").hidden = w.kind !== "tone"; $("btn-next").hidden = true;
+    $("quiz-q").textContent = w.kind === "tone" ? "Nghe và chọn thanh điệu đúng" : "Bộ thủ này nghĩa là gì?";
+    $("quiz-han").textContent = w.h; $("quiz-han").style.fontFamily = "";
+    // bài thanh điệu: hiện chữ Hán + pinyin chưa có dấu, tự đọc to; trả lời xong mới hiện dấu thanh
+    $("quiz-py").textContent = w.kind === "tone" ? pyTone(w.p).base : w.p; $("quiz-py").hidden = w.kind !== "tone"; $("btn-next").hidden = true;
+    if (w.kind === "tone") setTimeout(() => { if (QZ[zi] === w) say(w.h, w.p); }, 250);
     $("quiz-count").textContent = `${zi+1} / ${QZ.length}`; $("quiz-bar").style.width = (zi/QZ.length*100) + "%";
     const rads = w.kind === "rad" ? shuffle(RADS.filter(r => r.m !== w.ans)).slice(0,3).concat(w.r) : [];
     const pool = w.kind === "tone" ? ["thanh 1","thanh 2","thanh 3","thanh 4","thanh nhẹ"] : rads.map(r => r.m);
@@ -1462,6 +1477,7 @@ function answer(btn){
     if (ok) zScore++;
     if (w.kind === "rad" && ok) S.rad[w.h] = 1;
     if (ok) addXP(10);
+    if (w.kind === "tone") $("quiz-py").textContent = w.p;
     $("quiz-py").hidden = false; touchStreak(); save(); renderStreak();
     feedback(ok, w.kind === "tone" ? `${w.p} là ${w.ans} (chữ ${w.h})` : `${w.h} là bộ ${w.p.replace("Bộ ","")}: ${w.ans}`, zi+1 >= QZ.length);
     return;
@@ -1491,6 +1507,9 @@ function nextQ(){
   $("quiz-bar").style.width = "100%";
   $("sheet").hidden = true;
   const T = `Đúng ${zScore}/${QZ.length} câu`;
+  doneTest = !!zTest;
+  if (zTest){ S.tests = S.tests || {}; const old = S.tests[zTest] || 0; S.tests[zTest] = Math.max(old, zScore); save();
+    if (zKind === "word") return showDone(T, (zScore >= 8 ? "Rất tốt, bạn nhớ khá chắc các từ trong bài này." : "Xem lại các từ trong bài này ở mục Flashcard rồi thử lại nhé.") + (zScore > old && old ? ` Điểm cao nhất mới (trước đây ${old}/10).` : "")); }
   if (zKind === "tone"){ S.steps.pinyin = Math.max(S.steps.pinyin || 0, zScore); save();
     showDone(T, zScore >= 8 ? "Bạn đã hoàn thành phần thanh điệu. Có thể học tiếp 52 bộ thủ thông dụng." : "Cần 8/10 để hoàn thành. Xem lại phần thanh điệu rồi thử lần nữa nhé."); return; }
   if (zKind === "rad"){ showDone(T, `Bạn đã nhớ ${radKnown()}/52 bộ thủ.` + (radDone() ? " Đã hoàn thành phần bộ thủ, giờ chọn cấp HSK để học thôi." : " Cần 40 bộ để hoàn thành.")); return; }
@@ -1789,7 +1808,7 @@ async function openRad(g){
 }
 // ===== 5. GẮN SỰ KIỆN
 document.querySelectorAll("#tabs button[data-v]").forEach(b => b.onclick = () => {
-  const v = b.dataset.v; if (v === "study") show("decks"); else if (v === "chars") show("chars"); else if (v === "quiz") startQuiz(); else show(v);
+  const v = b.dataset.v; if (v === "study") show("decks"); else if (v === "chars") show("chars"); else if (v === "quiz") show("tests"); else show(v);
 });
 $("btn-start").onclick = () => {
   const val = n => document.querySelector(`input[name=${n}]:checked`).value;
@@ -1803,8 +1822,8 @@ $("card").onkeydown = e => { if (e.key === "Enter") flip(); };
 $("btn-speak").onclick = e => { e.stopPropagation(); say(Q[qi].w.h, Q[qi].w.p); };
 $("btn-again").onclick = () => grade(false);
 $("btn-ok").onclick = () => grade(true);
-$("btn-more").onclick = () => show(doneDeck ? "deck" : "today");
-$("btn-quiz2").onclick = () => startQuiz(false, zKind);
+$("btn-more").onclick = () => show(doneDeck ? "deck" : doneFromTest ? "tests" : "today");
+$("btn-quiz2").onclick = () => doneFromTest && zTestArgs ? startQuiz(...zTestArgs) : startQuiz(false, zKind);
 $("quiz-opts").onclick = e => { const b = e.target.closest(".opt"); if (!b || b.disabled) return; if (b.classList.contains("done")) say(b.dataset.h, b.dataset.p); else answer(b); };
 $("quiz-say").onclick = quizSay;
 $("btn-next").onclick = nextQ;
@@ -2274,6 +2293,35 @@ function startDeck(ws, label){
   qi = 0; sessionNew = 0; sessionRev = 0; deckLbl = label; studyBack = "deck";
   show("study"); renderCard();
 }
+// ===== Kiểm tra: chọn bài theo cấp / theo bài
+var TS = (() => { try { return Object.assign({lv: 0}, JSON.parse(localStorage.getItem("hsk-tests") || "{}")); } catch(e){ return {lv: 0}; } })();
+const tsSave = () => { try { localStorage.setItem("hsk-tests", JSON.stringify(TS)); } catch(e){} };
+const tsBest = id => (S.tests || {})[id];
+const tsTile = (id, ic, name, sub, cls = "") => { const b = tsBest(id);
+  return `<button class="dk ${cls}" data-test="${id}">${ic ? `<span class="ic">${ic}</span>` : ""}<b>${name}</b><small>${sub}${sub ? " · " : ""}${b == null ? "Chưa làm" : `Cao nhất ${b}/10`}</small><span class="bar"><i style="width:${(b || 0) * 10}%"></i></span></button>`; };
+function testOf(id){
+  const [t, a] = id.split(":");
+  if (t === "lv") return {label: `Kiểm tra HSK ${a}`, pool: BYLV[a] || []};
+  if (t === "ls"){ const [L, i] = a.split("-"); return {label: `HSK ${L} · Bài ${+i + 1}`, pool: (BYLV[L] || []).slice(i * LESSON, (+i + 1) * LESSON)}; }
+  if (t === "seen") return {label: `Từ đã học · HSK ${a}`, pool: (BYLV[a] || []).filter(w => S.cards[w.k])};
+  if (t === "tone") return {label: "Nhận ra thanh điệu", kind: "tone"};
+  if (t === "rad") return {label: "Kiểm tra bộ thủ", kind: "rad"};
+  return null;
+}
+function renderTests(){
+  const L = TS.lv || curLv(), ws = BYLV[L] || [], nl = Math.ceil(ws.length / LESSON), seen = ws.filter(w => S.cards[w.k]).length;
+  $("ts-lvs").innerHTML = `<div class="seg">${Array.from({length: MAXLV}, (_, i) => `<button data-lv="${i+1}" aria-pressed="${L === i+1}">HSK ${i+1}</button>`).join("")}</div>`;
+  $("ts-body").innerHTML = `<div class="dk-grid">${tsTile("lv:" + L, "全", `Toàn bộ HSK ${L}`, `${ws.length} từ`, "whole")}${seen >= 4 ? tsTile("seen:" + L, "复", "Từ bạn đã học", `${seen} từ`) : ""}</div>
+    <h3 style="margin:4px 0 0">Theo bài (${nl} bài, mỗi bài ${LESSON} từ)</h3>
+    <div class="dk-grid small">${Array.from({length: nl}, (_, i) => tsTile(`ls:${L}-${i}`, "", `Bài ${i+1}`, "")).join("")}</div>
+    <h3 style="margin:4px 0 0">Phát âm và bộ thủ</h3>
+    <div class="dk-grid">${tsTile("tone", "声", "Thanh điệu", "Âm tiết mang thanh mấy")}${tsTile("rad", "部", "52 bộ thủ", "Nghĩa của bộ")}</div>`;
+}
+$("ts-lvs").onclick = e => { const b = e.target.closest("[data-lv]"); if (!b) return; TS.lv = +b.dataset.lv; tsSave(); renderTests(); };
+$("ts-body").onclick = e => { const b = e.target.closest("[data-test]"); if (!b) return; const id = b.dataset.test, t = testOf(id); if (!t) return;
+  if (t.kind) return startQuiz(false, t.kind, null, null, {id, label: t.label});
+  if (t.pool.length < 4) return toast("Bài này chưa đủ từ để kiểm tra");
+  startQuiz(false, "word", t.pool, null, {id, label: t.label}); };
 $("study-x").onclick = () => show(studyBack === "deck" ? "deck" : "today");
 
 // ===== Tab Chữ Hán: duyệt từ theo chủ đề (chủ đề tự soạn, dùng chung với Flashcard)

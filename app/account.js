@@ -209,7 +209,7 @@ function merge(a, b){
   }
   out.cards = cards;
   const maxMap = (x = {}, y = {}) => { const r = { ...x }; for (const k in y) r[k] = Math.max(r[k] || 0, y[k] || 0); return r; };
-  out.steps = maxMap(a.steps, b.steps); out.rad = maxMap(a.rad, b.rad); out.writ = maxMap(a.writ, b.writ); out.reviews = maxMap(a.reviews, b.reviews);
+  out.steps = maxMap(a.steps, b.steps); out.rad = maxMap(a.rad, b.rad); out.writ = maxMap(a.writ, b.writ); out.reviews = maxMap(a.reviews, b.reviews); out.tests = maxMap(a.tests, b.tests);
   out.stars = { ...(other.stars || {}), ...(base.stars || {}) };
   out.tips = { ...(other.tips || {}), ...(base.tips || {}) };
   out.xp = Math.max(a.xp || 0, b.xp || 0);
