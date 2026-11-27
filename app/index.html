@@ -111,7 +111,19 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
 .topic .pct{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .tag{display:inline-block;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
 /* card */
-.card{perspective:1200px;height:340px;cursor:pointer}
+.card{perspective:1200px;height:340px;cursor:pointer;position:relative;z-index:1;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+/* quẹt thẻ kiểu dating app */
+.cstack{position:relative}
+.cstack::before{content:"";position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);transform:translateY(10px) scale(.95);opacity:.75}
+.card.anim{transition:transform .3s ease-out,opacity .3s ease-out}
+.card.enter{transform:scale(.92);opacity:0;transition:none}
+.card.enter .face{transition:none}
+.card.pop{transition:transform .22s ease-out,opacity .22s ease-out}
+.stamp{position:absolute;top:22px;z-index:3;padding:4px 12px;border:3px solid currentColor;border-radius:10px;font-weight:800;font-size:1.1rem;letter-spacing:.04em;text-transform:uppercase;opacity:0;pointer-events:none;background:var(--surface)}
+.stamp.ok{left:20px;color:var(--accent);transform:rotate(-12deg)}
+.stamp.no{right:20px;color:var(--cinnabar);transform:rotate(12deg)}
+html:has(#v-study:not([hidden])){overscroll-behavior-x:none;overflow-x:clip}
+html:has(#v-study:not([hidden])) body{overscroll-behavior-x:none}
 .card .back{overflow-y:auto;align-content:safe center}
 .card .back .vi{font-size:1.05rem;line-height:1.4}
 .card .face{position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;align-content:center;gap:8px;padding:20px;backface-visibility:hidden;transition:transform .45s ease}
@@ -583,17 +595,18 @@ nav.tabs[hidden]{display:none!important}
   <!-- STUDY -->
   <section id="v-study" hidden>
     <div class="cardmeta"><button class="iconbtn" id="study-x" aria-label="Thoát bài học">✕</button><span id="study-label" style="flex:1"></span><span id="study-count"></span></div>
-    <div class="card" id="card" tabindex="0" role="button" aria-label="Lật thẻ">
+    <div class="cstack"><div class="card" id="card" tabindex="0" role="button" aria-label="Lật thẻ. Kéo sang phải là Nhớ rồi, sang trái là Chưa nhớ">
+      <span class="stamp ok" id="st-ok">Nhớ rồi</span><span class="stamp no" id="st-no">Chưa nhớ</span>
       <div class="inner">
         <div class="face front"><span class="tag" id="c-topic"></span><div class="big" id="c-han"></div><span class="hint">Chạm để xem nghĩa</span></div>
         <div class="face back"><div class="big" id="c-han2" style="font-size:2.4rem"></div><div class="py" id="c-py"></div><div class="hint" id="c-hv"></div><div class="vi" id="c-vi"></div><div class="hint zh" id="c-ex" style="max-width:34ch;text-align:center"></div><button class="speak" id="btn-speak" type="button">Nghe phát âm</button><div class="chips" id="c-chips"></div></div>
       </div>
-    </div>
+    </div></div>
     <div class="row">
-      <button class="bad" id="btn-again">Chưa nhớ</button>
-      <button class="good" id="btn-ok">Nhớ rồi</button>
+      <button class="bad" id="btn-again">← Chưa nhớ</button>
+      <button class="good" id="btn-ok">Nhớ rồi →</button>
     </div>
-    <p class="hint" style="margin:0;text-align:center">Phím tắt: Space để lật, 1 = Chưa nhớ, 2 = Nhớ rồi</p>
+    <p class="hint" style="margin:0;text-align:center">Quẹt thẻ sang phải = Nhớ rồi, sang trái = Chưa nhớ (kéo bằng chuột, vuốt 2 ngón trên touchpad, hoặc chạm kéo trên điện thoại). Phím tắt: Space lật, ← / 1 Chưa nhớ, → / 2 Nhớ rồi</p>
   </section>
 
   <!-- FLASHCARD: CHỌN BỘ THẺ -->
@@ -1798,11 +1811,70 @@ $("btn-start").onclick = () => {
   if (S.profile.level === 1 && !Object.keys(S.cards).length) startQuiz(true); else show("today");
 };
 $("btn-go").onclick = () => startStudy();
-$("card").onclick = flip;
+let dragEnd = 0;
+$("card").onclick = () => { if (performance.now() - dragEnd < 300) return; flip(); };
 $("card").onkeydown = e => { if (e.key === "Enter") flip(); };
 $("btn-speak").onclick = e => { e.stopPropagation(); say(Q[qi].w.h, Q[qi].w.p); };
-$("btn-again").onclick = () => grade(false);
-$("btn-ok").onclick = () => grade(true);
+$("btn-again").onclick = () => swipeOut(-1);
+$("btn-ok").onclick = () => swipeOut(1);
+// ===== Quẹt thẻ kiểu dating app: phải = Nhớ rồi, trái = Chưa nhớ
+let swBusy = false;
+function cardMove(dx, anim){
+  const c = $("card"); c.classList.toggle("anim", !!anim);
+  c.style.transform = dx ? `translateX(${dx}px) rotate(${dx / 16}deg)` : "";
+  const p = Math.min(1, Math.abs(dx) / 110);
+  $("st-ok").style.opacity = dx > 0 ? p : 0; $("st-no").style.opacity = dx < 0 ? p : 0;
+}
+function swipeOut(dir){
+  if (swBusy || $("v-study").hidden || !Q[qi]) return; swBusy = true;
+  const c = $("card"); cardMove(dir * Math.max(window.innerWidth, 700), true); c.style.opacity = "0";
+  setTimeout(() => {
+    c.classList.remove("anim"); c.classList.add("enter"); cardMove(0); c.style.opacity = "";
+    swBusy = false; grade(dir > 0);
+    void c.offsetWidth; c.classList.remove("enter"); c.classList.add("pop");
+    setTimeout(() => c.classList.remove("pop"), 240);
+  }, 280);
+}
+// Kéo bằng chuột hoặc ngón tay
+let drag = null;
+$("card").addEventListener("pointerdown", e => {
+  if (swBusy || e.button > 0 || e.target.closest("button,a,input,textarea")) return;
+  drag = {id: e.pointerId, x0: e.clientX, y0: e.clientY, on: false, pts: []};
+});
+window.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if (!drag.on){
+    if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)){ drag.on = true; try { $("card").setPointerCapture(e.pointerId); } catch(_){} }
+    else { if (Math.abs(dy) > 10) drag = null; return; }
+  }
+  e.preventDefault();
+  drag.pts.push([performance.now(), dx]); if (drag.pts.length > 5) drag.pts.shift();
+  cardMove(dx);
+}, {passive: false});
+const dragStop = e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag; drag = null; if (!d.on) return;
+  dragEnd = performance.now();
+  const dx = e.clientX - d.x0, a = d.pts[0], b = d.pts[d.pts.length - 1];
+  const v = a && b && b[0] > a[0] ? (b[1] - a[1]) / (b[0] - a[0]) : 0; // px/ms
+  if (e.type !== "pointercancel" && (Math.abs(dx) > 100 || (Math.abs(v) > 0.5 && Math.abs(dx) > 30 && Math.sign(v) === Math.sign(dx)))) swipeOut(Math.sign(dx));
+  else cardMove(0, true);
+};
+window.addEventListener("pointerup", dragStop); window.addEventListener("pointercancel", dragStop);
+// Vuốt 2 ngón ngang trên touchpad (chặn luôn cử chỉ Quay lại của trình duyệt khi đang học thẻ)
+let wh = {dx: 0, lock: 0, tm: 0};
+window.addEventListener("wheel", e => {
+  if ($("v-study").hidden || !$("sheet").hidden) return;
+  if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const now = performance.now();
+  if (swBusy || now < wh.lock){ wh.lock = now + 250; return; } // bỏ qua đà quán tính sau một lần quẹt
+  wh.dx -= e.deltaX * (e.deltaMode === 1 ? 16 : 1);
+  cardMove(wh.dx); clearTimeout(wh.tm);
+  if (Math.abs(wh.dx) > 120){ const d = Math.sign(wh.dx); wh.dx = 0; wh.lock = now + 400; swipeOut(d); return; }
+  wh.tm = setTimeout(() => { wh.dx = 0; cardMove(0, true); }, 160);
+}, {passive: false, capture: true});
 $("btn-more").onclick = () => show(doneDeck ? "deck" : "today");
 $("btn-quiz2").onclick = () => startQuiz(false, zKind);
 $("quiz-opts").onclick = e => { const b = e.target.closest(".opt"); if (!b || b.disabled) return; if (b.classList.contains("done")) say(b.dataset.h, b.dataset.p); else answer(b); };
@@ -1841,8 +1913,8 @@ document.addEventListener("keydown", e => {
   if (!$("sheet").hidden && e.key === "Enter" && document.activeElement !== $("sheet-next")){ e.preventDefault(); $("sheet-next").click(); return; }
   if ($("v-study").hidden) return;
   if (e.key === " "){ e.preventDefault(); flip(); }
-  if (e.key === "1") grade(false);
-  if (e.key === "2") grade(true);
+  if (e.key === "1" || e.key === "ArrowLeft"){ e.preventDefault(); swipeOut(-1); }
+  if (e.key === "2" || e.key === "ArrowRight"){ e.preventDefault(); swipeOut(1); }
 });
 
 // ===== 5c. TỪ ĐIỂN: tra từ, mục từ chi tiết, phát âm từng âm tiết, bóc tách và từ ghép theo cấp
