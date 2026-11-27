@@ -122,6 +122,7 @@ nav.tabs button[aria-current="true"]{color:var(--surface);background:var(--accen
 .card.out .face{transition:transform .45s ease,opacity .4s ease}
 .card.out .stamp{transition:opacity .4s ease}
 .card.enter .stamp{transition:none}
+.card.nostamp .stamp{display:none}
 .card-next .face{position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;align-content:center;gap:8px;padding:20px}
 .card-next.back-anim{transition:transform .35s cubic-bezier(.22,.61,.36,1)}
 .card.ghost{position:absolute;inset:0;z-index:2;pointer-events:none;margin:0}
@@ -1981,6 +1982,7 @@ function paintCard(dx){
   if (dx) c.style.setProperty("--fade", String(1 - p * 0.6)); else c.style.removeProperty("--fade");
   const n = $("card-next"); n.style.transform = NEXT_T(p); // thẻ sau tiến lên dần
   n.style.setProperty("--nx", String(p * p)); // chữ thẻ sau hiện dần
+  if (dx) c.classList.remove("nostamp"); // nhãn chỉ hiện lại khi bắt đầu kéo thẻ mới
   $("st-ok").style.opacity = dx > 0 ? p : 0; $("st-no").style.opacity = dx < 0 ? p : 0;
 }
 function cardMove(dx, anim){
@@ -1999,13 +2001,14 @@ function swipeOut(dir){
   c.parentNode.appendChild(g);
   const nT = n.style.transform || NEXT_T(0);
   c.classList.remove("anim", "cpop"); c.classList.add("enter"); c.style.transform = nT; c.style.removeProperty("--fade");
-  $("st-ok").style.opacity = 0; $("st-no").style.opacity = 0;
+  $("st-ok").style.opacity = 0; $("st-no").style.opacity = 0; c.classList.add("nostamp"); // thẻ mới: ẩn hẳn nhãn
   n.classList.remove("back-anim"); n.style.transform = NEXT_T(0); n.style.setProperty("--nx", "0");
   grade(dir > 0);
-  void g.offsetWidth; void c.offsetWidth;
-  g.classList.add("out"); g.style.transform = `translateX(${dir * W}px) translateY(40px) rotate(${dir * 28}deg)`; g.style.setProperty("--gone", "0");
-  g.querySelector(dir > 0 ? ".stamp.ok" : ".stamp.no").style.opacity = 1;
+  const gOn = g.querySelector(dir > 0 ? ".stamp.ok" : ".stamp.no"); gOn.style.opacity = 1;
   g.querySelector(dir > 0 ? ".stamp.no" : ".stamp.ok").style.opacity = 0;
+  void g.offsetWidth; void c.offsetWidth;
+  // thẻ bị quẹt bay đi, nhãn của nó mờ dần cùng thẻ
+  g.classList.add("out"); g.style.transform = `translateX(${dir * W}px) translateY(40px) rotate(${dir * 28}deg)`; g.style.setProperty("--gone", "0"); gOn.style.opacity = 0;
   c.classList.remove("enter"); c.classList.add("cpop"); c.style.transform = "";
   setTimeout(() => { c.classList.remove("cpop"); }, 360);
   setTimeout(() => g.remove(), 520);
