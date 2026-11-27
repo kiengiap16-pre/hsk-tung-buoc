@@ -364,6 +364,9 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 .syl b{font-size:1.2rem}
 .syl span{font-size:.78rem;color:var(--muted)}
 .syl.warn{border-color:var(--accent);background:var(--accent-soft)}
+.sylgrid .syl{grid-template-columns:1fr;gap:2px;padding:8px 10px;cursor:pointer;color:inherit;font:inherit;text-align:left;transition:transform .1s,border-color .15s}
+.sylgrid .syl:hover{border-color:var(--accent)}.sylgrid .syl:active{transform:scale(.97)}
+.sylgrid .syl .dm{font-size:.78rem;color:var(--accent);font-weight:600;margin-top:2px}
 #quiz-py{cursor:pointer}
 /* HUD + bản đồ lộ trình (kiểu bài học nối nhau) */
 .hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -851,15 +854,16 @@ nav.tabs[hidden]{display:none!important}
       <h2>Pinyin và thanh điệu</h2>
       <p class="muted" style="margin:0">Pinyin là cách viết âm tiếng Trung bằng chữ Latin. Mỗi âm tiết có một thanh điệu, đổi thanh là đổi nghĩa. Bấm vào từng thẻ để nghe.</p>
       <div class="tones" id="tones"></div>
-      <p class="hint" style="margin:0">Đường kẻ là độ cao giọng theo thang 5 bậc (5 cao nhất). Phát âm dùng giọng đọc tiếng Trung có sẵn trên máy bạn, có máy sẽ không có.</p>
+      <p class="hint" style="margin:0">Đường kẻ là độ cao giọng theo thang 5 bậc (5 cao nhất). Bấm một lần nghe tốc độ thường, bấm lần nữa nghe chậm.</p>
     </div>
     <div class="panel">
       <h2>Thanh mẫu (phụ âm đầu)</h2>
-      <p class="muted" style="margin:0">Có 21 thanh mẫu. Ô viền đất nung là những âm người Việt hay đọc sai.</p>
+      <p class="muted" style="margin:0">Có 21 thanh mẫu. Ô viền đất nung là những âm người Việt hay đọc sai. Phụ âm không đọc riêng được nên mỗi ô đọc kèm một nguyên âm (bo, po, mo...). Bấm ô để nghe, bấm lần nữa để nghe chậm.</p>
       <div class="sylgrid" id="initials"></div>
     </div>
     <div class="panel">
       <h2>Vận mẫu (vần)</h2>
+      <p class="muted" style="margin:0">Vận mẫu đứng một mình thì viết bằng y/w (i → yi, u → wu, ü → yu). Riêng ong luôn đi sau phụ âm nên đọc mẫu là hong.</p>
       <div class="sylgrid" id="finals"></div>
     </div>
     <div class="panel">
@@ -1434,6 +1438,14 @@ function sayChain(h, p, slow){
     els[i].onended = () => play(i + 1); els[i].play().catch(() => { if (i === 0) speak(h); }); };
   play(0); return true;
 }
+function sayDemo(syl){ // âm đọc mẫu thanh mẫu / vận mẫu: lần 1 bình thường, bấm lại trong 8 giây thì đọc chậm
+  const now = Date.now(), again = lastSay.h === syl && now - lastSay.at < 8000;
+  const slow = again ? !lastSay.slow : false; lastSay = {h: syl, at: now, slow};
+  if (slow) toast("Đọc chậm");
+  try { if (audEl) audEl.pause(); audEl = new Audio(`audio/py/${syl}.mp3`);
+    if (slow){ audEl.preservesPitch = true; audEl.playbackRate = 0.7; }
+    audEl.play().catch(() => speak(markPy(syl.slice(0, -1), +syl.slice(-1)), slow)); } catch(e){}
+}
 function saySyl(syl){ // âm tiết pinyin có số thanh, ví dụ "ma3"
   if (AUD && AUD.py && AUD.py.includes(syl)){ try { if (audEl) audEl.pause(); audEl = new Audio(`audio/py/${syl}.mp3`); audEl.play(); return true; } catch(e){} }
   return false;
@@ -1734,6 +1746,9 @@ const TONES = [
   {n:0,s:"ma",c:"吗",m:"không? (hỏi)",pts:"45,30 55,30",d:"Thanh nhẹ: ngắn, nhẹ, không đánh dấu."}
 ];
 const INITIALS = [["b","p không bật hơi"],["p","p bật hơi mạnh",1],["m","m"],["f","ph"],["d","t không bật hơi"],["t","th bật hơi",1],["n","n"],["l","l"],["g","c / k"],["k","kh bật hơi",1],["h","h (hơi từ cổ)"],["j","ch, mặt lưỡi",1],["q","ch bật hơi, mặt lưỡi",1],["x","x, mặt lưỡi"],["zh","tr uốn lưỡi",1],["ch","tr bật hơi, uốn lưỡi",1],["sh","s uốn lưỡi"],["r","r uốn lưỡi, gần d nhẹ",1],["z","ch đầu lưỡi",1],["c","ts bật hơi",1],["s","x đầu lưỡi"]];
+// Âm tiết đọc mẫu cho từng thanh mẫu / vận mẫu (giáo viên thường đọc kèm nguyên âm: bo, po, mo, fo...). Vận mẫu đứng một mình viết bằng y/w.
+const PY_DEMO = {b:"bo",p:"po",m:"mo",f:"fo",d:"de",t:"te",n:"ne",l:"le",g:"ge",k:"ke",h:"he",j:"ji",q:"qi",x:"xi",zh:"zhi",ch:"chi",sh:"shi",r:"ri",z:"zi",c:"ci",s:"si"};
+const FIN_DEMO = {a:"a",o:"o",e:"e",i:"yi",u:"wu","ü":"yu",ai:"ai",ei:"ei",ao:"ao",ou:"ou",an:"an",en:"en",ang:"ang",eng:"eng",ong:"hong",ia:"ya",ie:"ye",iao:"yao",iu:"you",ian:"yan",in:"yin",ing:"ying",ua:"wa",uo:"wo",uai:"wai",ui:"wei",uan:"wan",un:"wen","üe":"yue",er:"er"};
 const FINALS = [["a","a"],["o","ua (môi tròn)"],["e","ưa (ơ)",1],["i","i"],["u","u"],["ü","uy (môi tròn, nói i)",1],["ai","ai"],["ei","ây",1],["ao","ao"],["ou","âu",1],["an","an"],["en","ân",1],["ang","ang"],["eng","âng",1],["ong","ung"],["ia","ia"],["ie","iê"],["iao","eo"],["iu","iêu",1],["ian","iên",1],["in","in"],["ing","inh"],["ua","oa"],["uo","ua",1],["uai","oai"],["ui","uây",1],["uan","oan"],["un","uân"],["üe","uê"],["er","ơ uốn lưỡi",1]];
 const RAD_RAW = `人|亻|nhân|người|你 他 作
 刀|刂|đao|con dao|到 别
@@ -1805,8 +1820,9 @@ function stepsHtml(){
 function renderPinyin(){
   $("py-status").textContent = pyDone() ? "Đã hoàn thành" : "Chưa hoàn thành";
   $("tones").innerHTML = TONES.map(t => `<button class="tone" data-say="${t.c}"><svg viewBox="0 0 100 50" aria-hidden="true"><line x1="0" y1="5" x2="100" y2="5"/><line x1="0" y1="25" x2="100" y2="25"/><line x1="0" y1="45" x2="100" y2="45"/><polyline points="${t.pts}"/></svg><span class="ts">${t.s}</span><span class="han">${t.c}</span><span class="muted">${t.n ? "Thanh " + t.n : "Thanh nhẹ"} · ${t.m}</span><span class="hint">${t.d}</span></button>`).join("");
-  const cell = ([a,b,w]) => `<div class="syl ${w?"warn":""}"><b>${a}</b><span>${b}</span></div>`;
-  $("initials").innerHTML = INITIALS.map(cell).join(""); $("finals").innerHTML = FINALS.map(cell).join("");
+  const cell = demo => ([a,b,w]) => { const d = demo[a], t = d === "er" ? 2 : 1;
+    return `<button class="syl ${w?"warn":""}" data-syl="${d}${t}" title="Bấm để nghe, bấm lần nữa để nghe chậm"><b>${a}</b><span>${b}</span><span class="dm">🔊 ${markPy(d, t)}</span></button>`; };
+  $("initials").innerHTML = INITIALS.map(cell(PY_DEMO)).join(""); $("finals").innerHTML = FINALS.map(cell(FIN_DEMO)).join("");
 }
 function renderRad(){
   $("rad-status").textContent = `Đã nhớ ${radKnown()}/52`;
@@ -1940,6 +1956,7 @@ $("map").onclick = e => { const u = e.target.closest("[data-lv]");
 $("char-lv").onclick = e => { const b = e.target.closest("[data-clv]"); if (b){ S.charLv = +b.dataset.clv; save(); renderChars(); } };
 document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (!g || g.disabled) return;
   if (g.matches(".back, .cardmeta .iconbtn")) navBack(g.dataset.go); else show(g.dataset.go); });
+["initials","finals"].forEach(id => $(id).onclick = e => { const b = e.target.closest("[data-syl]"); if (b) sayDemo(b.dataset.syl); });
 $("tones").onclick = e => { const b = e.target.closest("[data-say]"); if (!b) return; const t = TONES.find(x => x.c === b.dataset.say); if (!(t && saySyl("ma" + (t.n || 5)))) say(b.dataset.say); };
 $("quiz-py").onclick = () => { const w = QZ[zi]; if (w && w.kind === "tone") say(w.h, w.p); };
 $("py-quiz").onclick = () => startQuiz(false, "tone");
