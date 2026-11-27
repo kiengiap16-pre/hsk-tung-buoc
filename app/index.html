@@ -111,7 +111,24 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
 .topic .pct{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .tag{display:inline-block;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
 /* card */
-.card{perspective:1200px;height:340px;cursor:pointer}
+.card{perspective:1200px;height:340px;cursor:pointer;position:relative;z-index:1;will-change:transform,opacity;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+/* quẹt thẻ kiểu dating app */
+.cstack{position:relative}
+.card-next{position:absolute;inset:0;height:340px;transform:translateY(10px) scale(.95);transform-origin:50% 60%;pointer-events:none}
+.card-next .face{position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;align-content:center;gap:8px;padding:20px}
+.card-next.back-anim{transition:transform .35s cubic-bezier(.22,.61,.36,1)}
+.card.ghost{position:absolute;inset:0;z-index:2;pointer-events:none;margin:0}
+.card.anim{transition:transform .42s cubic-bezier(.34,1.4,.64,1),opacity .42s ease}
+.card.out{transition:transform .5s cubic-bezier(.22,.61,.36,1),opacity .45s ease}
+.card.enter{transition:none}
+.card.enter .face{transition:none}
+.card.cpop{transition:transform .35s cubic-bezier(.22,.61,.36,1),opacity .35s ease}
+.stamp{transition:opacity .12s linear}
+.stamp{position:absolute;top:22px;z-index:3;padding:4px 12px;border:3px solid currentColor;border-radius:10px;font-weight:800;font-size:1.1rem;letter-spacing:.04em;text-transform:uppercase;opacity:0;pointer-events:none;background:var(--surface)}
+.stamp.ok{left:20px;color:var(--accent);transform:rotate(-12deg)}
+.stamp.no{right:20px;color:var(--cinnabar);transform:rotate(12deg)}
+html:has(#v-study:not([hidden])){overscroll-behavior-x:none;overflow-x:clip}
+html:has(#v-study:not([hidden])) body{overscroll-behavior-x:none}
 .card .back{overflow-y:auto;align-content:safe center}
 .card .back .vi{font-size:1.05rem;line-height:1.4}
 .card .face{position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;align-content:center;gap:8px;padding:20px;backface-visibility:hidden;transition:transform .45s ease}
@@ -583,17 +600,18 @@ nav.tabs[hidden]{display:none!important}
   <!-- STUDY -->
   <section id="v-study" hidden>
     <div class="cardmeta"><button class="iconbtn" id="study-x" aria-label="Thoát bài học">✕</button><span id="study-label" style="flex:1"></span><span id="study-count"></span></div>
-    <div class="card" id="card" tabindex="0" role="button" aria-label="Lật thẻ">
+    <div class="cstack"><div class="card-next" id="card-next" aria-hidden="true"><div class="face"><span class="tag" id="cn-topic"></span><div class="big" id="cn-han"></div><span class="hint">Chạm để xem nghĩa</span></div></div><div class="card" id="card" tabindex="0" role="button" aria-label="Lật thẻ. Kéo sang phải là Nhớ rồi, sang trái là Chưa nhớ">
+      <span class="stamp ok" id="st-ok">Nhớ rồi</span><span class="stamp no" id="st-no">Chưa nhớ</span>
       <div class="inner">
         <div class="face front"><span class="tag" id="c-topic"></span><div class="big" id="c-han"></div><span class="hint">Chạm để xem nghĩa</span></div>
         <div class="face back"><div class="big" id="c-han2" style="font-size:2.4rem"></div><div class="py" id="c-py"></div><div class="hint" id="c-hv"></div><div class="vi" id="c-vi"></div><div class="hint zh" id="c-ex" style="max-width:34ch;text-align:center"></div><button class="speak" id="btn-speak" type="button">Nghe phát âm</button><div class="chips" id="c-chips"></div></div>
       </div>
-    </div>
+    </div></div>
     <div class="row">
-      <button class="bad" id="btn-again">Chưa nhớ</button>
-      <button class="good" id="btn-ok">Nhớ rồi</button>
+      <button class="bad" id="btn-again">← Chưa nhớ</button>
+      <button class="good" id="btn-ok">Nhớ rồi →</button>
     </div>
-    <p class="hint" style="margin:0;text-align:center">Phím tắt: Space để lật, 1 = Chưa nhớ, 2 = Nhớ rồi</p>
+    <p class="hint" style="margin:0;text-align:center">Quẹt thẻ sang phải = Nhớ rồi, sang trái = Chưa nhớ (kéo bằng chuột, vuốt 2 ngón trên touchpad, hoặc chạm kéo trên điện thoại). Phím tắt: Space lật, ← / 1 Chưa nhớ, → / 2 Nhớ rồi</p>
   </section>
 
   <!-- FLASHCARD: CHỌN BỘ THẺ -->
@@ -1357,7 +1375,12 @@ function startStudy(extra=0, lk=null){
 function renderCard(){
   const {w,isNew} = Q[qi];
   $("card").classList.remove("flipped");
-  $("c-topic").textContent = deckLbl ? `${deckLbl} · ${w.ext ? "HSK 7–9 mở rộng" : "HSK " + w.L}` : `HSK ${w.L} · Bài ${w.ls+1}`;
+  const lbl = w => deckLbl ? `${deckLbl} · ${w.ext ? "HSK 7–9 mở rộng" : "HSK " + w.L}` : `HSK ${w.L} · Bài ${w.ls+1}`;
+  $("c-topic").textContent = lbl(w);
+  // thẻ phía sau: hiện sẵn từ tiếp theo để khi quẹt thấy ngay
+  const nx = Q[qi+1] && Q[qi+1].w;
+  $("cn-topic").textContent = nx ? lbl(nx) : ""; $("cn-topic").hidden = !nx;
+  $("cn-han").textContent = nx ? nx.h : ""; $("card-next").querySelector(".hint").hidden = !nx;
   $("c-hv").textContent = w.hv ? "Hán Việt: " + w.hv : "";
   $("c-han").textContent = w.h; $("c-han2").textContent = w.h; $("c-py").textContent = w.p; $("c-vi").textContent = w.v; $("c-ex").textContent = w.ex ? "Ví dụ: " + w.ex : "";
   $("c-chips").innerHTML = `<button type="button" data-w="${w.k}">Chi tiết từ ›</button>` + [...new Set(w.h)].filter(c => CHARS[c]).map(c => `<button type="button" data-c="${c}" aria-label="Xem chữ ${c}">${c} ›</button>`).join("");
@@ -1817,11 +1840,92 @@ $("btn-start").onclick = () => {
   if (S.profile.level === 1 && !Object.keys(S.cards).length) startQuiz(true); else show("today");
 };
 $("btn-go").onclick = () => startStudy();
-$("card").onclick = flip;
+let dragEnd = 0;
+$("card").onclick = () => { if (performance.now() - dragEnd < 300) return; flip(); };
 $("card").onkeydown = e => { if (e.key === "Enter") flip(); };
 $("btn-speak").onclick = e => { e.stopPropagation(); say(Q[qi].w.h, Q[qi].w.p); };
-$("btn-again").onclick = () => grade(false);
-$("btn-ok").onclick = () => grade(true);
+$("btn-again").onclick = () => swipeOut(-1);
+$("btn-ok").onclick = () => swipeOut(1);
+// ===== Quẹt thẻ kiểu dating app: phải = Nhớ rồi, trái = Chưa nhớ
+let swBusy = false, mvRaf = 0, mvDx = 0;
+const SW_DIST = 160; // quãng kéo để thẻ bay đi (px)
+const NEXT_T = p => `translateY(${10 * (1 - p)}px) scale(${0.95 + 0.05 * p})`;
+function paintCard(dx){
+  const c = $("card"), p = Math.min(1, Math.abs(dx) / SW_DIST);
+  c.style.transform = dx ? `translateX(${dx}px) translateY(${Math.abs(dx) * 0.04}px) rotate(${dx / 20}deg)` : "";
+  c.style.opacity = dx ? String(1 - p * 0.55) : ""; // mờ dần khi quẹt xa
+  $("card-next").style.transform = NEXT_T(p); // thẻ sau tiến lên dần
+  $("st-ok").style.opacity = dx > 0 ? p : 0; $("st-no").style.opacity = dx < 0 ? p : 0;
+}
+function cardMove(dx, anim){
+  const c = $("card"), n = $("card-next"); c.classList.toggle("anim", !!anim); n.classList.toggle("back-anim", !!anim);
+  if (anim){ cancelAnimationFrame(mvRaf); mvRaf = 0; paintCard(dx); return; }
+  mvDx = dx; if (!mvRaf) mvRaf = requestAnimationFrame(() => { mvRaf = 0; paintCard(mvDx); });
+}
+function swipeOut(dir){
+  if (swBusy || $("v-study").hidden || !Q[qi]) return; swBusy = true;
+  cancelAnimationFrame(mvRaf); mvRaf = 0;
+  const c = $("card"), n = $("card-next"), W = Math.max(window.innerWidth, 700) * 0.9;
+  // Thẻ cũ: tách ra một bản sao để bay đi, thẻ thật lập tức thành từ tiếp theo
+  const g = c.cloneNode(true); g.removeAttribute("id"); g.querySelectorAll("[id]").forEach(x => x.removeAttribute("id"));
+  g.classList.remove("anim", "cpop", "enter"); g.classList.add("ghost"); g.setAttribute("aria-hidden", "true");
+  g.style.transform = c.style.transform; g.style.opacity = c.style.opacity || "1";
+  c.parentNode.appendChild(g);
+  const nT = n.style.transform || NEXT_T(0);
+  c.classList.remove("anim", "cpop"); c.classList.add("enter"); c.style.transform = nT; c.style.opacity = "";
+  $("st-ok").style.opacity = 0; $("st-no").style.opacity = 0;
+  n.classList.remove("back-anim"); n.style.transform = NEXT_T(0);
+  grade(dir > 0);
+  void g.offsetWidth; void c.offsetWidth;
+  g.classList.add("out"); g.style.transform = `translateX(${dir * W}px) translateY(40px) rotate(${dir * 28}deg)`; g.style.opacity = "0";
+  g.querySelector(dir > 0 ? ".stamp.ok" : ".stamp.no").style.opacity = 1;
+  g.querySelector(dir > 0 ? ".stamp.no" : ".stamp.ok").style.opacity = 0;
+  c.classList.remove("enter"); c.classList.add("cpop"); c.style.transform = "";
+  setTimeout(() => { c.classList.remove("cpop"); }, 360);
+  setTimeout(() => g.remove(), 520);
+  setTimeout(() => { swBusy = false; }, 180);
+}
+// Kéo bằng chuột hoặc ngón tay
+let drag = null;
+$("card").addEventListener("pointerdown", e => {
+  if (swBusy || e.button > 0 || e.target.closest("button,a,input,textarea")) return;
+  drag = {id: e.pointerId, x0: e.clientX, y0: e.clientY, on: false, pts: []};
+});
+window.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  if (!drag.on){
+    if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)){ drag.on = true; drag.x0 += Math.sign(dx) * 8; try { $("card").setPointerCapture(e.pointerId); } catch(_){} }
+    else { if (Math.abs(dy) > 10) drag = null; return; }
+  }
+  e.preventDefault();
+  const x = e.clientX - drag.x0;
+  drag.pts.push([performance.now(), x]); if (drag.pts.length > 6) drag.pts.shift();
+  cardMove(x);
+}, {passive: false});
+const dragStop = e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag; drag = null; if (!d.on) return;
+  dragEnd = performance.now();
+  const dx = e.clientX - d.x0, a = d.pts[0], b = d.pts[d.pts.length - 1];
+  const v = a && b && b[0] > a[0] ? (b[1] - a[1]) / (b[0] - a[0]) : 0; // px/ms
+  if (e.type !== "pointercancel" && (Math.abs(dx) > SW_DIST || (Math.abs(v) > 0.55 && Math.abs(dx) > 60 && Math.sign(v) === Math.sign(dx)))) swipeOut(Math.sign(dx));
+  else cardMove(0, true);
+};
+window.addEventListener("pointerup", dragStop); window.addEventListener("pointercancel", dragStop);
+// Vuốt 2 ngón ngang trên touchpad (chặn luôn cử chỉ Quay lại của trình duyệt khi đang học thẻ)
+let wh = {dx: 0, lock: 0, tm: 0};
+window.addEventListener("wheel", e => {
+  if ($("v-study").hidden || !$("sheet").hidden) return;
+  if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const now = performance.now();
+  if (swBusy || now < wh.lock){ wh.lock = now + 250; return; } // bỏ qua đà quán tính sau một lần quẹt
+  wh.dx -= e.deltaX * (e.deltaMode === 1 ? 16 : 1);
+  cardMove(wh.dx); clearTimeout(wh.tm);
+  if (Math.abs(wh.dx) > SW_DIST + 30){ const d = Math.sign(wh.dx); wh.dx = 0; wh.lock = now + 400; swipeOut(d); return; }
+  wh.tm = setTimeout(() => { wh.dx = 0; cardMove(0, true); }, 200);
+}, {passive: false, capture: true});
 $("btn-more").onclick = () => show(doneDeck ? "deck" : doneFromTest ? "tests" : "today");
 $("btn-quiz2").onclick = () => doneFromTest && zTestArgs ? startQuiz(...zTestArgs) : startQuiz(false, zKind);
 $("quiz-opts").onclick = e => { const b = e.target.closest(".opt"); if (!b || b.disabled) return; if (b.classList.contains("done")) say(b.dataset.h, b.dataset.p); else answer(b); };
@@ -1860,8 +1964,8 @@ document.addEventListener("keydown", e => {
   if (!$("sheet").hidden && e.key === "Enter" && document.activeElement !== $("sheet-next")){ e.preventDefault(); $("sheet-next").click(); return; }
   if ($("v-study").hidden) return;
   if (e.key === " "){ e.preventDefault(); flip(); }
-  if (e.key === "1") grade(false);
-  if (e.key === "2") grade(true);
+  if (e.key === "1" || e.key === "ArrowLeft"){ e.preventDefault(); swipeOut(-1); }
+  if (e.key === "2" || e.key === "ArrowRight"){ e.preventDefault(); swipeOut(1); }
 });
 
 // ===== 5c. TỪ ĐIỂN: tra từ, mục từ chi tiết, phát âm từng âm tiết, bóc tách và từ ghép theo cấp
