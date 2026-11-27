@@ -114,12 +114,15 @@ nav.tabs button[aria-current="true"]{color:var(--accent);background:var(--accent
 .card{perspective:1200px;height:340px;cursor:pointer;position:relative;z-index:1;will-change:transform,opacity;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 /* quẹt thẻ kiểu dating app */
 .cstack{position:relative}
-.cstack::before{content:"";position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);transform:translateY(10px) scale(.95);opacity:.75}
+.card-next{position:absolute;inset:0;height:340px;transform:translateY(10px) scale(.95);transform-origin:50% 60%;pointer-events:none}
+.card-next .face{position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;align-content:center;gap:8px;padding:20px}
+.card-next.back-anim{transition:transform .35s cubic-bezier(.22,.61,.36,1)}
+.card.ghost{position:absolute;inset:0;z-index:2;pointer-events:none;margin:0}
 .card.anim{transition:transform .42s cubic-bezier(.34,1.4,.64,1),opacity .42s ease}
 .card.out{transition:transform .5s cubic-bezier(.22,.61,.36,1),opacity .45s ease}
-.card.enter{transform:translateY(10px) scale(.95);opacity:.6;transition:none}
+.card.enter{transition:none}
 .card.enter .face{transition:none}
-.card.pop{transition:transform .35s cubic-bezier(.22,.61,.36,1),opacity .35s ease}
+.card.cpop{transition:transform .35s cubic-bezier(.22,.61,.36,1),opacity .35s ease}
 .stamp{transition:opacity .12s linear}
 .stamp{position:absolute;top:22px;z-index:3;padding:4px 12px;border:3px solid currentColor;border-radius:10px;font-weight:800;font-size:1.1rem;letter-spacing:.04em;text-transform:uppercase;opacity:0;pointer-events:none;background:var(--surface)}
 .stamp.ok{left:20px;color:var(--accent);transform:rotate(-12deg)}
@@ -597,7 +600,7 @@ nav.tabs[hidden]{display:none!important}
   <!-- STUDY -->
   <section id="v-study" hidden>
     <div class="cardmeta"><button class="iconbtn" id="study-x" aria-label="Thoát bài học">✕</button><span id="study-label" style="flex:1"></span><span id="study-count"></span></div>
-    <div class="cstack"><div class="card" id="card" tabindex="0" role="button" aria-label="Lật thẻ. Kéo sang phải là Nhớ rồi, sang trái là Chưa nhớ">
+    <div class="cstack"><div class="card-next" id="card-next" aria-hidden="true"><div class="face"><span class="tag" id="cn-topic"></span><div class="big" id="cn-han"></div><span class="hint">Chạm để xem nghĩa</span></div></div><div class="card" id="card" tabindex="0" role="button" aria-label="Lật thẻ. Kéo sang phải là Nhớ rồi, sang trái là Chưa nhớ">
       <span class="stamp ok" id="st-ok">Nhớ rồi</span><span class="stamp no" id="st-no">Chưa nhớ</span>
       <div class="inner">
         <div class="face front"><span class="tag" id="c-topic"></span><div class="big" id="c-han"></div><span class="hint">Chạm để xem nghĩa</span></div>
@@ -1361,7 +1364,12 @@ function startStudy(extra=0, lk=null){
 function renderCard(){
   const {w,isNew} = Q[qi];
   $("card").classList.remove("flipped");
-  $("c-topic").textContent = deckLbl ? `${deckLbl} · ${w.ext ? "HSK 7–9 mở rộng" : "HSK " + w.L}` : `HSK ${w.L} · Bài ${w.ls+1}`;
+  const lbl = w => deckLbl ? `${deckLbl} · ${w.ext ? "HSK 7–9 mở rộng" : "HSK " + w.L}` : `HSK ${w.L} · Bài ${w.ls+1}`;
+  $("c-topic").textContent = lbl(w);
+  // thẻ phía sau: hiện sẵn từ tiếp theo để khi quẹt thấy ngay
+  const nx = Q[qi+1] && Q[qi+1].w;
+  $("cn-topic").textContent = nx ? lbl(nx) : ""; $("cn-topic").hidden = !nx;
+  $("cn-han").textContent = nx ? nx.h : ""; $("card-next").querySelector(".hint").hidden = !nx;
   $("c-hv").textContent = w.hv ? "Hán Việt: " + w.hv : "";
   $("c-han").textContent = w.h; $("c-han2").textContent = w.h; $("c-py").textContent = w.p; $("c-vi").textContent = w.v; $("c-ex").textContent = w.ex ? "Ví dụ: " + w.ex : "";
   $("c-chips").innerHTML = `<button type="button" data-w="${w.k}">Chi tiết từ ›</button>` + [...new Set(w.h)].filter(c => CHARS[c]).map(c => `<button type="button" data-c="${c}" aria-label="Xem chữ ${c}">${c} ›</button>`).join("");
@@ -1822,31 +1830,41 @@ $("btn-ok").onclick = () => swipeOut(1);
 // ===== Quẹt thẻ kiểu dating app: phải = Nhớ rồi, trái = Chưa nhớ
 let swBusy = false, mvRaf = 0, mvDx = 0;
 const SW_DIST = 160; // quãng kéo để thẻ bay đi (px)
+const NEXT_T = p => `translateY(${10 * (1 - p)}px) scale(${0.95 + 0.05 * p})`;
 function paintCard(dx){
   const c = $("card"), p = Math.min(1, Math.abs(dx) / SW_DIST);
   c.style.transform = dx ? `translateX(${dx}px) translateY(${Math.abs(dx) * 0.04}px) rotate(${dx / 20}deg)` : "";
   c.style.opacity = dx ? String(1 - p * 0.55) : ""; // mờ dần khi quẹt xa
+  $("card-next").style.transform = NEXT_T(p); // thẻ sau tiến lên dần
   $("st-ok").style.opacity = dx > 0 ? p : 0; $("st-no").style.opacity = dx < 0 ? p : 0;
 }
 function cardMove(dx, anim){
-  const c = $("card"); c.classList.remove("out"); c.classList.toggle("anim", !!anim);
+  const c = $("card"), n = $("card-next"); c.classList.toggle("anim", !!anim); n.classList.toggle("back-anim", !!anim);
   if (anim){ cancelAnimationFrame(mvRaf); mvRaf = 0; paintCard(dx); return; }
   mvDx = dx; if (!mvRaf) mvRaf = requestAnimationFrame(() => { mvRaf = 0; paintCard(mvDx); });
 }
 function swipeOut(dir){
   if (swBusy || $("v-study").hidden || !Q[qi]) return; swBusy = true;
   cancelAnimationFrame(mvRaf); mvRaf = 0;
-  const c = $("card"), W = Math.max(window.innerWidth, 700) * 0.9;
-  c.classList.remove("anim"); c.classList.add("out");
-  c.style.transform = `translateX(${dir * W}px) translateY(40px) rotate(${dir * 28}deg)`; c.style.opacity = "0";
-  $("st-ok").style.opacity = dir > 0 ? 1 : 0; $("st-no").style.opacity = dir < 0 ? 1 : 0;
-  setTimeout(() => {
-    c.classList.remove("out"); c.classList.add("enter"); c.style.transform = ""; c.style.opacity = "";
-    $("st-ok").style.opacity = 0; $("st-no").style.opacity = 0;
-    swBusy = false; grade(dir > 0);
-    void c.offsetWidth; c.classList.remove("enter"); c.classList.add("pop");
-    setTimeout(() => c.classList.remove("pop"), 360);
-  }, 380);
+  const c = $("card"), n = $("card-next"), W = Math.max(window.innerWidth, 700) * 0.9;
+  // Thẻ cũ: tách ra một bản sao để bay đi, thẻ thật lập tức thành từ tiếp theo
+  const g = c.cloneNode(true); g.removeAttribute("id"); g.querySelectorAll("[id]").forEach(x => x.removeAttribute("id"));
+  g.classList.remove("anim", "cpop", "enter"); g.classList.add("ghost"); g.setAttribute("aria-hidden", "true");
+  g.style.transform = c.style.transform; g.style.opacity = c.style.opacity || "1";
+  c.parentNode.appendChild(g);
+  const nT = n.style.transform || NEXT_T(0);
+  c.classList.remove("anim", "cpop"); c.classList.add("enter"); c.style.transform = nT; c.style.opacity = "";
+  $("st-ok").style.opacity = 0; $("st-no").style.opacity = 0;
+  n.classList.remove("back-anim"); n.style.transform = NEXT_T(0);
+  grade(dir > 0);
+  void g.offsetWidth; void c.offsetWidth;
+  g.classList.add("out"); g.style.transform = `translateX(${dir * W}px) translateY(40px) rotate(${dir * 28}deg)`; g.style.opacity = "0";
+  g.querySelector(dir > 0 ? ".stamp.ok" : ".stamp.no").style.opacity = 1;
+  g.querySelector(dir > 0 ? ".stamp.no" : ".stamp.ok").style.opacity = 0;
+  c.classList.remove("enter"); c.classList.add("cpop"); c.style.transform = "";
+  setTimeout(() => { c.classList.remove("cpop"); }, 360);
+  setTimeout(() => g.remove(), 520);
+  setTimeout(() => { swBusy = false; }, 180);
 }
 // Kéo bằng chuột hoặc ngón tay
 let drag = null;
