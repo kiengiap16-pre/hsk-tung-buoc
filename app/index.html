@@ -1238,10 +1238,8 @@ function setLv(L){ S.lv = L || 0; S.viewLv = L || autoLv(); S.charLv = L || S.ch
 function dailyNew(){ return NEW_PER_DAY[S.profile?.minutes || 10]; }
 function buildQueue(extra=0, lk=null){
   rollDay();
-  if (lk){ // một bài: thẻ đến hạn của bài + tối đa 10 từ mới của bài đó
-    const inT = w => w.lk === lk;
-    return [...WORDS.filter(w => inT(w) && isDue(w)).map(w=>({w,isNew:false})), ...newWords().filter(inT).slice(0,10).map(w=>({w,isNew:true}))];
-  }
+  if (lk) // một bài: đủ mọi từ của bài đó
+    return WORDS.filter(w => w.lk === lk).map(w=>({w,isNew:!S.cards[w.k]}));
   const due = [...WORDS, ...EXTALL].filter(isDue);
   const left = Math.max(0, dailyNew() + extra - S.day.newDone);
   return [...due.map(w=>({w,isNew:false})), ...newWords().slice(0,left).map(w=>({w,isNew:true}))];
@@ -2617,18 +2615,20 @@ function renderDeck(){
   $("dk-sub").textContent = tr(`${st.n} từ · đã thuộc ${st.kn} · đang học ${st.lr - st.kn} · chưa học ${st.n - st.lr}`, `${st.n} words · ${st.kn} learned · ${st.lr - st.kn} learning · ${st.n - st.lr} not started`);
   $("dk-pbar").style.width = st.p + "%";
   const due = d.words.filter(isDue).length, nw = d.words.filter(w => !S.cards[w.k]).length;
-  $("dk-hint").textContent = due || nw ? tr(`Mỗi lượt: ${due ? `${due} thẻ đến hạn ôn, ` : ""}${Math.min(10, nw)} từ mới.`, `Each round: ${due ? `${due} due cards, ` : ""}${Math.min(10, nw)} new words.`) : tr("Bạn đã học hết bộ này. Học tiếp sẽ ôn ngẫu nhiên 10 từ.", "You've studied this whole deck. Continuing reviews 10 random words.");
+  $("dk-hint").textContent = deckId.startsWith("ls:") ? tr(`Mỗi lượt học đủ ${d.words.length} từ của bài.`, `Each round covers all ${d.words.length} words of the lesson.`) : due || nw ? tr(`Mỗi lượt: ${due ? `${due} thẻ đến hạn ôn, ` : ""}${Math.min(10, nw)} từ mới.`, `Each round: ${due ? `${due} due cards, ` : ""}${Math.min(10, nw)} new words.`) : tr("Bạn đã học hết bộ này. Học tiếp sẽ ôn ngẫu nhiên 10 từ.", "You've studied this whole deck. Continuing reviews 10 random words.");
   $("dk-words").innerHTML = d.words.slice(0, deckShown).map(w => { const c = S.cards[w.k], kn = (c?.box || 0) >= 2;
     return `<button data-w="${w.k}"><span class="h">${w.h}</span><span class="p">${w.p}</span><span class="st">${w.ext ? tr("mở rộng", "extra") : "HSK " + w.L}<i class="${kn ? "on" : c ? "mid" : ""}" title="${kn ? tr("Đã thuộc", "Learned") : c ? tr("Đang học", "Learning") : tr("Chưa học", "Not studied")}"></i></span><span class="v">${w.v.split(/;\s*/)[0]}</span></button>`; }).join("");
   $("dk-more").hidden = d.words.length <= deckShown;
 }
 $("dk-more").onclick = () => { deckShown += 200; renderDeck(); };
 $("dk-words").onclick = e => { const b = e.target.closest("[data-w]"); if (b) openWord(b.dataset.w, "deck"); };
-$("dk-start").onclick = () => { const d = deckOf(deckId); startDeck(d.words, d.title); };
-function startDeck(ws, label, back = "deck"){
+$("dk-start").onclick = () => { const d = deckOf(deckId); startDeck(d.words, d.title, "deck", deckId.startsWith("ls:")); };
+// all = true (một bài học): đưa ĐỦ mọi từ của bài vào lượt học, theo thứ tự trong bài
+function startDeck(ws, label, back = "deck", all = false){
   resetSession(); rollDay();
-  const due = ws.filter(isDue), nw = ws.filter(w => !S.cards[w.k]).slice(0, 10);
-  Q = [...due.map(w => ({w, isNew: false})), ...nw.map(w => ({w, isNew: true}))];
+  if (all) Q = ws.map(w => ({w, isNew: !S.cards[w.k]}));
+  else { const due = ws.filter(isDue), nw = ws.filter(w => !S.cards[w.k]).slice(0, 10);
+    Q = [...due.map(w => ({w, isNew: false})), ...nw.map(w => ({w, isNew: true}))]; }
   if (!Q.length) Q = shuffle(ws).slice(0, 10).map(w => ({w, isNew: false}));
   if (!Q.length) return toast(tr("Bộ thẻ này chưa có từ", "This deck has no words yet"));
   qi = 0; sessionNew = 0; sessionRev = 0; deckLbl = label; studyBack = back; doneBack = back;
@@ -2720,7 +2720,7 @@ function renderLesson(){
 }
 $("ls-acts").onclick = e => { const b = e.target.closest("[data-la]"); if (!b || !LS) return;
   const [L, i] = LS.split("-").map(Number), x = lessonInfo(L, i), label = `HSK ${L} · ${tr("Bài", "Lesson")} ${i + 1}`;
-  if (b.dataset.la === "card") return startDeck(x.ws, label, "lesson");
+  if (b.dataset.la === "card") return startDeck(x.ws, label, "lesson", true);
   if (b.dataset.la === "test") return startQuiz(false, "word", x.ws, null, {id: `ls:${L}-${i}`, label, back: "lesson"});
   if (!x.cs.length) return toast(tr("Bài này không có chữ mới để tập viết", "This lesson has no new characters to write"));
   const order = [...x.cs.filter(c => !S.writ?.[c]), ...x.cs.filter(c => S.writ?.[c])];
