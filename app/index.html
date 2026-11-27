@@ -115,6 +115,13 @@ nav.tabs button[aria-current="true"]{color:var(--surface);background:var(--accen
 /* quẹt thẻ kiểu dating app */
 .cstack{position:relative}
 .card-next{position:absolute;inset:0;height:340px;transform:translateY(10px) scale(.95);transform-origin:50% 60%;pointer-events:none}
+.card-next .face>*{opacity:var(--nx,0)}
+.card .face>*{opacity:var(--fade,1)}
+.card .face{opacity:var(--gone,1)}
+.card.anim .face>*{transition:opacity .42s ease}
+.card.out .face{transition:transform .45s ease,opacity .4s ease}
+.card.out .stamp{transition:opacity .4s ease}
+.card.enter .stamp{transition:none}
 .card-next .face{position:absolute;inset:0;border-radius:18px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;align-content:center;gap:8px;padding:20px}
 .card-next.back-anim{transition:transform .35s cubic-bezier(.22,.61,.36,1)}
 .card.ghost{position:absolute;inset:0;z-index:2;pointer-events:none;margin:0}
@@ -1969,8 +1976,11 @@ const NEXT_T = p => `translateY(${10 * (1 - p)}px) scale(${0.95 + 0.05 * p})`;
 function paintCard(dx){
   const c = $("card"), p = Math.min(1, Math.abs(dx) / SW_DIST);
   c.style.transform = dx ? `translateX(${dx}px) translateY(${Math.abs(dx) * 0.04}px) rotate(${dx / 20}deg)` : "";
-  c.style.opacity = dx ? String(1 - p * 0.55) : ""; // mờ dần khi quẹt xa
-  $("card-next").style.transform = NEXT_T(p); // thẻ sau tiến lên dần
+  // mờ dần khi quẹt xa: làm mờ từng mặt thẻ (không đặt opacity lên cả thẻ để Safari không lộ mặt sau),
+  // chỉ chữ trên thẻ mờ đi, nền thẻ vẫn đặc để chữ thẻ phía sau không lộ lẫn vào
+  if (dx) c.style.setProperty("--fade", String(1 - p * 0.6)); else c.style.removeProperty("--fade");
+  const n = $("card-next"); n.style.transform = NEXT_T(p); // thẻ sau tiến lên dần
+  n.style.setProperty("--nx", String(p * p)); // chữ thẻ sau hiện dần
   $("st-ok").style.opacity = dx > 0 ? p : 0; $("st-no").style.opacity = dx < 0 ? p : 0;
 }
 function cardMove(dx, anim){
@@ -1985,15 +1995,15 @@ function swipeOut(dir){
   // Thẻ cũ: tách ra một bản sao để bay đi, thẻ thật lập tức thành từ tiếp theo
   const g = c.cloneNode(true); g.removeAttribute("id"); g.querySelectorAll("[id]").forEach(x => x.removeAttribute("id"));
   g.classList.remove("anim", "cpop", "enter"); g.classList.add("ghost"); g.setAttribute("aria-hidden", "true");
-  g.style.transform = c.style.transform; g.style.opacity = c.style.opacity || "1";
+  g.style.transform = c.style.transform;
   c.parentNode.appendChild(g);
   const nT = n.style.transform || NEXT_T(0);
-  c.classList.remove("anim", "cpop"); c.classList.add("enter"); c.style.transform = nT; c.style.opacity = "";
+  c.classList.remove("anim", "cpop"); c.classList.add("enter"); c.style.transform = nT; c.style.removeProperty("--fade");
   $("st-ok").style.opacity = 0; $("st-no").style.opacity = 0;
-  n.classList.remove("back-anim"); n.style.transform = NEXT_T(0);
+  n.classList.remove("back-anim"); n.style.transform = NEXT_T(0); n.style.setProperty("--nx", "0");
   grade(dir > 0);
   void g.offsetWidth; void c.offsetWidth;
-  g.classList.add("out"); g.style.transform = `translateX(${dir * W}px) translateY(40px) rotate(${dir * 28}deg)`; g.style.opacity = "0";
+  g.classList.add("out"); g.style.transform = `translateX(${dir * W}px) translateY(40px) rotate(${dir * 28}deg)`; g.style.setProperty("--gone", "0");
   g.querySelector(dir > 0 ? ".stamp.ok" : ".stamp.no").style.opacity = 1;
   g.querySelector(dir > 0 ? ".stamp.no" : ".stamp.ok").style.opacity = 0;
   c.classList.remove("enter"); c.classList.add("cpop"); c.style.transform = "";
