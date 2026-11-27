@@ -430,6 +430,7 @@ nav.tabs button[aria-current="true"],nav.tabs button[aria-current="true"] .ic{ba
 nav.tabs button[aria-current="true"] .ic{background:transparent}
 .ls-next{outline:2px solid var(--accent);outline-offset:-2px}
 .ls-acts .dk{min-height:118px}
+.dk-more summary{cursor:pointer;font-weight:700;padding:6px 0}
 @media (min-width:700px){
   body:not(.focus){padding-left:112px;padding-bottom:40px}
   nav.tabs{top:0;bottom:0;right:auto;width:96px;border-top:0;border-right:2px solid var(--line);padding:20px 10px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
@@ -609,6 +610,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
       <button class="primary" id="btn-go">Học ngay</button>
     </div>
     <button class="gtoday" id="g-today" hidden></button>
+    <button class="gtoday" id="w-today"></button>
     <div class="map" id="map"></div>
   </section>
 
@@ -811,6 +813,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
   <!-- NGỮ PHÁP -->
   <!-- TẬP VIẾT: chữ mới của từng bài, chia theo cấp -->
   <section id="v-write" hidden>
+    <div class="ctop"><button class="back" data-go="today">← Học</button></div>
     <div class="panel">
       <span class="eyebrow">Luyện viết theo bài học</span>
       <h2>Tập viết chữ Hán</h2>
@@ -854,7 +857,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
 
   <!-- LUYỆN NGỮ PHÁP -->
   <section id="v-gpractice" hidden>
-    <div class="cardmeta"><button class="iconbtn" data-go="grammar" aria-label="Thoát luyện tập">✕</button><span id="gp-label" style="flex:1"></span><span id="gp-count"></span></div>
+    <div class="cardmeta"><button class="iconbtn" id="gp-x" data-go="grammar" aria-label="Thoát luyện tập">✕</button><span id="gp-label" style="flex:1"></span><span id="gp-count"></span></div>
     <div class="bar"><i id="gp-bar" style="width:0"></i></div>
     <div class="panel" style="text-align:center;justify-items:center">
       <span class="hint" id="gp-q"></span>
@@ -867,7 +870,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
 
   <!-- BÀI TẬP TỔNG HỢP -->
   <section id="v-greview" hidden>
-    <div class="ctop"><button class="back" data-go="grammar">← Ngữ pháp</button></div>
+    <div class="ctop"><button class="back" id="gr-back" data-go="grammar">← Ngữ pháp</button></div>
     <div class="panel"><span class="eyebrow">Ôn tập HSK 1–3</span><h2>Bài tập tổng hợp</h2><p class="hint" style="margin:0">Tự làm ra giấy hoặc nói to trước, rồi bấm “Xem đáp án” để so sánh. Phần sắp xếp câu thì chạm từng mảnh theo thứ tự.</p></div>
     <div id="gr-body"></div>
   </section>
@@ -1217,7 +1220,7 @@ function show(v){
   if (v !== "quiz") $("sheet").hidden = true;
   $("tabs").hidden = ["setup","study","quiz","gpractice","wpractice"].includes(v); // đang làm bài thì ẩn thanh tab cho tập trung
   document.body.classList.toggle("focus", $("tabs").hidden); renderRail();
-  const tab = (v === "decks" || v === "tests" || (v === "deck" && deckBack !== "chars")) ? "decks" : (v === "chars" || v === "char" || v === "word" || v === "deck") ? "chars" : (v === "grammar" || v === "gpractice" || v === "greview") ? "grammar" : v === "path" ? "path" : "today";
+  const tab = (v === "decks" || v === "tests" || (v === "deck" && deckBack !== "chars")) ? "decks" : (v === "chars" || v === "char" || v === "word" || v === "deck") ? "chars" : ((v === "gpractice" || v === "greview") && gpBack === "decks") ? "decks" : (v === "grammar" || v === "gpractice" || v === "greview") ? "grammar" : v === "path" ? "path" : "today";
   document.querySelectorAll("#tabs button[data-v]").forEach(b => b.setAttribute("aria-current", b.dataset.v === tab));
   document.querySelectorAll("#tabs [data-sv]").forEach(b => b.setAttribute("aria-current", b.dataset.sv === tab));
   if (v === "today") renderToday();
@@ -1368,7 +1371,7 @@ function renderLvPick(){
 $("lv-pick").onclick = e => { const b = e.target.closest("[data-pl]"); if (!b) return; const L = +b.dataset.pl;
   setLv(L); toast(L ? `Đã chọn học HSK ${L}. Bấm "Học ngay" để học từ mới của cấp này` : "Học tự động theo lộ trình gợi ý"); renderToday(); };
 function renderToday(){
-  rollDay(); renderGToday(); renderLvPick();
+  rollDay(); renderGToday(); renderWToday(); renderLvPick();
   const d = new Date();
   $("today-date").textContent = d.toLocaleDateString("vi-VN",{weekday:"long",day:"numeric",month:"numeric"});
   const due = WORDS.filter(isDue).length, nw = Math.max(0, dailyNew() - S.day.newDone), known = WORDS.filter(isKnown).length;
@@ -2237,7 +2240,8 @@ function makeGQ(L){
   });
   return qs;
 }
-function startGP(){ loadGram().then(() => { GQ = makeGQ(gLv); gi = 0; gScore = 0; resetSession(); $("gp-label").textContent = `Luyện ngữ pháp HSK ${gLv}`; show("gpractice"); renderGQ(); }); }
+var gpBack = "grammar";
+function startGP(back = "grammar"){ gpBack = back; $("gp-x").dataset.go = back; loadGram().then(() => { doneBack = back; GQ = makeGQ(gLv); gi = 0; gScore = 0; resetSession(); $("gp-label").textContent = `Luyện ngữ pháp HSK ${gLv}`; show("gpractice"); renderGQ(); }); }
 function renderGQ(){
   const q = GQ[gi]; $("sheet").hidden = true;
   $("gp-count").textContent = `${gi + 1} / ${GQ.length}`; $("gp-bar").style.width = (gi / GQ.length * 100) + "%";
@@ -2308,9 +2312,15 @@ $("g-lv").onclick = e => { const b = e.target.closest("[data-l]"); if (b){ gLv =
 $("g-list").onclick = e => { const k = e.target.closest(".ok"), sp = e.target.closest(".say");
   if (sp) return sayZh(sp.dataset.zh);
   if (k){ const key = gKey(gLv, +k.dataset.i); S.gram = S.gram || {}; if (S.gram[key]) delete S.gram[key]; else { S.gram[key] = 1; addXP(5); } save(); renderStreak(); renderGrammar(); } };
-$("g-practice").onclick = startGP;
-$("g-review").onclick = () => { show("greview"); renderReview(); };
+$("g-practice").onclick = () => startGP();
+$("g-review").onclick = () => { gpBack = "grammar"; $("gr-back").dataset.go = "grammar"; $("gr-back").textContent = "← Ngữ pháp"; show("greview"); renderReview(); };
 // thẻ gợi ý ngữ pháp trên trang Hôm nay
+function renderWToday(){
+  const L = curLv(), all = writeLessons()[L] || [], tot = all.reduce((n, x) => n + x.cs.length, 0), done = all.reduce((n, x) => n + x.cs.filter(c => S.writ?.[c]).length, 0);
+  const nx = all.find(x => x.cs.some(c => !S.writ?.[c]));
+  $("w-today").innerHTML = `<span class="ic">写</span><span><small>Tập viết · HSK ${L}</small><b>${nx ? `Bài ${nx.i + 1}: ${nx.cs.slice(0, 6).join(" ")}${nx.cs.length > 6 ? "…" : ""}` : "Đã viết hết chữ của cấp này"}</b><small>Đã viết ${done}/${tot} chữ · chọn bài để luyện</small></span><span aria-hidden="true">›</span>`;
+}
+$("w-today").onclick = () => { wrLv = curLv(); show("write"); };
 function renderGToday(){
   loadGram().then(G => { S.gram = S.gram || {};
     const L = Math.min(MAXLV, Math.max(1, curLv())), pts = G.levels[L] || [], i = pts.findIndex((_, n) => !S.gram[gKey(L, n)]);
@@ -2365,7 +2375,7 @@ loadData().then(() => {
 
 // ===== Flashcard: chọn bộ thẻ theo cấp độ / theo chủ đề
 var deckLbl = "", studyBack = "today", deckId = null, deckShown = 120, deckBack = "decks", doneBack = "today", LS = null;
-const BACK_TXT = {today: "Tiếp tục lộ trình", lesson: "Quay lại bài học", deck: "Quay lại bộ thẻ", decks: "Quay lại Ôn tập"};
+const BACK_TXT = {grammar: "Quay lại Ngữ pháp", today: "Tiếp tục lộ trình", lesson: "Quay lại bài học", deck: "Quay lại bộ thẻ", decks: "Quay lại Ôn tập"};
 var DK = (() => { try { return Object.assign({m: "lv", lv: 1, tlv: 0, ext: true}, JSON.parse(localStorage.getItem("hsk-deck") || "{}")); } catch(e){ return {m: "lv", lv: 1, tlv: 0, ext: true}; } })();
 const dkSave = () => { try { localStorage.setItem("hsk-deck", JSON.stringify(DK)); } catch(e){} };
 var TOPICS = null, topicsP = null;
@@ -2393,7 +2403,7 @@ function deckOf(id){
   return {title: tp[1], tag: "Chủ đề" + (DK.tlv ? ` · HSK ${DK.tlv}` : ""), words: topicWords(a), topic: true};
 }
 async function renderDecks(){
-  const L = curLv(), ws = BYLV[L] || [], seen = ws.filter(w => S.cards[w.k]).length;
+  const L = curLv(), ws = BYLV[L] || [], seen = ws.filter(w => S.cards[w.k]).length, nl = Math.ceil(ws.length / LESSON);
   const due = deckOf("due").words, weak = deckOf("weak").words, star = deckOf("star").words;
   $("dk-body").innerHTML = `<div class="panel">
       <span class="eyebrow">Hôm nay</span>
@@ -2404,14 +2414,28 @@ async function renderDecks(){
     <h3 style="margin:4px 0 0">Bộ thẻ để ôn</h3>
     <div class="dk-grid">${dkTile("weak", "难", "Từ chưa thuộc", weak)}${dkTile("star", "★", "Sổ tay (từ đánh sao)", star)}${dkTile("lv:" + L, "全", `Toàn bộ HSK ${L}`, ws, "whole")}</div>
     ${star.length ? "" : `<p class="dk-note" style="margin:0">Bấm ☆ ở trang của một từ để thêm vào sổ tay.</p>`}
-    <h3 style="margin:4px 0 0">Kiểm tra cả cấp HSK ${L}</h3>
-    <div class="dk-grid">${tsTile("lv:" + L, "考", `Toàn bộ HSK ${L}`, `${ws.length} từ`)}${seen >= 4 ? tsTile("seen:" + L, "复", "Từ bạn đã học", `${seen} từ`) : ""}</div>
+    <h3 style="margin:4px 0 0">Kiểm tra từ vựng HSK ${L}</h3>
+    <div class="dk-grid">${tsTile("lv:" + L, "考", `Toàn bộ HSK ${L}`, `${ws.length} từ`, "whole")}${seen >= 4 ? tsTile("seen:" + L, "复", "Từ bạn đã học", `${seen} từ`) : ""}${tsTile("tone", "声", "Thanh điệu", "Nghe, chọn thanh")}${tsTile("rad", "部", "52 bộ thủ", "Nghĩa của bộ")}</div>
+    <details class="dk-more"><summary>Kiểm tra theo từng bài (${nl} bài)</summary><div class="dk-grid small" style="margin-top:10px">${Array.from({length: nl}, (_, i) => tsTile(`ls:${L}-${i}`, "", `Bài ${i+1}`, "")).join("")}</div></details>
+    <h3 style="margin:4px 0 0">Kiểm tra ngữ pháp</h3>
+    <div class="dk-grid" id="dk-gram"><p class="muted" style="margin:0">Đang tải ngữ pháp…</p></div>
+    <h3 style="margin:4px 0 0">Thi thử</h3>
+    <div class="dk-grid"><button class="dk" disabled style="opacity:.6"><span class="ic">卷</span><b>Đề thi thử HSK</b><small>Sắp có</small></button></div>
     <p class="dk-note" style="margin:0">Đổi cấp ở mục Học. Bộ thẻ theo chủ đề nằm ở Từ điển › Chủ đề.</p>`;
+  loadGram().then(G => { const box = $("dk-gram"); if (!box || $("v-decks").hidden) return;
+    const lvs = Object.keys(G.levels).map(Number), gL = lvs.includes(L) ? L : Math.max(...lvs.filter(x => x <= L), Math.min(...lvs));
+    const best = S.gramBest?.[gL], n = (G.levels[gL]?.points || G.levels[gL] || []).length;
+    box.innerHTML = `<button class="dk whole" data-gp="${gL}"><span class="ic">法</span><b>Luyện ngữ pháp HSK ${gL}</b><small>10 câu · ${best == null ? "Chưa làm" : `Cao nhất ${best}/10`}</small><span class="bar"><i style="width:${(best || 0) * 10}%"></i></span></button>
+      <button class="dk" data-gr="1"><span class="ic">练</span><b>Bài tập tổng hợp</b><small>Ôn ngữ pháp HSK 1–3 theo tài liệu</small></button>`; });
 }
 $("dk-body").onclick = e => {
   if (e.target.closest("[data-due]")) return startDeck(deckOf("due").words, "Ôn thẻ đến hạn", "decks");
+  const g = e.target.closest("[data-gp]"); if (g){ gLv = +g.dataset.gp; return startGP("decks"); }
+  if (e.target.closest("[data-gr]")){ gpBack = "decks"; $("gr-back").dataset.go = "decks"; $("gr-back").textContent = "← Ôn tập"; show("greview"); return renderReview(); }
   const t = e.target.closest("[data-test]");
-  if (t){ const id = t.dataset.test, x = testOf(id); if (!x) return; if (x.pool.length < 4) return toast("Bài này chưa đủ từ để kiểm tra");
+  if (t){ const id = t.dataset.test, x = testOf(id); if (!x) return;
+    if (x.kind) return startQuiz(false, x.kind, null, null, {id, label: x.label, back: "decks"});
+    if (x.pool.length < 4) return toast("Bài này chưa đủ từ để kiểm tra");
     return startQuiz(false, "word", x.pool, null, {id, label: x.label, back: "decks"}); }
   const b = e.target.closest("[data-deck]"); if (!b) return;
   if (!deckOf(b.dataset.deck).words.length) return toast(b.dataset.deck === "star" ? "Sổ tay đang trống" : "Bộ này chưa có từ");
