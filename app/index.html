@@ -172,7 +172,7 @@ button.say{width:44px;height:44px;border-radius:99px;padding:0;display:grid;plac
 .search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:var(--bg);color:var(--muted)}
 .search:focus-within{outline:2px solid var(--accent);outline-offset:1px}
 .search input{flex:1;min-width:0;border:0;background:none;color:var(--ink);font:inherit;padding:12px 0;outline:none}
-.dres{display:grid;gap:6px}
+.dres{display:grid;gap:6px}.dres .dsep{margin:8px 0 0}
 .dres:empty{display:none}
 .drow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;text-align:left;font-weight:400;padding:10px 12px}
 .drow .h{font-family:var(--font-han);font-size:1.5rem;line-height:1.1}
@@ -712,7 +712,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
   <!-- TRA TỪ + DANH SÁCH CHỮ -->
   <section id="v-chars" hidden>
     <div class="panel">
-      <span class="eyebrow">Từ điển HSK 1–6</span>
+      <span class="eyebrow">Từ điển Trung – Việt · hơn 120.000 từ</span>
       <h2>Tra từ</h2>
       <label class="search"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg><input id="dq" type="search" placeholder="Chữ Hán, pinyin, tiếng Việt, Hán Việt hoặc English" aria-label="Tra từ" autocomplete="off"></label>
       <div class="dres" id="dres"></div>
@@ -801,6 +801,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
     <div class="panel" id="wd-sec-mean">
       <div class="sech"><h2>Nghĩa</h2><div class="seg" role="tablist"><button id="wd-l-vi" aria-pressed="true">Tiếng Việt</button><button id="wd-l-en" aria-pressed="false">English</button></div></div>
       <ol class="senses" id="wd-senses"></ol>
+      <p class="hint" id="wd-mt" hidden></p>
       <p class="hint" id="wd-extra"></p>
     </div>
     <div class="panel" id="wd-sec-pron">
@@ -958,7 +959,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
       <span class="eyebrow">Chuẩn HSK 3.0 (áp dụng từ 2021)</span>
       <h2>9 cấp, chia 3 giai đoạn</h2>
       <p class="muted" style="margin:0">Mỗi cấp đo bằng ba chỉ số: số âm tiết, số chữ Hán và số từ vựng mới. Web hiện có đủ từ vựng cấp 1 đến 6.</p>
-      <p class="hint" style="margin:0">Nguồn: danh sách từ vựng HSK 1–6 (nghĩa, Hán Việt, từ loại, ví dụ) và đề cương ngữ pháp theo tài liệu HSK 3.0 (11-2025) của cô Trần Mỹ Hạnh, Meiday Chinese (facebook.com/tranmyhanh101198, tài liệu miễn phí, không dùng để kinh doanh). Cấp 7–9 theo chuẩn GF 0025-2021. Nghĩa tiếng Anh, phồn thể, tần suất: complete-hsk-vocabulary (drkameleon). Từ ghép mở rộng 7–9: nghĩa từ CVDICT của Phong Phan (CC BY-SA 4.0), âm Hán Việt hanviet-pinyin-words (MIT). Cấu tạo chữ và thứ tự nét: Make Me a Hanzi / Hanzi Writer. Mẹo nhớ là bản nháp do Claude viết. Nên đối chiếu lại với giáo trình.</p>
+      <p class="hint" style="margin:0">Nguồn: danh sách từ vựng HSK 1–6 (nghĩa, Hán Việt, từ loại, ví dụ) và đề cương ngữ pháp theo tài liệu HSK 3.0 (11-2025) của cô Trần Mỹ Hạnh, Meiday Chinese (facebook.com/tranmyhanh101198, tài liệu miễn phí, không dùng để kinh doanh). Cấp 7–9 theo chuẩn GF 0025-2021. Nghĩa tiếng Anh, phồn thể, tần suất: complete-hsk-vocabulary (drkameleon). Từ ghép mở rộng 7–9: nghĩa từ CVDICT của Phong Phan (CC BY-SA 4.0), âm Hán Việt hanviet-pinyin-words (MIT). Từ điển mở rộng (hơn 110.000 từ ngoài HSK): CC-CEDICT của MDBG (CC BY-SA 4.0) cho nghĩa tiếng Anh, CVDICT cho nghĩa tiếng Việt; khoảng 1.200 từ CVDICT chưa có thì nghĩa tiếng Việt do AI dịch từ tiếng Anh (có ghi chú ở từng từ); độ thông dụng theo từ điển tần suất của jieba. Cấu tạo chữ và thứ tự nét: Make Me a Hanzi / Hanzi Writer. Mẹo nhớ là bản nháp do Claude viết. Nên đối chiếu lại với giáo trình.</p>
     </div>
     <div class="levels" id="levels"></div>
   </section>
@@ -980,7 +981,7 @@ nav.tabs button[aria-current="true"] .ic{background:transparent}
 <div class="sheet" id="sheet" hidden><div class="in"><div class="msg"><b id="sheet-t"></b><span id="sheet-d"></span></div><button id="sheet-next">Tiếp tục</button></div></div>
 <div class="toast" id="toast" hidden></div>
 
-<script src="i18n.js?v=1"></script>
+<script src="i18n.js?v=2"></script>
 <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.2/dist/hanzi-writer.min.js"></script>
 <script src="firebase-config.js?v=5"></script>
 <script type="module" src="account.js?v=8"></script>
@@ -1657,10 +1658,12 @@ function renderPath(){
 S.stars = S.stars || {}; S.tips = S.tips || {};
 const STROKES = {}; // STROKES[L] = promise dữ liệu nét của các chữ xuất hiện lần đầu ở cấp L
 const strokesOfLv = L => STROKES[L] || (STROKES[L] = fetch(`data/strokes${L}.json`).then(r => r.json()).catch(() => ({})));
-const strokeOf = async c => { const L = CHARS[c]?.L || 1; return (await strokesOfLv(L))[c] || (await strokesOfLv(1))[c]; };
+const STROKE_NET = {}; // chữ ngoài HSK 1–6: lấy dữ liệu nét từ hanzi-writer-data trên mạng
+const strokeOf = async c => { const L = CHARS[c]?.L || 1; return (L ? (await strokesOfLv(L))[c] || (await strokesOfLv(1))[c] : null)
+  || await (STROKE_NET[c] ||= fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0.1/${encodeURIComponent(c)}.json`).then(r => r.ok ? r.json() : null).catch(() => null)); };
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const wordsWith = c => WORDS.filter(w => w.h.includes(c));
-const wchip = x => `<button data-w="${x.k || x.h}"><b>${x.h}</b>${x.p} · ${x.v.split(/[;,]/)[0]} <span class="lvb">${lvTxt(x)}</span></button>`;
+const wchip = x => `<button data-w="${x.k || x.h}"><b>${x.h}</b>${x.p} · ${(x.v || x.en || "").split(/[;,]/)[0]} <span class="lvb">${lvTxt(x)}</span></button>`;
 const charKnown = c => wordsWith(c).some(isKnown);
 function renderChars(){
   if (!extLv) extLv = Math.min(MAXLV, S.charLv || curLv()); renderExt();
@@ -1719,7 +1722,9 @@ function openChar(c, from){
   $("ch-tip").value = S.tips[c] || makeTip(ch);
   $("ch-words").innerHTML = wordsWith(c).sort((a, b) => a.L - b.L || a.h.length - b.h.length).slice(0, 30).map(wchip).join("");
   extLoad().then(() => { if (curChar?.c !== c) return; const xs = EXTALL.filter(x => x.h.includes(c)).slice(0, 12);
-    if (xs.length) $("ch-words").insertAdjacentHTML("beforeend", `<p class="hint" style="width:100%;margin:6px 0 0">${tr("Từ ghép mở rộng (HSK 7–9)", "Extra compounds (HSK 7–9)")}</p>` + xs.map(wchip).join("")); });
+    if (xs.length) $("ch-words").insertAdjacentHTML("beforeend", `<p class="hint" style="width:100%;margin:6px 0 0">${tr("Từ ghép mở rộng (HSK 7–9)", "Extra compounds (HSK 7–9)")}</p>` + xs.map(wchip).join(""));
+    return cdStarts(c, 12); }).then(ys => { if (curChar?.c !== c || !ys?.length) return;
+    $("ch-words").insertAdjacentHTML("beforeend", `<p class="hint" style="width:100%;margin:6px 0 0">${tr("Từ điển mở rộng (ngoài HSK)", "Extended dictionary (beyond HSK)")}</p>` + ys.map(wchip).join("")); });
   $("ch-msg").textContent = "";
   drawWriter(ch);
 }
@@ -1727,7 +1732,7 @@ async function drawWriter(ch){
   const el = $("writer"); el.innerHTML = ""; writer = null;
   const raw = await strokeOf(ch.c);
   const data = raw && (ch.k === "ht" && ch.sem ? {...raw, radStrokes: ch.sem} : raw);
-  $("ch-tags").innerHTML = `<span class="hsk">HSK ${ch.L || 1}</span><span>${KIND[ch.k]}</span>${data ? `<span>${data.strokes.length} ${tr("nét", "strokes")}</span>` : ""}`;
+  $("ch-tags").innerHTML = `<span class="hsk">${ch.L === 0 ? tr("Ngoài HSK", "Beyond HSK") : "HSK " + (ch.L || 1)}</span><span>${KIND[ch.k]}</span>${data ? `<span>${data.strokes.length} ${tr("nét", "strokes")}</span>` : ""}`;
   if (typeof HanziWriter === "undefined" || !data){ el.innerHTML = `<div class="han" style="display:grid;place-items:center;height:100%;font-size:6rem">${ch.c}</div>`; return; }
   const size = el.clientWidth || 200;
   writer = HanziWriter.create(el, ch.c, {
@@ -2085,12 +2090,62 @@ const unacc = t => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").re
 let SEARCH = null;
 // Từ ghép mở rộng: từ HSK 3.0 cấp 7–9 chỉ gồm chữ đã học ở cấp 1–6 (EXT[cấp chữ khó nhất] = [...])
 var EXT = null, EXTALL = [], extP = null;
-const lvTxt = w => w.ext ? "7–9" : w.L;
+const lvTxt = w => w.cd ? tr("ngoài HSK", "beyond HSK") : w.ext ? "7–9" : w.L;
+const lvTag = w => w.cd ? tr("Từ điển", "Dictionary") : "HSK " + lvTxt(w);
 function extLoad(){ return extP ||= fetch("data/ext.json").then(r => r.json()).then(j => {
     EXT = {}; DICT[7] = {};
     for (const L in j) EXT[L] = j[L].map(a => { DICT[7][a[0]] = [a[4], a[5], a[6], [], a[7], ""]; return (BYK["x~" + a[0]] = {h: a[0], p: a[1], v: EN && a[4] ? enShort(a[4]) : a[2], vi: a[2], hv: a[3], k: "x~" + a[0], L: 7, base: +L, ext: true}); });
     EXTALL = Object.values(EXT).flat(); EXTALL.forEach(w => { BYH[w.h] = BYH[w.h] || w; }); SEARCH = null; return EXT;
   }).catch(() => { EXT = {}; return EXT; }); }
+// Từ điển mở rộng (CC-CEDICT + nghĩa Việt CVDICT): ~110.000 từ ngoài HSK, chia nhỏ, chỉ tải phần cần dùng
+// cd/N.json: {từ: [Hán Việt, hạng tần suất, [[phồn thể, pinyin, nghĩa Việt, nghĩa Anh, lượng từ?, dịch máy?], ...]]} hoặc {phồn thể: "giản thể"}
+// cs/XX.json: chỉ mục tra bằng chữ Latin [[khoá, từ, pinyin, nghĩa ngắn], ...]; cc/N.json: chữ Hán ngoài HSK 1–6
+const CD = {}, CS = {}, CC = {};
+const getJ = (box, k, url) => box[k] ||= fetch(url).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+const cdShard = h => { const i = h.codePointAt(0) % 256; return getJ(CD, i, `data/cd/${i}.json`); };
+async function cdGet(h){ const s = await cdShard(h); let e = s[h];
+  if (typeof e === "string"){ h = e; e = (await cdShard(h))[h]; }
+  return Array.isArray(e) ? {h, e} : null; }
+function cdWord(h, e, i){ i = +i || 0; const r = e[2][i] || e[2][0], k = "c~" + h + (i ? "~" + i : "");
+  return BYK[k] ||= {h, p: r[1], v: EN ? enShort(r[3]) || r[2] : r[2], vi: r[2], hv: e[0], k, L: 0, cd: true, ri: i, en: r[3], tr: r[0], cl: r[4] || [], mt: !!r[5], rank: e[1], all: e[2]}; }
+async function cdOpen(key){ // "c~từ" hoặc "c~từ~2"
+  const [, h, i] = key.split("~"); const r = await cdGet(h); return r ? cdWord(r.h, r.e, i) : null; }
+// các từ trong từ điển mở rộng bắt đầu bằng chuỗi q (cùng file với chữ đầu), thông dụng trước
+async function cdStarts(q, n){ const s = await cdShard(q), out = [];
+  for (const h in s) if (h !== q && h.startsWith(q) && Array.isArray(s[h])) out.push(cdWord(h, s[h]));
+  return out.sort((a, b) => (a.rank || 1e9) - (b.rank || 1e9) || a.h.length - b.h.length).slice(0, n); }
+let CS_SPLIT = null;
+async function csRows(u){ CS_SPLIT ||= fetch("data/cs/split.json").then(r => r.json()).catch(() => []);
+  const sp = await CS_SPLIT, p3 = (u.replace(/ /g, "_") + "__").slice(0, 3), name = sp.includes(p3.slice(0, 2)) ? p3 : p3.slice(0, 2);
+  const j = await getJ(CS, name, `data/cs/${encodeURIComponent(name)}.json`); return Array.isArray(j) ? j : []; }
+async function cdLookup(q, skip){
+  q = q.trim(); if (!q) return [];
+  const han = /[\u3400-\u9fff]/.test(q), out = new Map();
+  if (han){
+    const r = await cdGet(q); if (r) out.set(r.h, [100, cdWord(r.h, r.e)]);
+    for (const w of await cdStarts(q, 30)) if (!out.has(w.h)) out.set(w.h, [50, w]);
+  } else {
+    const ql = q.toLowerCase().replace(/\s+/g, " "), u = unacc(ql).replace(/[^a-z0-9 ]/g, "").trim(), uz = u.replace(/ /g, "");
+    if (uz.length < 2) return [];
+    const rows = [...await csRows(u)]; if (uz !== u) rows.push(...await csRows(uz));
+    rows.forEach((x, i) => { const k = unacc(x[0]); let sc = 0;
+      if (k === u || k === uz) sc = 90 + (x[0] === ql ? 5 : 0);
+      else if (u.length >= 3 && (k.startsWith(u + " ") || k.startsWith(uz))) sc = 40;
+      else if (u.length >= 3 && k.startsWith(u)) sc = 30;
+      if (!sc) return; sc -= i / rows.length;
+      const o = out.get(x[1]); if (!o || o[0] < sc) out.set(x[1], [sc, {h: x[1], p: x[2], v: x[3], k: "c~" + x[1], cd: true, L: 0}]); });
+  }
+  const res = [...out.values()].filter(x => !skip.has(x[1].h)).sort((a, b) => b[0] - a[0]).slice(0, 30).map(x => x[1]);
+  // bản tiếng Anh: lấy nghĩa tiếng Anh từ mục từ điển đầy đủ
+  return EN ? Promise.all(res.map(async w => { if (w.en) return w; const r = await cdGet(w.h).catch(() => null); return r ? cdWord(r.h, r.e) : w; })) : res;
+}
+// chữ Hán ngoài HSK 1–6: nạp thông tin cấu tạo khi cần
+async function ensureChars(str, deep = 1){
+  const need = [...new Set([...str])].filter(c => /[\u3400-\u9fff]/.test(c) && !CHARS[c] && !COMP[c]);
+  await Promise.all(need.map(async c => { const i = c.codePointAt(0) % 8, j = await getJ(CC, i, `data/cc/${i}.json`); if (j[c] && !CHARS[c]) CHARS[c] = {c, ...j[c]}; }));
+  // nạp luôn thành phần (phần âm, phần ý) để trang chữ hiện được cách đọc và nghĩa của chúng
+  if (deep) await ensureChars(need.flatMap(c => CHARS[c] ? [CHARS[c].am, CHARS[c].y, ...(CHARS[c].parts || [])] : []).filter(Boolean).join(""), 0);
+}
 function searchIndex(){ if (SEARCH) return SEARCH;
   WORDS.forEach(w => BYH[w.h] = BYH[w.h] || w);
   return SEARCH = WORDS.concat(EXTALL).map(w => ({w, py: unacc(w.p).replace(/\s/g, ""), vi: unacc(w.v), hv: unacc(w.hv)})); }
@@ -2110,10 +2165,15 @@ function lookup(q){
   }
   return out.sort((a, b) => b[0] - a[0]).slice(0, 40).map(x => x[1]);
 }
-function renderResults(){
-  const q = $("dq").value, r = lookup(q);
-  $("dres").innerHTML = !q.trim() ? "" : r.length ? r.map(w => `<button class="drow" data-w="${w.k || w.h}"><span class="h">${w.h}</span><span class="m"><b>${w.p}</b><span>${w.v}</span></span><span class="lvb">HSK ${lvTxt(w)}</span></button>`).join("")
-    : `<p class="muted" style="margin:0">${tr(`Chưa có từ này trong HSK 1–9. Thử gõ chữ Hán, pinyin không dấu (ví dụ "xuexi") hoặc nghĩa tiếng Việt.`, `Not found in HSK 1–9. Try Chinese characters, pinyin without tones (e.g. "xuexi") or an English meaning.`)}</p>`;
+const drow = w => `<button class="drow" data-w="${w.k || w.h}"><span class="h">${w.h}</span><span class="m"><b>${w.p}</b><span>${(EN ? w.en || w.v : w.v || w.en) || ""}</span></span><span class="lvb">${lvTag(w)}</span></button>`;
+async function renderResults(){
+  const q = $("dq").value, r = lookup(q), id = renderResults.id = (renderResults.id || 0) + 1;
+  if (!q.trim()){ $("dres").innerHTML = ""; return; }
+  $("dres").innerHTML = r.map(drow).join("") + `<p class="muted dmore" style="margin:0">${tr("Đang tìm thêm trong từ điển…", "Searching the full dictionary…")}</p>`;
+  const more = await cdLookup(q, new Set(r.map(w => w.h)));
+  if (id !== renderResults.id) return; // người dùng đã gõ tiếp
+  $("dres").innerHTML = r.length || more.length ? r.map(drow).join("") + (more.length ? (r.length ? `<p class="hint dsep">${tr("Từ điển mở rộng (ngoài HSK)", "Extended dictionary (beyond HSK)")}</p>` : "") + more.map(drow).join("") : "")
+    : `<p class="muted" style="margin:0">${tr(`Không tìm thấy. Thử gõ chữ Hán, pinyin không dấu (ví dụ "xuexi"), nghĩa tiếng Việt hoặc tiếng Anh.`, `Nothing found. Try Chinese characters, pinyin without tones (e.g. "xuexi") or an English meaning.`)}</p>`;
 }
 // --- tách pinyin thành âm tiết, rồi thành thanh mẫu + vận mẫu + thanh điệu
 const PY_MARK = {"\u0304":1,"\u0301":2,"\u030c":3,"\u0300":4};
@@ -2175,28 +2235,34 @@ const POS_EN = {"danh từ":"noun","động từ":"verb","tính từ":"adjective
 const posName = x => EN ? (POS_EN[x] || x) : x;
 let curWord = null, wordFrom = "chars", wdLang = EN ? "en" : "vi", wordWriters = [];
 async function openWord(h, from){
-  searchIndex(); if (!BYK[h] && !BYH[h]) await extLoad(); const w = BYK[h] || BYH[h]; if (!w) return openChar(h, from);
+  searchIndex(); if (!BYK[h] && !BYH[h] && !h.startsWith("c~")) await extLoad();
+  let w = h.startsWith("c~") ? await cdOpen(h) : BYK[h] || BYH[h];
+  if (!w){ const r = await cdGet(h); if (r) w = cdWord(r.h, r.e); }
+  if (!w){ await ensureChars(h); return openChar(h, from); }
+  await ensureChars(w.h);
   curWord = w; if (from && from !== "word") wordFrom = from;
-  const d = (await dictLv(w.L))[w.ext ? w.h : (w.k || w.h)] || ["", [], "", []];
+  const d = w.cd ? [w.en, [], w.tr, w.cl, w.rank, CHARS[w.h[0]]?.rad || ""] : (await dictLv(w.L))[w.ext ? w.h : (w.k || w.h)] || ["", [], "", []];
   show("word");
   $("wd-han").innerHTML = [...w.h].map(c => `<button data-c="${c}" aria-label="${tr("Xem chữ", "See character")} ${c}">${c}</button>`).join("");
   $("wd-py").textContent = w.p;
   $("wd-star").textContent = S.stars[w.h] ? "★" : "☆"; $("wd-star").classList.toggle("on", !!S.stars[w.h]);
   const card = S.cards[w.k];
-  $("wd-tags").innerHTML = [w.ext ? `<span class="lvb" title="${tr(`Từ HSK 3.0 cấp 7–9, ghép từ các chữ đã học đến HSK ${w.base}`, `HSK 3.0 level 7–9 word, built from characters learned up to HSK ${w.base}`)}">${tr("HSK 7–9 · mở rộng", "HSK 7–9 · extra")}</span>` : `<span class="lvb">HSK ${w.L}</span>`, w.hv && !EN ? `<span class="pill" style="border:1px solid var(--line)">Hán Việt: <b>${w.hv}</b></span>` : "",
+  $("wd-tags").innerHTML = [w.cd ? `<span class="lvb" title="${tr("Từ trong từ điển mở rộng CC-CEDICT, không thuộc danh sách HSK", "Word from the CC-CEDICT extended dictionary, not on the HSK list")}">${tr("Ngoài HSK", "Beyond HSK")}</span>` : w.ext ? `<span class="lvb" title="${tr(`Từ HSK 3.0 cấp 7–9, ghép từ các chữ đã học đến HSK ${w.base}`, `HSK 3.0 level 7–9 word, built from characters learned up to HSK ${w.base}`)}">${tr("HSK 7–9 · mở rộng", "HSK 7–9 · extra")}</span>` : `<span class="lvb">HSK ${w.L}</span>`, w.hv && !EN ? `<span class="pill" style="border:1px solid var(--line)">Hán Việt: <b>${w.hv}</b></span>` : "",
     ...d[1].map(x => `<span class="pill" style="border:1px solid var(--line)">${posName(x)}</span>`), d[2] ? `<span class="pill" style="border:1px solid var(--line)">${tr("Phồn thể", "Traditional")} ${d[2]}</span>` : "",
     d[4] ? (() => { const f = d[4], n = f <= 300 ? 5 : f <= 1500 ? 4 : f <= 5000 ? 3 : f <= 15000 ? 2 : 1; return `<span class="pill" style="border:1px solid var(--line)" title="${tr("Thứ hạng tần suất", "Frequency rank")} ${f}">${(EN ? ["","Rare","Uncommon","Common","Frequent","Very frequent"] : ["","Ít gặp","Khá ít gặp","Thường gặp","Phổ biến","Rất phổ biến"])[n]}<span class="pop">${[1,2,3,4,5].map(i => `<i class="${i <= n ? "on" : ""}"></i>`).join("")}</span></span>`; })() : "",
     `<span class="pill" style="border:1px solid var(--line)">${card ? (card.box >= 2 ? tr("Đã thuộc", "Learned") : tr("Đang học", "Learning")) : tr("Chưa học", "Not studied")}</span>`].join("");
   const renderSenses = () => {
-    const list = wdLang === "vi" ? (w.vi || w.v).split(/;\s*/) : (d[0] || "").split(/;\s*/);
+    const vv = w.vi || (EN && !w.cd ? "" : w.v), noVi = wdLang === "vi" && !vv, list = wdLang === "vi" && vv ? vv.split(/;\s*/) : (d[0] || w.en || "").split(/;\s*/);
     $("wd-senses").innerHTML = list.filter(Boolean).map(x => `<li>${x}</li>`).join("") || `<li>${tr("Chưa có nghĩa tiếng Anh.", "No English meaning yet.")}</li>`;
+    $("wd-mt").hidden = !(wdLang === "vi" && (w.mt || noVi));
+    $("wd-mt").textContent = noVi ? tr("Từ này chưa có nghĩa tiếng Việt, tạm hiện nghĩa tiếng Anh.", "No Vietnamese meaning yet; showing the English meaning.") : tr("Nghĩa tiếng Việt do AI dịch từ nghĩa tiếng Anh, có thể chưa thật chuẩn.", "The Vietnamese meaning was machine-translated from English and may not be exact.");
     $("wd-l-vi").setAttribute("aria-pressed", wdLang === "vi"); $("wd-l-en").setAttribute("aria-pressed", wdLang === "en");
   };
   $("wd-l-vi").onclick = () => { wdLang = "vi"; renderSenses(); }; $("wd-l-en").onclick = () => { wdLang = "en"; renderSenses(); };
   renderSenses();
-  const alt = w.ext ? [] : WORDS.filter(x => x.h === w.h && x !== w);
+  const alt = w.cd ? w.all.map((r, i) => i === w.ri ? null : cdWord(w.h, [w.hv, w.rank, w.all], i)).filter(Boolean) : w.ext ? [] : WORDS.filter(x => x.h === w.h && x !== w);
   $("wd-extra").innerHTML = (w.ex ? `<b>${tr("Ví dụ:", "Example:")}</b> <span class="zh">${w.ex}</span><br>` : "") + (d[3]?.length ? tr("Lượng từ đi kèm: ", "Measure words: ") + d[3].join(", ") + "<br>" : "")
-    + (alt.length ? tr("Cách dùng khác: ", "Other uses: ") + alt.map(x => `<button class="linkbtn" data-w="${x.k}">${x.p} · ${x.v.split(/;\s*/)[0]} (HSK ${x.L})</button>`).join(" ") : "");
+    + (alt.length ? (w.cd ? tr("Cách đọc, cách dùng khác: ", "Other readings and uses: ") : tr("Cách dùng khác: ", "Other uses: ")) + alt.map(x => `<button class="linkbtn" data-w="${x.k}">${x.p} · ${((EN ? x.en || x.v : x.v || x.en) || "").split(/;\s*/)[0]}${x.cd ? "" : ` (HSK ${x.L})`}</button>`).join(" ") : "");
   // phát âm chi tiết
   const syls = segPy(w.p) || [], chars = [...w.h.replace(/儿$/, syls.length < w.h.length ? "" : "儿")];
   const {eff, notes} = sandhiNotes(w.h, syls);
@@ -2216,7 +2282,10 @@ async function openWord(h, from){
     const xs = EXTALL.filter(x => x.h !== w.h && x.h.includes(c));
     if (!ws.length && !xs.length) return "";
     return `<div class="comp"><h3>${tr(`<b>${c}</b> có trong ${ws.length} từ HSK 1–6${xs.length ? ` và ${xs.length} từ mở rộng` : ""}`, `<b>${c}</b> appears in ${ws.length} HSK 1–6 words${xs.length ? ` and ${xs.length} extra words` : ""}`)}</h3>${ws.length ? `<div class="wchips">${ws.slice(0, 12).map(wchip).join("")}</div>` : ""}${xs.length ? `<p class="hint" style="margin:8px 0 4px">${tr("Mở rộng (HSK 7–9, phổ biến nhất trước)", "Extra (HSK 7–9, most common first)")}</p><div class="wchips">${xs.slice(0, 10).map(wchip).join("")}</div>` : ""}</div>`; }).join("");
-  $("wd-compp").hidden = !comp; $("wd-comp").innerHTML = comp;
+  const longer = await cdStarts(w.h, 12);
+  if (curWord !== w) return;
+  const comp2 = (longer.length ? `<div class="comp"><h3>${tr(`Từ bắt đầu bằng <b>${w.h}</b> (từ điển mở rộng)`, `Words starting with <b>${w.h}</b> (extended dictionary)`)}</h3><div class="wchips">${longer.map(wchip).join("")}</div></div>` : "") + comp;
+  $("wd-compp").hidden = !comp2; $("wd-comp").innerHTML = comp2;
   // cách viết: một ô cho mỗi chữ, chạy thứ tự nét
   const wc = [...w.h].filter(c => CHARS[c]);
   $("wd-sec-write").hidden = !wc.length;
